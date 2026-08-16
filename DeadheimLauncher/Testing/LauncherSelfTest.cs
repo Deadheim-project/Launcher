@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Windows.Diagnostics;
 using DeadheimLauncher.Models;
 using DeadheimLauncher.Services;
 
@@ -61,6 +63,8 @@ public static class LauncherSelfTest
                 Skip("Thunderstore: baixa e instala pacote real");
                 Skip("GitHub: resolve o release mais recente");
             }
+
+            await RunUiChecks();
         }
         catch (Exception ex)
         {
@@ -72,6 +76,85 @@ public static class LauncherSelfTest
         }
 
         return Report();
+    }
+
+    // ---------------------------------------------------------------------- ui
+
+    /// <summary>
+    /// Abre a janela principal de verdade, fora da tela, e deixa o ciclo de vida
+    /// do WPF rodar (InitializeComponent, Loaded, InitializeAsync, layout).
+    ///
+    /// Todo o resto do self-test é headless e nunca tocaria nisto: erro de XAML,
+    /// binding para propriedade que não existe, recurso estático faltando —
+    /// nada disso quebra a compilação, só aparece quando a janela abre. Um
+    /// binding quebrado é silencioso em produção (o campo fica vazio), então
+    /// aqui os avisos de binding do WPF são capturados e viram falha.
+    /// </summary>
+    private static async Task RunUiChecks()
+    {
+        var errosDeBinding = new List<string>();
+        var listener = new BindingErrorListener(errosDeBinding);
+
+        PresentationTraceSources.Refresh();
+        PresentationTraceSources.DataBindingSource.Listeners.Add(listener);
+        PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Warning;
+
+        try
+        {
+            Views.MainWindow? janela = null;
+            try
+            {
+                janela = new Views.MainWindow
+                {
+                    // Fora da área visível: o teste não deve piscar janela na cara
+                    // de quem rodou, mas precisa de um Show() real para o WPF
+                    // fazer measure/arrange e avaliar os bindings.
+                    Left = -10000,
+                    Top = -10000,
+                    ShowInTaskbar = false
+                };
+                janela.Show();
+
+                Check("UI: janela principal abre sem erro de XAML", true);
+
+                // Dá tempo do Loaded disparar e do InitializeAsync popular a lista.
+                await Task.Delay(2500);
+                janela.UpdateLayout();
+
+                var itens = (janela.DataContext as ViewModels.MainViewModel)?.Mods.Count ?? 0;
+                Check("UI: lista de mods é populada", itens > 0, $"{itens} itens");
+            }
+            finally
+            {
+                janela?.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Check("UI: janela principal abre sem erro de XAML", false, ex.Message);
+        }
+        finally
+        {
+            PresentationTraceSources.DataBindingSource.Listeners.Remove(listener);
+        }
+
+        Check("UI: nenhum binding quebrado", errosDeBinding.Count == 0,
+            errosDeBinding.Count == 0 ? "" : string.Join(" | ", errosDeBinding.Take(4)));
+    }
+
+    /// <summary>Captura os avisos que o WPF emite quando um binding não resolve.</summary>
+    private sealed class BindingErrorListener : TraceListener
+    {
+        private readonly List<string> _destino;
+        public BindingErrorListener(List<string> destino) => _destino = destino;
+
+        public override void Write(string? message) { }
+
+        public override void WriteLine(string? message)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+                _destino.Add(message.Trim());
+        }
     }
 
     // ---------------------------------------------------------------- settings
