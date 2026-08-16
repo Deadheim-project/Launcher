@@ -59,6 +59,71 @@ public sealed partial class MainViewModel : ObservableObject
         ErroDetalhe = null;
     }
 
+    // ---- atualização do próprio launcher ----
+
+    private AtualizacaoDisponivel? _atualizacao;
+
+    [ObservableProperty]
+    private string? _avisoDeAtualizacao;
+
+    public bool MostrarAtualizacao => !string.IsNullOrWhiteSpace(AvisoDeAtualizacao);
+
+    partial void OnAvisoDeAtualizacaoChanged(string? value) => OnPropertyChanged(nameof(MostrarAtualizacao));
+
+    /// <summary>
+    /// Procura versão nova em segundo plano. Falha aqui é silenciosa de
+    /// propósito: sem internet, o launcher tem que abrir e funcionar com o que
+    /// já está no disco, não travar avisando que não conseguiu se atualizar.
+    /// </summary>
+    private async Task ProcurarAtualizacaoAsync()
+    {
+        try
+        {
+            _atualizacao = await new AutoAtualizacaoService(_http).ProcurarAsync();
+            if (_atualizacao is not null)
+                AvisoDeAtualizacao = $"Versão {_atualizacao.Versao} disponível " +
+                                     $"(você está na {AutoAtualizacaoService.VersaoAtual}).";
+        }
+        catch
+        {
+            // Sem rede ou GitHub fora do ar: segue com a versão atual.
+        }
+    }
+
+    [RelayCommand]
+    private async Task AtualizarLauncherAsync()
+    {
+        if (_atualizacao is null) return;
+
+        IsBusy = true;
+        LimparErro();
+        try
+        {
+            StatusText = "Baixando a atualização...";
+            ProgressoTotal = 100;
+            var progresso = new Progress<double>(p => ProgressoAtual = (int)p);
+
+            var instalador = await new AutoAtualizacaoService(_http)
+                .BaixarInstaladorAsync(_atualizacao, progresso);
+
+            StatusText = "Instalando. O launcher vai reabrir sozinho.";
+            AutoAtualizacaoService.ExecutarInstalador(instalador);
+
+            // O instalador precisa substituir o executável em uso, então saímos.
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            ErroTexto = ErroAmigavel.Descrever(ex, "atualizar o launcher");
+            StatusText = "Não foi possível atualizar.";
+        }
+        finally
+        {
+            ProgressoTotal = 0;
+            IsBusy = false;
+        }
+    }
+
     /// <summary>Quantos mods já foram processados nesta instalação.</summary>
     [ObservableProperty]
     private int _progressoAtual;
@@ -114,6 +179,10 @@ public sealed partial class MainViewModel : ObservableObject
 
             await SwitchProfileAsync(startProfile);
             StatusText = "Pronto.";
+
+            // Depois de a janela já estar utilizável: checar atualização não
+            // pode atrasar a abertura.
+            _ = ProcurarAtualizacaoAsync();
         }
         catch (Exception ex)
         {

@@ -55,6 +55,7 @@ public static class LauncherSelfTest
             RunGameSyncChecks();
             RunConfigRoutingChecks();
             RunUpdateRuleChecks();
+            RunAutoUpdateChecks();
             RunCleanupChecks();
 
             if (includeNetwork)
@@ -111,6 +112,44 @@ public static class LauncherSelfTest
 
         Check("atualizar: mod sem versão fixada é sempre rebaixado",
             ViewModels.MainViewModel.PrecisaAtualizar("2.29.0", null, estaNoDisco: true));
+    }
+
+    // ------------------------------------------------- atualizacao do launcher
+
+    /// <summary>
+    /// Comparar versão como texto é a armadilha clássica: "1.0.10" &lt; "1.0.9" em
+    /// ordem alfabética, então a atualização pararia de funcionar exatamente
+    /// depois do décimo lançamento — sem erro nenhum aparecer.
+    /// </summary>
+    private static void RunAutoUpdateChecks()
+    {
+        Check("launcher: versão maior é oferecida",
+            AutoAtualizacaoService.EhMaisNova("v1.0.8", "1.0.7"));
+
+        Check("launcher: versão igual não é oferecida",
+            !AutoAtualizacaoService.EhMaisNova("v1.0.7", "1.0.7"));
+
+        Check("launcher: versão anterior não é oferecida",
+            !AutoAtualizacaoService.EhMaisNova("v1.0.6", "1.0.7"));
+
+        Check("launcher: 1.0.10 é reconhecida como maior que 1.0.9",
+            AutoAtualizacaoService.EhMaisNova("v1.0.10", "1.0.9"));
+
+        Check("launcher: salto de versão maior é reconhecido",
+            AutoAtualizacaoService.EhMaisNova("v2.0.0", "1.9.9"));
+
+        Check("launcher: prefixo v é opcional",
+            AutoAtualizacaoService.EhMaisNova("1.1.0", "1.0.0"));
+
+        Check("launcher: sufixo de pré-lançamento não quebra a comparação",
+            AutoAtualizacaoService.EhMaisNova("v1.1.0-beta", "1.0.0"));
+
+        Check("launcher: tag sem formato de versão é ignorada",
+            !AutoAtualizacaoService.EhMaisNova("ultima", "1.0.0"));
+
+        Check("launcher: versão do binário é legível",
+            System.Text.RegularExpressions.Regex.IsMatch(AutoAtualizacaoService.VersaoAtual, @"^\d+\.\d+\.\d+$"),
+            AutoAtualizacaoService.VersaoAtual);
     }
 
     // --------------------------------------------------------------- limpeza

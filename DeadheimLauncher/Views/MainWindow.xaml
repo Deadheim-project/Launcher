@@ -60,9 +60,23 @@
                     </StackPanel>
                 </StackPanel>
 
-                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Content="Configurações"
-                        Style="{StaticResource BotaoSecundario}" Padding="12,6"
-                        Command="{Binding OpenSettingsCommand}" />
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
+                    <!-- Aviso de versão nova do próprio launcher. -->
+                    <Border Background="#2A2119" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1"
+                            CornerRadius="4" Padding="10,6" Margin="0,0,10,0" VerticalAlignment="Center"
+                            Visibility="{Binding MostrarAtualizacao, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding AvisoDeAtualizacao}" FontSize="11" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TextBrush}" />
+                            <Button Content="Atualizar" Padding="10,4" FontSize="11" Margin="10,0,0,0"
+                                    Command="{Binding AtualizarLauncherCommand}"
+                                    IsEnabled="{Binding IsBusy, Converter={x:Static local:InverseBoolConverter.Instance}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="Configurações" Style="{StaticResource BotaoSecundario}" Padding="12,6"
+                            VerticalAlignment="Center" Command="{Binding OpenSettingsCommand}" />
+                </StackPanel>
             </Grid>
 
             <!-- ===== painel de mods, sobreposto e fechado por padrão ===== -->

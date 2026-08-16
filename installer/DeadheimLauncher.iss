@@ -57,6 +57,10 @@ DefaultDirName={localappdata}\DeadheimLauncher
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 
+; A auto-atualizacao substitui o exe enquanto o launcher pode estar aberto.
+CloseApplications=yes
+RestartApplications=no
+
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=Output
@@ -89,7 +93,10 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+; Sem skipifsilent de proposito: a auto-atualizacao roda o instalador em modo
+; /SILENT, e o launcher precisa reabrir sozinho depois. Com skipifsilent o
+; jogador ficaria sem nada aberto ao fim da atualizacao.
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
 [UninstallDelete]
 ; Só o que o instalador colocou. Perfis e mods do jogador ficam em
