@@ -175,10 +175,13 @@ public static class LauncherSelfTest
             profile.EnabledModIds.Add(id);
         }
 
-        // O BepInEx mora no gameroot: precisa sobreviver, está no manifest.
-        var gameroot = Path.Combine(AppPaths.ProfileGameRootDir(perfil), "bepinexpack-valheim");
-        Directory.CreateDirectory(gameroot);
-        File.WriteAllText(Path.Combine(gameroot, "winhttp.dll"), "loader");
+        // A árvore do BepInEx vive na raiz de jogo do perfil e não é um mod. A
+        // limpeza não pode encostar nela — os nomes ali (core, config) nunca vão
+        // constar do manifest.
+        var core = Path.Combine(AppPaths.ProfileBepInExDir(perfil), "core");
+        Directory.CreateDirectory(core);
+        File.WriteAllText(Path.Combine(core, "BepInEx.Preloader.dll"), "preloader");
+        File.WriteAllText(Path.Combine(AppPaths.ProfileGameDir(perfil), "winhttp.dll"), "injetor");
         service.Save(profile);
 
         var removidos = service.RemoverModsForaDoManifest(profile, new[] { "raidsystem", "bepinexpack-valheim" });
@@ -187,8 +190,9 @@ public static class LauncherSelfTest
             !Directory.Exists(Path.Combine(plugins, "modremovido")), string.Join(", ", removidos));
         Check("limpeza: mod que continua no manifest é preservado",
             File.Exists(Path.Combine(plugins, "raidsystem", "raidsystem.dll")));
-        Check("limpeza: pacote de raiz do jogo não é apagado por engano",
-            File.Exists(Path.Combine(gameroot, "winhttp.dll")));
+        Check("limpeza: a árvore do BepInEx não é apagada por engano",
+            File.Exists(Path.Combine(core, "BepInEx.Preloader.dll")) &&
+            File.Exists(Path.Combine(AppPaths.ProfileGameDir(perfil), "winhttp.dll")));
 
         var recarregado = service.LoadOrCreate(perfil);
         Check("limpeza: perfil deixa de listar o mod removido",
@@ -233,21 +237,28 @@ public static class LauncherSelfTest
             File.Exists(Path.Combine(configPerfil, "Detalhes.RaidSystem.cfg")) &&
             File.Exists(Path.Combine(configPerfil, "RaidSystem", "RaidSystem.Default.cfg")));
 
-        var jogo = Path.Combine(AppPaths.Root, "ConfigValheim");
-        Directory.CreateDirectory(Path.Combine(jogo, "BepInEx", "plugins"));
+        // O config agora fica dentro do BepInEx do perfil, que é a árvore que o
+        // jogo carrega. Não passa mais pela pasta do Valheim.
+        Check("config: fica dentro do BepInEx do perfil",
+            configPerfil.StartsWith(AppPaths.ProfileBepInExDir(perfil), StringComparison.OrdinalIgnoreCase),
+            configPerfil);
 
-        // Um .cfg que o jogador editou e que o servidor não manda: tem que sobreviver.
+        var jogo = Path.Combine(AppPaths.Root, "ConfigValheim");
         var configJogo = Path.Combine(jogo, "BepInEx", "config");
         Directory.CreateDirectory(configJogo);
         File.WriteAllText(Path.Combine(configJogo, "MinhasTeclas.cfg"), "tecla=F5");
 
-        new ValheimLaunchService().SyncProfileToGame(jogo, perfil);
+        var coreDoPerfil = Path.Combine(AppPaths.ProfileBepInExDir(perfil), "core");
+        Directory.CreateDirectory(coreDoPerfil);
+        File.WriteAllText(Path.Combine(coreDoPerfil, "BepInEx.Preloader.dll"), "preloader");
+        File.WriteAllText(Path.Combine(jogo, "valheim.exe"), "jogo");
 
-        Check("config: chega em BepInEx/config do jogo",
-            File.ReadAllText(Path.Combine(configJogo, "Detalhes.RaidSystem.cfg")) == "dano=99" &&
-            File.Exists(Path.Combine(configJogo, "RaidSystem", "RaidSystem.Default.cfg")));
-        Check("config: não apaga o que o jogador configurou",
-            File.Exists(Path.Combine(configJogo, "MinhasTeclas.cfg")));
+        new ValheimLaunchService().PrepararJogo(jogo, perfil);
+
+        Check("config: o do jogador continua intacto",
+            File.ReadAllText(Path.Combine(configJogo, "MinhasTeclas.cfg")) == "tecla=F5");
+        Check("config: o do servidor não é despejado na pasta do jogo",
+            !File.Exists(Path.Combine(configJogo, "Detalhes.RaidSystem.cfg")));
     }
 
     // ---------------------------------------------------------------------- ui
@@ -324,65 +335,8 @@ public static class LauncherSelfTest
         Check("UI: nenhum binding quebrado", errosDeBinding.Count == 0,
             errosDeBinding.Count == 0 ? "" : string.Join(" | ", errosDeBinding.Take(4)));
 
-        RunProfileDialogChecks();
     }
 
-    /// <summary>
-    /// A tela de criar perfil já quebrou por altura fixa: os botões Confirmar e
-    /// Cancelar ficavam fora da janela, e como ela era ResizeMode=NoResize não
-    /// dava nem para esticar. Compila sem erro nenhum — só aparece abrindo.
-    /// </summary>
-    private static void RunProfileDialogChecks()
-    {
-        try
-        {
-            var dialogo = new Views.InputDialog(
-                "Nome do novo perfil:", "Novo Perfil",
-                hint: "Cada perfil guarda sua própria seleção de mods.",
-                validar: Views.InputDialog.ValidarNomeDePerfil)
-            {
-                Left = -10000,
-                Top = -10000,
-                ShowInTaskbar = false
-            };
-
-            dialogo.Show();
-            dialogo.UpdateLayout();
-
-            var conteudo = (System.Windows.FrameworkElement)dialogo.Content;
-            conteudo.Measure(new System.Windows.Size(dialogo.Width, double.PositiveInfinity));
-            var alturaNecessaria = conteudo.DesiredSize.Height;
-
-            // Medir ActualHeight logo após o Show() é instável (o WPF ainda não
-            // fechou o layout). O que importa afinal é a regra: ou a janela
-            // acompanha o conteúdo, ou a altura fixa é suficiente. Altura fixa
-            // menor que o conteúdo foi exatamente o que cortou os botões.
-            var acompanhaConteudo = dialogo.SizeToContent == System.Windows.SizeToContent.Height
-                                    || dialogo.SizeToContent == System.Windows.SizeToContent.WidthAndHeight;
-
-            Check("UI: tela de perfil não corta o conteúdo",
-                acompanhaConteudo || dialogo.Height >= alturaNecessaria,
-                acompanhaConteudo
-                    ? $"janela acompanha o conteúdo ({alturaNecessaria:F0}px)"
-                    : $"altura fixa {dialogo.Height:F0}px, conteúdo {alturaNecessaria:F0}px");
-
-            dialogo.Close();
-            Check("UI: tela de perfil abre sem erro de XAML", true);
-        }
-        catch (Exception ex)
-        {
-            Check("UI: tela de perfil abre sem erro de XAML", false, ex.Message);
-        }
-
-        // A validação existe para o erro aparecer no próprio campo, em vez de a
-        // janela fechar em silêncio como acontecia com nome vazio ou repetido.
-        Check("UI: nome de perfil vazio é recusado",
-            Views.InputDialog.ValidarNomeDePerfil("   ") is not null);
-        Check("UI: nome de perfil com caractere de caminho é recusado",
-            Views.InputDialog.ValidarNomeDePerfil("meu/perfil") is not null);
-        Check("UI: nome de perfil válido é aceito",
-            Views.InputDialog.ValidarNomeDePerfil("Hardcore") is null);
-    }
 
     /// <summary>Captura os avisos que o WPF emite quando um binding não resolve.</summary>
     private sealed class BindingErrorListener : TraceListener
@@ -553,28 +507,48 @@ public static class LauncherSelfTest
         File.WriteAllText(Path.Combine(modDir, "config", "npc.cfg"), "cfg");
 
         var fakeGame = Path.Combine(AppPaths.Root, "FakeValheim");
-
-        // Sem BepInEx a sincronização tem que reclamar em vez de copiar pro vazio.
         Directory.CreateDirectory(fakeGame);
+        File.WriteAllText(Path.Combine(fakeGame, "valheim.exe"), "jogo");
+
+        // Sem o BepInEx baixado no perfil, preparar tem que reclamar em vez de
+        // deixar o jogador abrir o jogo sem carregador nenhum.
         var threw = false;
-        try { launch.SyncProfileToGame(fakeGame, "SyncTest"); }
+        try { launch.PrepararJogo(fakeGame, "SyncTest"); }
         catch (BepInExNotFoundException) { threw = true; }
-        Check("sincronizar sem BepInEx instalado dá erro claro", threw);
+        Check("preparar sem o BepInEx do perfil dá erro claro", threw);
 
-        Directory.CreateDirectory(Path.Combine(fakeGame, "BepInEx", "plugins"));
+        // BepInEx do perfil, com os arquivos que o Doorstop precisa.
+        var coreDoPerfil = Path.Combine(AppPaths.ProfileBepInExDir("SyncTest"), "core");
+        Directory.CreateDirectory(coreDoPerfil);
+        File.WriteAllText(Path.Combine(coreDoPerfil, "BepInEx.Preloader.dll"), "preloader");
+        File.WriteAllText(Path.Combine(AppPaths.ProfileGameDir("SyncTest"), "winhttp.dll"), "injetor");
 
-        // Mod de outro perfil, que a sincronização deve limpar.
-        var stale = Path.Combine(fakeGame, "BepInEx", "plugins", "ModDeOutroPerfil");
-        Directory.CreateDirectory(stale);
-        File.WriteAllText(Path.Combine(stale, "Velho.dll"), "velho");
+        // Mods que o JOGADOR instalou por conta própria: não podem ser tocados.
+        var doJogador = Path.Combine(fakeGame, "BepInEx", "plugins", "ModDoJogador");
+        Directory.CreateDirectory(doJogador);
+        File.WriteAllText(Path.Combine(doJogador, "Dele.dll"), "nao mexa");
 
-        launch.SyncProfileToGame(fakeGame, "SyncTest");
+        launch.PrepararJogo(fakeGame, "SyncTest");
 
-        Check("sincronizar copia a DLL do perfil pro jogo",
-            File.Exists(Path.Combine(fakeGame, "BepInEx", "plugins", "npcs", "Npcs.dll")));
-        Check("sincronizar preserva subpastas do mod (config)",
-            File.Exists(Path.Combine(fakeGame, "BepInEx", "plugins", "npcs", "config", "npc.cfg")));
-        Check("sincronizar remove mod que não pertence ao perfil ativo", !Directory.Exists(stale));
+        Check("preparar não instala mod dentro do Valheim",
+            !Directory.Exists(Path.Combine(fakeGame, "BepInEx", "plugins", "npcs")));
+        Check("preparar preserva os mods que o jogador instalou",
+            File.Exists(Path.Combine(doJogador, "Dele.dll")));
+        Check("preparar leva o injetor para junto do valheim.exe",
+            File.Exists(Path.Combine(fakeGame, "winhttp.dll")));
+
+        // Sem isso, abrir pela Steam carregaria os mods do servidor sem o
+        // jogador ter pedido.
+        var doorstopIni = Path.Combine(fakeGame, "doorstop_config.ini");
+        Check("preparar deixa o carregamento desligado por padrão",
+            File.Exists(doorstopIni) && File.ReadAllText(doorstopIni).Contains("enabled=false"));
+
+        var argumentos = ValheimLaunchService.MontarArgumentosDeInicializacao("SyncTest");
+        Check("argumentos ligam o Doorstop apontando para o perfil",
+            argumentos.Contains("--doorstop-enabled true")
+            && argumentos.Contains(AppPaths.ProfileBepInExDir("SyncTest"))
+            && argumentos.Contains("BepInEx.Preloader.dll"),
+            argumentos);
 
         var settings = new LauncherSettings { ValheimPath = fakeGame };
         Check("caminho do Valheim configurado à mão é respeitado",
@@ -818,29 +792,30 @@ public static class LauncherSelfTest
 
         var game = Path.Combine(AppPaths.Root, "FullValheim");
         Directory.CreateDirectory(game);
-        new ValheimLaunchService().SyncProfileToGame(game, profile);
+        File.WriteAllText(Path.Combine(game, "valheim.exe"), "jogo");
 
-        var gamePlugins = Path.Combine(game, "BepInEx", "plugins");
-        var syncedMods = Directory.Exists(gamePlugins) ? Directory.GetDirectories(gamePlugins).Length : 0;
-        var syncedDlls = Directory.Exists(gamePlugins)
-            ? Directory.GetFiles(gamePlugins, "*.dll", SearchOption.AllDirectories).Length
-            : 0;
+        // Mod que o jogador instalou por conta própria antes de usar o launcher.
+        var doJogador = Path.Combine(game, "BepInEx", "plugins", "ModDoJogador");
+        Directory.CreateDirectory(doJogador);
+        File.WriteAllText(Path.Combine(doJogador, "Dele.dll"), "nao mexa");
 
-        Check("sincroniza o perfil completo para o jogo",
-            syncedMods >= 30 && syncedDlls >= 30,
-            $"{syncedMods} pastas de mod, {syncedDlls} dlls");
+        new ValheimLaunchService().PrepararJogo(game, profile);
 
-        Check("o BepInEx do perfil chega na raiz do jogo",
-            File.Exists(Path.Combine(game, "winhttp.dll")) &&
-            Directory.Exists(Path.Combine(game, "BepInEx", "core")));
+        Check("o BepInEx do perfil tem o carregador",
+            File.Exists(Path.Combine(AppPaths.ProfileBepInExDir(profile), "core", "BepInEx.Preloader.dll")));
 
-        // Nomes que o servidor exige de fato: se um destes não chegou, o jogador
-        // é recusado ou desincroniza ao entrar.
+        Check("preparar o perfil completo não instala nada em BepInEx/plugins do jogo",
+            Directory.GetDirectories(Path.Combine(game, "BepInEx", "plugins")).Length == 1);
+
+        Check("o mod do jogador sobrevive ao perfil completo",
+            File.Exists(Path.Combine(doJogador, "Dele.dll")));
+
+        // Nomes que o servidor exige de fato: se um destes faltar no perfil, o
+        // jogador é recusado ou desincroniza ao entrar.
         string[] criticos = { "Jotunn.dll", "ServerCharacters.dll", "AzuAntiCheat.dll" };
-        var todosPresentes = Directory.Exists(gamePlugins)
-            ? criticos.All(n => Directory.GetFiles(gamePlugins, n, SearchOption.AllDirectories).Length > 0)
-            : false;
-        Check("mods críticos do servidor chegaram ao jogo", todosPresentes, string.Join(", ", criticos));
+        var todosPresentes = criticos.All(n =>
+            Directory.GetFiles(pluginsRoot, n, SearchOption.AllDirectories).Length > 0);
+        Check("mods críticos do servidor estão no perfil", todosPresentes, string.Join(", ", criticos));
     }
 
     /// <summary>
@@ -862,9 +837,11 @@ public static class LauncherSelfTest
             new ProfileService().LoadOrCreate("BepInExTest");
             await installer.InstallAsync(bepinex, "BepInExTest");
 
-            var installedDir = Path.Combine(AppPaths.ProfileGameRootDir("BepInExTest"), bepinex.Id);
+            // Funde na raiz de jogo do perfil, sem virar subpasta: é essa árvore
+            // que o jogo carrega.
+            var installedDir = AppPaths.ProfileGameDir("BepInExTest");
 
-            Check("BepInEx: vai para gameroot e não para plugins",
+            Check("BepInEx: funde na raiz do perfil e não vira mais um plugin",
                 Directory.Exists(installedDir) &&
                 !Directory.Exists(Path.Combine(AppPaths.ProfilePluginsDir("BepInExTest"), bepinex.Id)));
 
@@ -877,14 +854,15 @@ public static class LauncherSelfTest
             Check("BepInEx: traz a pasta BepInEx/core",
                 Directory.Exists(Path.Combine(installedDir, "BepInEx", "core")));
 
-            // Um Valheim limpo, sem BepInEx: o perfil tem que conseguir instalar sozinho.
+            // Valheim limpo: só o injetor deve chegar lá, nada de BepInEx.
             var cleanGame = Path.Combine(AppPaths.Root, "CleanValheim");
             Directory.CreateDirectory(cleanGame);
-            new ValheimLaunchService().SyncProfileToGame(cleanGame, "BepInExTest");
+            File.WriteAllText(Path.Combine(cleanGame, "valheim.exe"), "jogo");
+            new ValheimLaunchService().PrepararJogo(cleanGame, "BepInExTest");
 
-            Check("BepInEx: sincronizar instala o carregador num Valheim limpo",
+            Check("BepInEx: só o injetor vai para o Valheim",
                 File.Exists(Path.Combine(cleanGame, "winhttp.dll")) &&
-                Directory.Exists(Path.Combine(cleanGame, "BepInEx", "core")));
+                !Directory.Exists(Path.Combine(cleanGame, "BepInEx")));
         }
         catch (Exception ex)
         {

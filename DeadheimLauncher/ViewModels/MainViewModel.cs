@@ -21,11 +21,23 @@ public sealed partial class MainViewModel : ObservableObject
     private ModManifest _manifest = new();
     private Profile _activeProfile = new();
 
-    public ObservableCollection<string> Profiles { get; } = new();
+    /// <summary>
+    /// Nome fixo do único perfil. O launcher atende um servidor só, então manter
+    /// mais de um conjunto de mods não serviria para nada. Segue sendo "Default"
+    /// para quem já usou versões anteriores não perder o que estava instalado.
+    /// </summary>
+    private const string PerfilUnico = "Default";
+
     public ObservableCollection<ModListItemViewModel> Mods { get; } = new();
 
-    [ObservableProperty]
-    private string? _selectedProfile;
+    /// <summary>Mods do servidor: o que é preciso para jogar.</summary>
+    public ObservableCollection<ModListItemViewModel> ModsDoServidor { get; } = new();
+
+    /// <summary>
+    /// Ferramentas de administração, em aba separada. Ficam fora do caminho de
+    /// quem só quer entrar e jogar, e nenhuma é obrigatória.
+    /// </summary>
+    public ObservableCollection<ModListItemViewModel> ModsDeAdmin { get; } = new();
 
     [ObservableProperty]
     private string _statusText = "Iniciando...";
@@ -162,22 +174,10 @@ public sealed partial class MainViewModel : ObservableObject
         {
             _settings = _settingsService.Load();
 
-            var profiles = _profileService.ListProfiles();
-            if (profiles.Count == 0)
-            {
-                _profileService.LoadOrCreate("Default");
-                profiles = _profileService.ListProfiles();
-            }
-
-            Profiles.Clear();
-            foreach (var p in profiles) Profiles.Add(p);
-
-            var startProfile = profiles.Contains(_settings.LastActiveProfile) ? _settings.LastActiveProfile : profiles[0];
-
             StatusText = "Baixando lista de mods do servidor...";
             _manifest = await _manifestService.GetManifestAsync(_settings.ManifestUrl);
 
-            await SwitchProfileAsync(startProfile);
+            CarregarPerfil();
             StatusText = "Pronto.";
 
             // Depois de a janela já estar utilizável: checar atualização não
@@ -194,67 +194,32 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedProfileChanged(string? value)
+    /// <summary>
+    /// Carrega o perfil único e monta a lista de mods.
+    ///
+    /// O launcher atende um servidor só, então não existe motivo para o jogador
+    /// manter mais de um conjunto de mods. A pasta de perfil continua existindo
+    /// porque é ela que mantém tudo fora da instalação do Valheim — mas é uma só
+    /// e não aparece na interface.
+    /// </summary>
+    private void CarregarPerfil()
     {
-        if (value is not null && value != _activeProfile.Name)
-        {
-            _ = SwitchProfileAsync(value);
-        }
-    }
-
-    private async Task SwitchProfileAsync(string profileName)
-    {
-        _activeProfile = _profileService.LoadOrCreate(profileName);
-        SelectedProfile = profileName;
-        _settings.LastActiveProfile = profileName;
-        _settingsService.Save(_settings);
+        _activeProfile = _profileService.LoadOrCreate(PerfilUnico);
 
         Mods.Clear();
+        ModsDoServidor.Clear();
+        ModsDeAdmin.Clear();
+
         foreach (var entry in _manifest.AllMods)
         {
             var enabled = entry.Required || _activeProfile.EnabledModIds.Contains(entry.Id);
-            Mods.Add(new ModListItemViewModel(entry, enabled));
+            var item = new ModListItemViewModel(entry, enabled);
+
+            // Mods fica com tudo: é a lista que instala e sincroniza. As duas
+            // coleções por categoria existem só para a interface.
+            Mods.Add(item);
+            (entry.Category == ModCategory.Admin ? ModsDeAdmin : ModsDoServidor).Add(item);
         }
-
-        await Task.CompletedTask;
-    }
-
-    [RelayCommand]
-    private void CreateProfile()
-    {
-        var name = PromptForName("Nome do novo perfil:", "Novo Perfil");
-        if (string.IsNullOrWhiteSpace(name) || Profiles.Contains(name)) return;
-
-        _profileService.LoadOrCreate(name);
-        Profiles.Add(name);
-        SelectedProfile = name;
-    }
-
-    [RelayCommand]
-    private void DuplicateProfile()
-    {
-        if (SelectedProfile is null) return;
-        var name = PromptForName("Nome do perfil duplicado:", $"{SelectedProfile} - cópia");
-        if (string.IsNullOrWhiteSpace(name) || Profiles.Contains(name)) return;
-
-        _profileService.Duplicate(_activeProfile, name);
-        Profiles.Add(name);
-        SelectedProfile = name;
-    }
-
-    [RelayCommand]
-    private void DeleteProfile()
-    {
-        if (SelectedProfile is null || Profiles.Count <= 1) return;
-        var toDelete = SelectedProfile;
-
-        var result = MessageBox.Show($"Excluir o perfil '{toDelete}'? Essa ação não pode ser desfeita.",
-            "Confirmar exclusão", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes) return;
-
-        _profileService.Delete(toDelete);
-        Profiles.Remove(toDelete);
-        SelectedProfile = Profiles[0];
     }
 
     [RelayCommand]
@@ -265,7 +230,7 @@ public sealed partial class MainViewModel : ObservableObject
         try
         {
             _manifest = await _manifestService.GetManifestAsync(_settings.ManifestUrl);
-            await SwitchProfileAsync(_activeProfile.Name);
+            CarregarPerfil();
             StatusText = "Lista de mods atualizada.";
         }
         catch (Exception ex)
@@ -294,7 +259,7 @@ public sealed partial class MainViewModel : ObservableObject
             try
             {
                 _manifest = await _manifestService.GetManifestAsync(_settings.ManifestUrl);
-                await SwitchProfileAsync(_activeProfile.Name);
+                CarregarPerfil();
 
                 if (!string.IsNullOrWhiteSpace(_manifest.PackVersion) && _manifest.PackVersion != versaoAnterior)
                     StatusText = $"Servidor atualizado para {_manifest.PackVersion}. Aplicando...";
@@ -333,12 +298,12 @@ public sealed partial class MainViewModel : ObservableObject
                 StatusText = $"{falhas.Count} mod(s) opcional(is) não instalaram — seguindo sem eles.";
             }
 
-            StatusText = "Sincronizando mods com o Valheim...";
+            StatusText = "Preparando o Valheim...";
             var valheimPath = _launchService.ResolveValheimPath(_settings);
-            _launchService.SyncProfileToGame(valheimPath, _activeProfile.Name);
+            _launchService.PrepararJogo(valheimPath, _activeProfile.Name);
 
             StatusText = "Iniciando o Valheim...";
-            _launchService.LaunchGame();
+            _launchService.LaunchGame(valheimPath, _activeProfile.Name);
             StatusText = "Valheim iniciado.";
         }
         catch (Exception ex)
@@ -463,30 +428,4 @@ public sealed partial class MainViewModel : ObservableObject
         _settings = _settingsService.Load();
     }
 
-    /// <summary>
-    /// Pede o nome do perfil já validando dentro do diálogo. Antes, nome vazio
-    /// ou repetido fazia o chamador dar return em silêncio: a janela fechava e
-    /// nada acontecia, sem dizer por quê.
-    /// </summary>
-    private string? PromptForName(string message, string defaultValue)
-    {
-        var dialog = new Views.InputDialog(
-            message,
-            defaultValue,
-            hint: "Cada perfil guarda sua própria seleção de mods.",
-            validar: nome =>
-            {
-                var erro = Views.InputDialog.ValidarNomeDePerfil(nome);
-                if (erro is not null) return erro;
-
-                return Profiles.Contains(nome, StringComparer.OrdinalIgnoreCase)
-                    ? $"Já existe um perfil chamado “{nome}”."
-                    : null;
-            })
-        {
-            Owner = Application.Current.MainWindow
-        };
-
-        return dialog.ShowDialog() == true ? dialog.ResponseText : null;
-    }
 }

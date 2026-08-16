@@ -54,77 +54,84 @@ public sealed class ValheimLaunchService
         }
     }
 
-    /// <summary>Substitui o conteúdo de BepInEx/plugins pelo do perfil ativo (remove o que não pertence a ele).</summary>
-    public void SyncProfileToGame(string valheimPath, string profileName)
+    /// <summary>
+    /// Prepara o jogo para carregar os mods do perfil SEM instalar nada dentro
+    /// dele.
+    ///
+    /// Antes, isto copiava os mods para BepInEx/plugins do Valheim e apagava
+    /// tudo que já estivesse lá — destruindo qualquer mod que o jogador tivesse
+    /// posto por conta própria. Agora a árvore BepInEx inteira (core, plugins,
+    /// config) mora no perfil, e o jogo é apontado para lá na hora de iniciar.
+    ///
+    /// O único arquivo que precisa estar junto do valheim.exe é o winhttp.dll:
+    /// é ele que injeta o carregador no processo, e não há como evitar isso sem
+    /// mexer nas opções de inicialização da Steam. Junto vai um
+    /// doorstop_config.ini com enabled=false, para que abrir o jogo direto pela
+    /// Steam continue sendo Valheim puro — o launcher liga o carregamento por
+    /// linha de comando, só na sua própria execução.
+    /// </summary>
+    public void PrepararJogo(string valheimPath, string profileName)
     {
-        // Primeiro os pacotes que vão na raiz do jogo — é onde mora o próprio
-        // BepInEx. Tem que vir antes da checagem abaixo, senão um perfil que
-        // instala o BepInEx seria recusado por... não ter BepInEx.
-        var gameRootSource = AppPaths.ProfileGameRootDir(profileName);
-        if (Directory.Exists(gameRootSource))
-        {
-            foreach (var packageDir in Directory.GetDirectories(gameRootSource))
-            {
-                CopyDirectory(packageDir, valheimPath);
-            }
-        }
-
-        var pluginsDir = Path.Combine(valheimPath, "BepInEx", "plugins");
-        if (!Directory.Exists(Path.Combine(valheimPath, "BepInEx")))
+        var bepinexDoPerfil = AppPaths.ProfileBepInExDir(profileName);
+        if (!Directory.Exists(Path.Combine(bepinexDoPerfil, "core")))
             throw new BepInExNotFoundException(
-                "BepInEx não está instalado nessa pasta do Valheim, e o perfil ativo não inclui o pacote do BepInEx. " +
-                "Marque o BepInEx na lista de mods ou instale-o manualmente.");
+                "O BepInEx ainda não foi baixado para este perfil. Marque o BepInEx na lista de mods e clique em Jogar de novo.");
 
-        Directory.CreateDirectory(pluginsDir);
+        var origemDoPerfil = AppPaths.ProfileGameDir(profileName);
 
-        foreach (var dir in Directory.GetDirectories(pluginsDir))
+        // winhttp.dll e doorstop_libs são o mínimo que o Windows exige ao lado
+        // do executável para a injeção acontecer.
+        foreach (var arquivo in new[] { "winhttp.dll", ".doorstop_version" })
         {
-            Directory.Delete(dir, recursive: true);
+            var origem = Path.Combine(origemDoPerfil, arquivo);
+            if (File.Exists(origem)) File.Copy(origem, Path.Combine(valheimPath, arquivo), overwrite: true);
         }
 
-        var profilePlugins = AppPaths.ProfilePluginsDir(profileName);
-        if (!Directory.Exists(profilePlugins)) return;
+        var libsOrigem = Path.Combine(origemDoPerfil, "doorstop_libs");
+        if (Directory.Exists(libsOrigem))
+            CopyDirectory(libsOrigem, Path.Combine(valheimPath, "doorstop_libs"));
 
-        foreach (var modDir in Directory.GetDirectories(profilePlugins))
+        // Desligado por padrão: sem isso, abrir pela Steam carregaria os mods do
+        // perfil sem o jogador ter pedido.
+        var configDoorstop = Path.Combine(valheimPath, "doorstop_config.ini");
+        if (!File.Exists(configDoorstop))
         {
-            var modName = Path.GetFileName(modDir);
-            var destDir = Path.Combine(pluginsDir, modName);
-            CopyDirectory(modDir, destDir);
+            File.WriteAllText(configDoorstop,
+                "[General]\r\nenabled=false\r\n" +
+                "target_assembly=BepInEx\\core\\BepInEx.Preloader.dll\r\n");
         }
-
-        CopiarConfigsDoPerfil(valheimPath, profileName);
     }
 
     /// <summary>
-    /// Leva os .cfg do perfil para BepInEx/config.
-    ///
-    /// Diferente de plugins, config/ não é limpo antes: o jogador ajusta coisa
-    /// ali (tecla, escala de HUD) e apagar tudo a cada partida seria hostil.
-    /// Os arquivos que o servidor manda sobrescrevem os correspondentes; o resto
-    /// fica como está.
+    /// Argumentos que mandam o Doorstop carregar o BepInEx do perfil, e não o do
+    /// jogo. Separado para poder ser verificado sem abrir o Valheim.
     /// </summary>
-    private static void CopiarConfigsDoPerfil(string valheimPath, string profileName)
+    public static string MontarArgumentosDeInicializacao(string profileName)
     {
-        var origem = AppPaths.ProfileConfigDir(profileName);
-        if (!Directory.Exists(origem)) return;
-
-        var destino = Path.Combine(valheimPath, "BepInEx", "config");
-        Directory.CreateDirectory(destino);
-
-        foreach (var arquivo in Directory.GetFiles(origem, "*", SearchOption.AllDirectories))
-        {
-            var alvo = Path.Combine(destino, Path.GetRelativePath(origem, arquivo));
-            Directory.CreateDirectory(Path.GetDirectoryName(alvo)!);
-            File.Copy(arquivo, alvo, overwrite: true);
-        }
+        var preloader = Path.Combine(AppPaths.ProfileBepInExDir(profileName), "core", "BepInEx.Preloader.dll");
+        return "--doorstop-enabled true " +
+               $"--doorstop-target-assembly \"{preloader}\"";
     }
 
-    /// <summary>Inicia o Valheim via Steam (URI steam://run), que garante overlay/updates do Steam funcionando.</summary>
-    public void LaunchGame()
+    /// <summary>
+    /// Inicia o Valheim já apontando para os mods do perfil.
+    ///
+    /// Executa o valheim.exe direto, e não steam://run, porque os argumentos do
+    /// Doorstop precisam chegar ao processo — a URI da Steam não repassa
+    /// argumentos. Com a Steam aberta, o jogo continua contando tempo e
+    /// aparecendo como "jogando"; o overlay costuma funcionar normalmente.
+    /// </summary>
+    public void LaunchGame(string valheimPath, string profileName)
     {
+        var exe = Path.Combine(valheimPath, "valheim.exe");
+        if (!File.Exists(exe))
+            throw new ValheimNotFoundException($"Não encontrei o valheim.exe em '{valheimPath}'.");
+
         Process.Start(new ProcessStartInfo
         {
-            FileName = $"steam://run/{ValheimSteamAppId}",
+            FileName = exe,
+            Arguments = MontarArgumentosDeInicializacao(profileName),
+            WorkingDirectory = valheimPath,
             UseShellExecute = true
         });
     }

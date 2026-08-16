@@ -89,11 +89,14 @@ public sealed class ProfileService
         var validos = new HashSet<string>(idsDoManifest, StringComparer.OrdinalIgnoreCase);
         var removidos = new List<string>();
 
-        foreach (var raiz in new[] { AppPaths.ProfilePluginsDir(profile.Name), AppPaths.ProfileGameRootDir(profile.Name) })
+        // Só a pasta de plugins: é a única onde cada subpasta corresponde a um
+        // mod. A raiz de jogo do perfil guarda a árvore do BepInEx (core,
+        // config...), cujos nomes não são ids de mod — varrer ali apagaria o
+        // carregador inteiro por não achá-lo no manifest.
+        var plugins = AppPaths.ProfilePluginsDir(profile.Name);
+        if (Directory.Exists(plugins))
         {
-            if (!Directory.Exists(raiz)) continue;
-
-            foreach (var pasta in Directory.GetDirectories(raiz))
+            foreach (var pasta in Directory.GetDirectories(plugins))
             {
                 var id = Path.GetFileName(pasta);
                 if (validos.Contains(id)) continue;

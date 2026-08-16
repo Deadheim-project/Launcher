@@ -49,10 +49,14 @@ public sealed class ModInstallerService
         progress?.Report(new ModInstallProgress { ModId = mod.Id, Status = "Resolvendo versão..." });
         var resolved = await ResolveLatestAsync(mod, ct);
 
-        var baseDir = mod.Target == InstallTarget.GameRoot
-            ? AppPaths.ProfileGameRootDir(profileName)
-            : AppPaths.ProfilePluginsDir(profileName);
-        var destDir = Path.Combine(baseDir, mod.Id);
+        // O BepInEx não é um mod: ele É a árvore que o jogo carrega. Por isso vai
+        // para uma área de montagem e depois se funde na raiz de jogo do perfil,
+        // em vez de virar mais uma subpasta. Fundir importa: apagar e recriar a
+        // raiz levaria junto os plugins já instalados.
+        var éCarregador = mod.Target == InstallTarget.GameRoot;
+        var destDir = éCarregador
+            ? Path.Combine(Path.GetTempPath(), $"deadheim-montagem-{Guid.NewGuid():N}")
+            : Path.Combine(AppPaths.ProfilePluginsDir(profileName), mod.Id);
         Directory.CreateDirectory(destDir);
 
         progress?.Report(new ModInstallProgress { ModId = mod.Id, Status = $"Baixando {resolved.FileName}..." });
@@ -93,21 +97,24 @@ public sealed class ModInstallerService
                 File.Copy(tempFile, Path.Combine(destDir, resolved.FileName), overwrite: true);
             }
 
-            if (mod.Target == InstallTarget.GameRoot)
+            if (éCarregador)
             {
                 FlattenSingleRootFolder(destDir);
+                MarkOfTheWeb.UnblockDirectory(destDir);
+                FundirNaRaizDoPerfil(destDir, AppPaths.ProfileGameDir(profileName));
             }
             else
             {
                 MoverConfigParaOPerfil(destDir, profileName);
-            }
 
-            // Tira a marca de "arquivo baixado da internet" das DLLs extraídas, senão
-            // o Windows pede pra desbloquear cada uma na mão. Ver MarkOfTheWeb.
-            MarkOfTheWeb.UnblockDirectory(destDir);
+                // Tira a marca de "arquivo baixado da internet" das DLLs extraídas,
+                // senão o Windows pede pra desbloquear cada uma na mão.
+                MarkOfTheWeb.UnblockDirectory(destDir);
+            }
         }
         finally
         {
+            if (éCarregador && Directory.Exists(destDir)) Directory.Delete(destDir, recursive: true);
             if (File.Exists(tempFile)) File.Delete(tempFile);
         }
 
@@ -131,6 +138,23 @@ public sealed class ModInstallerService
     /// cada mod recria um .cfg padrão e o jogador acaba com regras diferentes das
     /// do servidor — sem nenhum erro visível.
     /// </summary>
+    /// <summary>
+    /// Copia por cima, sem apagar o que já existe. A raiz de jogo do perfil
+    /// guarda tanto o carregador quanto os plugins já baixados; recriá-la do
+    /// zero a cada atualização do BepInEx apagaria os mods junto.
+    /// </summary>
+    private static void FundirNaRaizDoPerfil(string origem, string destino)
+    {
+        Directory.CreateDirectory(destino);
+
+        foreach (var arquivo in Directory.GetFiles(origem, "*", SearchOption.AllDirectories))
+        {
+            var alvo = Path.Combine(destino, Path.GetRelativePath(origem, arquivo));
+            Directory.CreateDirectory(Path.GetDirectoryName(alvo)!);
+            File.Copy(arquivo, alvo, overwrite: true);
+        }
+    }
+
     private static void MoverConfigParaOPerfil(string destDir, string profileName)
     {
         var origem = Path.Combine(destDir, "config");

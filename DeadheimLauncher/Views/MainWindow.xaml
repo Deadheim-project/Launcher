@@ -10,6 +10,57 @@
         <vm:MainViewModel />
     </Window.DataContext>
 
+    <Window.Resources>
+        <!-- Uma linha da lista de mods, usada pelas duas abas. Fica aqui e não
+             em App.xaml porque o link do autor chama AbrirLink, que é código
+             desta janela. -->
+        <DataTemplate x:Key="ItemDeMod">
+            <Border BorderBrush="#2C2521" BorderThickness="0,0,0,1" Padding="0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
+                              IsEnabled="{Binding IsRequired, Converter={x:Static local:InverseBoolConverter.Instance}}"
+                              VerticalAlignment="Top" Margin="0,2,10,0" />
+                    <StackPanel Grid.Column="1">
+                        <!-- Todos alinhados pela base: com tamanhos de fonte diferentes
+                             e alinhamentos misturados, nome, versão e autor ficavam
+                             visivelmente tortos entre si. -->
+                        <WrapPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                       FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding VersionLabel}" Foreground="{StaticResource MutedTextBrush}"
+                                       Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
+                            <!-- Crédito ao autor, clicável quando há página oficial.
+                                 Sem link vira texto simples: NavigateUri é do tipo Uri
+                                 e quebra o binding se receber null. -->
+                            <TextBlock Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center"
+                                       Visibility="{Binding TemLink, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="AbrirLink"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           TextDecorations="Underline">
+                                    <Run Text="{Binding AuthorLabel, Mode=OneWay}" />
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Text="{Binding AuthorLabel}" Margin="8,0,0,0" FontSize="11"
+                                       VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}"
+                                       Visibility="{Binding TemAutorSemLink, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+                            <TextBlock Text="obrigatório" Foreground="{StaticResource AccentBrush}"
+                                       Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center"
+                                       Visibility="{Binding IsRequired, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+                        </WrapPanel>
+                        <TextBlock Text="{Binding Description}" Foreground="{StaticResource MutedTextBrush}"
+                                   TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0" />
+                        <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource AccentBrush}"
+                                   FontSize="11" Margin="0,2,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
     <!--
         Layout no espírito do Battle.net: a arte ocupa o palco, a barra de baixo
         concentra a ação (perfil, progresso, JOGAR), e a lista de mods sai da
@@ -85,70 +136,35 @@
                     Visibility="{Binding IsChecked, ElementName=BotaoMods,
                                  Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                 <DockPanel Margin="16">
-                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="MODS DO SERVIDOR" FontWeight="SemiBold" FontSize="12" />
-                            <TextBlock Text="{Binding Mods.Count, StringFormat={}({0})}"
-                                       Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="6,0,0,0" />
-                        </StackPanel>
-                        <Button HorizontalAlignment="Right" Content="Atualizar lista" Padding="10,5"
-                                Style="{StaticResource BotaoSecundario}" Command="{Binding RefreshManifestCommand}" />
-                    </Grid>
+                    <Button DockPanel.Dock="Top" HorizontalAlignment="Right" Content="Atualizar lista"
+                            Padding="10,5" Margin="0,0,0,-34" Panel.ZIndex="1"
+                            Style="{StaticResource BotaoSecundario}" Command="{Binding RefreshManifestCommand}" />
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Mods}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#2C2521" BorderThickness="0,0,0,1" Padding="0,8">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
-                                                      IsEnabled="{Binding IsRequired, Converter={x:Static local:InverseBoolConverter.Instance}}"
-                                                      VerticalAlignment="Top" Margin="0,2,10,0" />
-                                            <StackPanel Grid.Column="1">
-                                                <!-- Todos alinhados pela base: com tamanhos de fonte
-                                                     diferentes e alinhamentos misturados, nome, versão e
-                                                     autor ficavam visivelmente tortos entre si. -->
-                                                <WrapPanel VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
-                                                               FontSize="13" VerticalAlignment="Center" />
-                                                    <TextBlock Text="{Binding VersionLabel}" Foreground="{StaticResource MutedTextBrush}"
-                                                               Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
-                                                    <!-- Crédito ao autor, clicável quando há página oficial.
-                                                         Sem link vira texto simples: NavigateUri é do tipo Uri
-                                                         e quebra o binding se receber null. -->
-                                                    <TextBlock Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center"
-                                                               Visibility="{Binding TemLink, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                                                        <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="AbrirLink"
-                                                                   Foreground="{StaticResource MutedTextBrush}"
-                                                                   TextDecorations="Underline">
-                                                            <Run Text="{Binding AuthorLabel, Mode=OneWay}" />
-                                                        </Hyperlink>
-                                                    </TextBlock>
-                                                    <TextBlock Text="{Binding AuthorLabel}" Margin="8,0,0,0" FontSize="11"
-                                                               VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}"
-                                                               Visibility="{Binding TemAutorSemLink, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
-                                                    <TextBlock Text="obrigatório" Foreground="{StaticResource AccentBrush}"
-                                                               Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center"
-                                                               Visibility="{Binding IsRequired, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
-                                                </WrapPanel>
-                                                <TextBlock Text="{Binding Description}" Foreground="{StaticResource MutedTextBrush}"
-                                                           TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0" />
-                                                <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource AccentBrush}"
-                                                           FontSize="11" Margin="0,2,0,0" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <!-- Abas: ferramentas de admin fora do caminho de quem só quer jogar. -->
+                    <TabControl>
+                        <TabItem Header="{Binding ModsDoServidor.Count, StringFormat=SERVIDOR ({0})}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding ModsDoServidor}"
+                                              ItemTemplate="{StaticResource ItemDeMod}" />
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="{Binding ModsDeAdmin.Count, StringFormat=ADMIN ({0})}">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="11" Margin="0,0,0,10"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           Text="Ferramentas de administração. Nenhuma é exigida pelo servidor — marque só o que for usar. O anticheat pode recusar sua entrada com algumas delas ativas." />
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding ModsDeAdmin}"
+                                                  ItemTemplate="{StaticResource ItemDeMod}" />
+                                </ScrollViewer>
+                            </DockPanel>
+                        </TabItem>
+                    </TabControl>
                 </DockPanel>
             </Border>
         </Grid>
+
 
         <!-- ================= barra de ação ================= -->
         <Border Grid.Row="1" Background="#1A1614" BorderBrush="{StaticResource BorderBrush2}"
@@ -180,45 +196,12 @@
 
                 <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- perfil -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="PERFIL" FontSize="10" FontWeight="SemiBold"
-                               Foreground="{StaticResource MutedTextBrush}" Margin="1,0,0,5" />
-                    <!-- Altura igual nos dois e alinhamento esticado: sem isso o
-                         botão ⋯ assentava pelo texto e ficava fora de esquadro
-                         em relação à caixa do perfil. -->
-                    <Grid Height="32">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ComboBox Grid.Column="0" VerticalAlignment="Stretch"
-                                  ItemsSource="{Binding Profiles}"
-                                  SelectedItem="{Binding SelectedProfile}" />
-                        <!-- Menu em vez de três botões: a barra de baixo é estreita,
-                             e criar/duplicar/excluir perfil é ação rara. -->
-                        <Button Grid.Column="1" Content="⋯" Margin="6,0,0,0" Padding="9,4" FontSize="13"
-                                Style="{StaticResource BotaoSecundario}" ToolTip="Gerenciar perfis"
-                                Click="AbrirMenuDePerfil">
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Novo perfil" Command="{Binding CreateProfileCommand}" />
-                                    <MenuItem Header="Duplicar perfil" Command="{Binding DuplicateProfileCommand}" />
-                                    <Separator />
-                                    <MenuItem Header="Excluir perfil" Command="{Binding DeleteProfileCommand}" />
-                                </ContextMenu>
-                            </Button.ContextMenu>
-                        </Button>
-                    </Grid>
-                </StackPanel>
-
                 <!-- status e progresso -->
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0">
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,24,0">
                     <Grid Margin="0,0,0,6">
                         <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource MutedTextBrush}"
                                    FontSize="12" TextTrimming="CharacterEllipsis" />
@@ -237,7 +220,7 @@
                 </StackPanel>
 
                 <!-- ações -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <ToggleButton x:Name="BotaoMods" Content="MODS" MinWidth="86" Height="44"
                                   Cursor="Hand" Foreground="{StaticResource TextBrush}"
                                   FontWeight="SemiBold" Margin="0,0,10,0">

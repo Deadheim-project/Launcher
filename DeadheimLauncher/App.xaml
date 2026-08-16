@@ -168,6 +168,57 @@
                 </Setter>
             </Style>
 
+            <!-- Mesma armadilha do ComboBox e do MenuItem: o TabItem padrão
+                 desenha a aba com o chrome claro do Windows e o rótulo herda o
+                 estilo global de TextBlock, ficando ilegível. -->
+            <Style TargetType="TabItem">
+                <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border x:Name="Fundo" Background="Transparent" Padding="14,8" Margin="0,0,4,0"
+                                    BorderBrush="Transparent" BorderThickness="0,0,0,2">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"
+                                                  TextElement.FontWeight="SemiBold" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Fundo" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsMouseOver" Value="True" />
+                                        <Condition Property="IsSelected" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="TabControl">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabControl">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Top" BorderBrush="{StaticResource BorderBrush2}"
+                                        BorderThickness="0,0,0,1" Margin="0,0,0,10">
+                                    <TabPanel IsItemsHost="True" HorizontalAlignment="Left" />
+                                </Border>
+                                <ContentPresenter ContentSource="SelectedContent" />
+                            </DockPanel>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style TargetType="Separator">
                 <Setter Property="Background" Value="{StaticResource BorderBrush2}" />
                 <Setter Property="Height" Value="1" />

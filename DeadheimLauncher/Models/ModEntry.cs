@@ -6,6 +6,16 @@ public enum ModSource
     Thunderstore
 }
 
+/// <summary>Em que aba o mod aparece.</summary>
+public enum ModCategory
+{
+    /// <summary>O que o servidor exige para jogar.</summary>
+    Servidor,
+
+    /// <summary>Ferramentas de administração, fora do caminho de quem só quer jogar.</summary>
+    Admin
+}
+
 /// <summary>Onde os arquivos do pacote são instalados dentro do jogo.</summary>
 public enum InstallTarget
 {
@@ -38,6 +48,8 @@ public sealed class ModEntry
     /// launcher que distribui trabalho de terceiros — e é barato de dar.
     /// </summary>
     public string? Author { get; set; }
+
+    public ModCategory Category { get; set; } = ModCategory.Servidor;
 
     /// <summary>Página oficial do mod (Thunderstore ou repositório), para dar crédito clicável.</summary>
     public string? Url { get; set; }

@@ -51,11 +51,26 @@ OWN_MODS = [
     ("donationshop", "Donation Shop", "Loja de doações."),
 ]
 
-# Mods opcionais que não fazem parte do pack, mas que o servidor oferece.
-EXTRA_OPTIONAL = [
-    ("JereKuusela", "Server_devcommands", "Comandos de admin/debug no servidor."),
-    ("YouDied", "DevToggle", "Atalho para alternar o modo dev."),
-    ("Azumatt", "Azus_UnOfficial_ConfigManager", "Menu in-game para editar as configs dos mods."),
+# Ferramentas de administração. Ficam numa aba separada para não atrapalhar
+# quem só quer entrar e jogar, e nenhuma é obrigatória.
+#
+# Os nomes foram conferidos um a um contra a API do Thunderstore: namespace
+# errado vira 404 na máquina de quem clicar.
+ADMIN_MODS = [
+    ("JereKuusela", "Server_devcommands",
+     "Liga os devcommands e o teleporte que funciona de verdade. Base das outras ferramentas."),
+    ("JereKuusela", "Infinity_Hammer",
+     "Copia, cola e move qualquer estrutura ou objeto do mundo."),
+    ("JereKuusela", "World_Edit_Commands",
+     "Comandos de edição do mundo: terreno, objetos e vegetação em área."),
+    ("JereKuusela", "Upgrade_World",
+     "Regenera áreas já exploradas para receber conteúdo novo. CUIDADO: altera o mundo salvo."),
+    ("JereKuusela", "Structure_Tweaks",
+     "Deixa estruturas invisíveis, invulneráveis ou atravessáveis."),
+    ("YouDied", "DevToggle",
+     "Atalho para ligar e desligar o modo dev."),
+    ("Azumatt", "Azus_UnOfficial_ConfigManager",
+     "Menu dentro do jogo para editar a configuração dos mods."),
 ]
 
 
@@ -112,14 +127,17 @@ def main():
             entry["description"] = "Carregador de mods do Valheim. Instalado na raiz do jogo."
         thunderstore_mods.append(entry)
 
-    for ns, name, desc in EXTRA_OPTIONAL:
+    for ns, name, desc in ADMIN_MODS:
         if any(m["thunderstoreName"] == name for m in thunderstore_mods):
             continue
         thunderstore_mods.append({
             "id": slugify(name),
             "name": name.replace("_", " "),
-            "description": desc + " Opcional.",
+            "description": desc,
+            # Nenhuma ferramenta de admin é obrigatória, e sem versão fixada
+            # porque não precisam casar com o servidor como os mods do pack.
             "required": False,
+            "category": "Admin",
             "source": "Thunderstore",
             "thunderstoreNamespace": ns,
             "thunderstoreName": name,
