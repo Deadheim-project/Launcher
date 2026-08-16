@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -52,6 +53,7 @@ public static class LauncherSelfTest
             await RunManifestChecks();
             RunMarkOfTheWebChecks();
             RunGameSyncChecks();
+            RunConfigRoutingChecks();
 
             if (includeNetwork)
             {
@@ -76,6 +78,54 @@ public static class LauncherSelfTest
         }
 
         return Report();
+    }
+
+    // ------------------------------------------------------------------ config
+
+    /// <summary>
+    /// Um pacote que traz config/ está entregando a configuração do servidor.
+    /// Ela precisa chegar em BepInEx/config; parando em plugins/&lt;mod&gt;/config/ o
+    /// BepInEx ignora e o jogador roda com regras diferentes das do servidor,
+    /// sem nenhum erro aparecer. Daí o teste.
+    /// </summary>
+    private static void RunConfigRoutingChecks()
+    {
+        const string perfil = "ConfigTest";
+        new ProfileService().LoadOrCreate(perfil);
+
+        // Simula um pacote já extraído: dll na raiz e config/ junto.
+        var modDir = Path.Combine(AppPaths.ProfilePluginsDir(perfil), "raidsystem");
+        Directory.CreateDirectory(Path.Combine(modDir, "config", "RaidSystem"));
+        File.WriteAllText(Path.Combine(modDir, "RaidSystem.dll"), "dll");
+        File.WriteAllText(Path.Combine(modDir, "config", "Detalhes.RaidSystem.cfg"), "dano=99");
+        File.WriteAllText(Path.Combine(modDir, "config", "RaidSystem", "RaidSystem.Default.cfg"), "padrao=1");
+
+        typeof(ModInstallerService)
+            .GetMethod("MoverConfigParaOPerfil", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, new object[] { modDir, perfil });
+
+        var configPerfil = AppPaths.ProfileConfigDir(perfil);
+        Check("config: sai de dentro da pasta do mod",
+            !Directory.Exists(Path.Combine(modDir, "config")) && File.Exists(Path.Combine(modDir, "RaidSystem.dll")));
+        Check("config: subpastas do config são preservadas",
+            File.Exists(Path.Combine(configPerfil, "Detalhes.RaidSystem.cfg")) &&
+            File.Exists(Path.Combine(configPerfil, "RaidSystem", "RaidSystem.Default.cfg")));
+
+        var jogo = Path.Combine(AppPaths.Root, "ConfigValheim");
+        Directory.CreateDirectory(Path.Combine(jogo, "BepInEx", "plugins"));
+
+        // Um .cfg que o jogador editou e que o servidor não manda: tem que sobreviver.
+        var configJogo = Path.Combine(jogo, "BepInEx", "config");
+        Directory.CreateDirectory(configJogo);
+        File.WriteAllText(Path.Combine(configJogo, "MinhasTeclas.cfg"), "tecla=F5");
+
+        new ValheimLaunchService().SyncProfileToGame(jogo, perfil);
+
+        Check("config: chega em BepInEx/config do jogo",
+            File.ReadAllText(Path.Combine(configJogo, "Detalhes.RaidSystem.cfg")) == "dano=99" &&
+            File.Exists(Path.Combine(configJogo, "RaidSystem", "RaidSystem.Default.cfg")));
+        Check("config: não apaga o que o jogador configurou",
+            File.Exists(Path.Combine(configJogo, "MinhasTeclas.cfg")));
     }
 
     // ---------------------------------------------------------------------- ui

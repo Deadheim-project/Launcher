@@ -31,6 +31,15 @@ public static class AppPaths
     /// </summary>
     public static string ProfileGameRootDir(string profileName) => Path.Combine(ProfileDir(profileName), "gameroot");
 
+    /// <summary>
+    /// Arquivos .cfg que vão para BepInEx/config, e não para dentro da pasta do
+    /// mod. Um pacote que traz config/ está entregando a configuração do
+    /// servidor; se ela cair em plugins/&lt;mod&gt;/config/ o BepInEx não lê, o mod
+    /// gera um .cfg padrão e o jogador roda com valores diferentes dos do
+    /// servidor — sem erro nenhum aparecendo.
+    /// </summary>
+    public static string ProfileConfigDir(string profileName) => Path.Combine(ProfileDir(profileName), "config");
+
     public static void EnsureDirs()
     {
         Directory.CreateDirectory(Root);

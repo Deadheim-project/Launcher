@@ -91,6 +91,32 @@ public sealed class ValheimLaunchService
             var destDir = Path.Combine(pluginsDir, modName);
             CopyDirectory(modDir, destDir);
         }
+
+        CopiarConfigsDoPerfil(valheimPath, profileName);
+    }
+
+    /// <summary>
+    /// Leva os .cfg do perfil para BepInEx/config.
+    ///
+    /// Diferente de plugins, config/ não é limpo antes: o jogador ajusta coisa
+    /// ali (tecla, escala de HUD) e apagar tudo a cada partida seria hostil.
+    /// Os arquivos que o servidor manda sobrescrevem os correspondentes; o resto
+    /// fica como está.
+    /// </summary>
+    private static void CopiarConfigsDoPerfil(string valheimPath, string profileName)
+    {
+        var origem = AppPaths.ProfileConfigDir(profileName);
+        if (!Directory.Exists(origem)) return;
+
+        var destino = Path.Combine(valheimPath, "BepInEx", "config");
+        Directory.CreateDirectory(destino);
+
+        foreach (var arquivo in Directory.GetFiles(origem, "*", SearchOption.AllDirectories))
+        {
+            var alvo = Path.Combine(destino, Path.GetRelativePath(origem, arquivo));
+            Directory.CreateDirectory(Path.GetDirectoryName(alvo)!);
+            File.Copy(arquivo, alvo, overwrite: true);
+        }
     }
 
     /// <summary>Inicia o Valheim via Steam (URI steam://run), que garante overlay/updates do Steam funcionando.</summary>

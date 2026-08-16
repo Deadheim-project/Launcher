@@ -97,6 +97,10 @@ public sealed class ModInstallerService
             {
                 FlattenSingleRootFolder(destDir);
             }
+            else
+            {
+                MoverConfigParaOPerfil(destDir, profileName);
+            }
 
             // Tira a marca de "arquivo baixado da internet" das DLLs extraídas, senão
             // o Windows pede pra desbloquear cada uma na mão. Ver MarkOfTheWeb.
@@ -118,6 +122,34 @@ public sealed class ModInstallerService
     /// criaria &lt;Valheim&gt;/BepInExPack_Valheim/winhttp.dll, que o jogo nunca carrega —
     /// o winhttp.dll precisa ficar ao lado do valheim.exe.
     /// </summary>
+    /// <summary>
+    /// Tira a pasta config/ de dentro do mod e joga no config/ do perfil, de onde
+    /// a sincronização a leva para BepInEx/config.
+    ///
+    /// Os pacotes do servidor trazem os .cfg com os valores reais (dano de raide,
+    /// preços da loja...). Deixados em plugins/&lt;mod&gt;/config/ o BepInEx ignora,
+    /// cada mod recria um .cfg padrão e o jogador acaba com regras diferentes das
+    /// do servidor — sem nenhum erro visível.
+    /// </summary>
+    private static void MoverConfigParaOPerfil(string destDir, string profileName)
+    {
+        var origem = Path.Combine(destDir, "config");
+        if (!Directory.Exists(origem)) return;
+
+        var destino = AppPaths.ProfileConfigDir(profileName);
+        Directory.CreateDirectory(destino);
+
+        foreach (var arquivo in Directory.GetFiles(origem, "*", SearchOption.AllDirectories))
+        {
+            var relativo = Path.GetRelativePath(origem, arquivo);
+            var alvo = Path.Combine(destino, relativo);
+            Directory.CreateDirectory(Path.GetDirectoryName(alvo)!);
+            File.Copy(arquivo, alvo, overwrite: true);
+        }
+
+        Directory.Delete(origem, recursive: true);
+    }
+
     private static void FlattenSingleRootFolder(string dir)
     {
         // Todo pacote do Thunderstore traz estes na raiz do zip, ao lado do
