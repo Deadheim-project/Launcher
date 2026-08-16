@@ -39,7 +39,15 @@ jobs:
         run: |
           $exe = "DeadheimLauncher\bin\Release\net8.0-windows\DeadheimLauncher.exe"
           & $exe --selftest --offline
-          if ($LASTEXITCODE -ne 0) { throw "self-test falhou" }
+          $codigo = $LASTEXITCODE
+          # O self-test tambem grava um log; em falha ele e a unica forma de saber
+          # qual verificacao quebrou, ja que a saida do runner some do console.
+          $log = Join-Path $env:TEMP "DeadheimLauncher-selftest.log"
+          if ($codigo -ne 0 -and (Test-Path $log)) {
+            Write-Host "----- log do self-test -----"
+            Get-Content $log
+          }
+          if ($codigo -ne 0) { throw "self-test falhou" }
 
       - name: Publicar self-contained
         run: dotnet publish DeadheimLauncher/DeadheimLauncher.csproj -c Release -r win-x64 --self-contained true -o publish/DeadheimLauncher

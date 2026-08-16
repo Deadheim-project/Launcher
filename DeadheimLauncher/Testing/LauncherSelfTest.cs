@@ -92,6 +92,17 @@ public static class LauncherSelfTest
     /// </summary>
     private static async Task RunUiChecks()
     {
+        // Abrir janela exige sessao interativa com desktop. Runner de CI nao tem,
+        // entao aqui isso e SKIP declarado - e nao um PASS falso nem um FAIL que
+        // travaria o release por algo que a maquina simplesmente nao consegue rodar.
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")))
+        {
+            Skip("UI: janela principal abre sem erro de XAML (CI sem desktop interativo)");
+            Skip("UI: lista de mods é populada (CI sem desktop interativo)");
+            Skip("UI: nenhum binding quebrado (CI sem desktop interativo)");
+            return;
+        }
+
         var errosDeBinding = new List<string>();
         var listener = new BindingErrorListener(errosDeBinding);
 
