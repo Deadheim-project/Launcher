@@ -85,7 +85,7 @@ Mods próprios no manifest hoje:
 
 | mod | repositório | estado |
 |---|---|---|
-| NPCs | `npcs` | não existe **ou é privado** |
+| NPCs | `npcs` | **privado** — precisa ser público |
 | Deadheim | `Deadheim` | existe, sem release |
 | Raid System | `RaidSystem` | existe, sem release |
 | Hearthstone | `Hearthstone` | existe, sem release |
@@ -97,8 +97,8 @@ Duas coisas a fazer:
    `manifest.json` na raiz. A URL padrão já aponta pra
    `https://raw.githubusercontent.com/Deadheim-project/Launcher/main/manifest.json`.
 2. **Publicar um release em cada repositório de mod**, com o `.zip` do mod como
-   asset. Só o `npcs` tem código aqui neste repositório de trabalho; os outros
-   quatro precisam do release feito de onde o código deles está.
+   asset. Cada mod mora no seu próprio repositório e publica de lá: este
+   repositório é só o launcher e não compila mod nenhum.
 
 Repositório **privado é o mesmo que inexistente** para o launcher: ele roda sem
 credencial na máquina do jogador, e a API do GitHub devolve 404 nos dois casos.
@@ -117,9 +117,9 @@ gh auth login
 pwsh installer/publish-github.ps1
 ```
 
-O script empacota o mod, publica o release, envia o manifest e roda o self-test
-no fim para confirmar que os dois `SKIP` viraram `PASS`. Ele mostra o que vai
-fazer e pede confirmação antes de criar repositório público.
+O script envia o `manifest.json`, anexa o instalador ao release do launcher (se
+já tiver sido gerado), relata quais repositórios de mod ainda estão sem release,
+e roda o self-test no fim. Ele **não compila nem publica mod algum**.
 
 ## Build e instalador
 
