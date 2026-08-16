@@ -32,6 +32,15 @@ public sealed class ModEntry
     public string Description { get; set; } = "";
     public bool Required { get; set; }
     public ModSource Source { get; set; }
+
+    /// <summary>
+    /// Quem fez o mod. Crédito visível é o que a comunidade de mods espera de um
+    /// launcher que distribui trabalho de terceiros — e é barato de dar.
+    /// </summary>
+    public string? Author { get; set; }
+
+    /// <summary>Página oficial do mod (Thunderstore ou repositório), para dar crédito clicável.</summary>
+    public string? Url { get; set; }
     public InstallTarget Target { get; set; } = InstallTarget.Plugins;
 
     /// <summary>

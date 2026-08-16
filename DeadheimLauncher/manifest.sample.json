@@ -10,7 +10,9 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "npcs",
-      "assetPattern": ".zip"
+      "assetPattern": ".zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/npcs/releases"
     },
     {
       "id": "deadheim",
@@ -20,7 +22,9 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "Deadheim",
-      "assetPattern": ".zip"
+      "assetPattern": ".zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/Deadheim/releases"
     },
     {
       "id": "raidsystem",
@@ -30,7 +34,9 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "RaidSystem",
-      "assetPattern": ".zip"
+      "assetPattern": ".zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/RaidSystem/releases"
     },
     {
       "id": "hearthstone",
@@ -40,7 +46,9 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "Hearthstone",
-      "assetPattern": ".zip"
+      "assetPattern": ".zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/Hearthstone/releases"
     },
     {
       "id": "donationshop",
@@ -50,7 +58,9 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "donationshop",
-      "assetPattern": ".zip"
+      "assetPattern": ".zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/donationshop/releases"
     }
   ],
   "thunderstoreMods": [
@@ -63,6 +73,8 @@
       "thunderstoreNamespace": "denikson",
       "thunderstoreName": "BepInExPack_Valheim",
       "version": "5.4.2333",
+      "author": "denikson",
+      "url": "https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/",
       "target": "GameRoot"
     },
     {
@@ -73,7 +85,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "MainStreetGaming",
       "thunderstoreName": "MassFarming",
-      "version": "1.12.0"
+      "version": "1.12.0",
+      "author": "MainStreetGaming",
+      "url": "https://thunderstore.io/c/valheim/p/MainStreetGaming/MassFarming/"
     },
     {
       "id": "justnoroof",
@@ -83,7 +97,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Frogger",
       "thunderstoreName": "JustNoRoof",
-      "version": "1.1.0"
+      "version": "1.1.0",
+      "author": "Frogger",
+      "url": "https://thunderstore.io/c/valheim/p/Frogger/JustNoRoof/"
     },
     {
       "id": "more-and-modified-player-cloth-colliders",
@@ -93,7 +109,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "HugotheDwarf",
       "thunderstoreName": "More_and_Modified_Player_Cloth_Colliders",
-      "version": "3.1.0"
+      "version": "3.1.0",
+      "author": "HugotheDwarf",
+      "url": "https://thunderstore.io/c/valheim/p/HugotheDwarf/More_and_Modified_Player_Cloth_Colliders/"
     },
     {
       "id": "historical-heritage",
@@ -103,7 +121,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Dreanegade",
       "thunderstoreName": "Historical_Heritage",
-      "version": "2.1.1"
+      "version": "2.1.1",
+      "author": "Dreanegade",
+      "url": "https://thunderstore.io/c/valheim/p/Dreanegade/Historical_Heritage/"
     },
     {
       "id": "hunter-legacy",
@@ -113,7 +133,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Dreanegade",
       "thunderstoreName": "Hunter_Legacy",
-      "version": "1.0.8"
+      "version": "1.0.8",
+      "author": "Dreanegade",
+      "url": "https://thunderstore.io/c/valheim/p/Dreanegade/Hunter_Legacy/"
     },
     {
       "id": "magic-supremacy",
@@ -123,7 +145,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Dreanegade",
       "thunderstoreName": "Magic_Supremacy",
-      "version": "3.0.6"
+      "version": "3.0.6",
+      "author": "Dreanegade",
+      "url": "https://thunderstore.io/c/valheim/p/Dreanegade/Magic_Supremacy/"
     },
     {
       "id": "azuextendedplayerinventory",
@@ -133,7 +157,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "AzuExtendedPlayerInventory",
-      "version": "2.4.1"
+      "version": "2.4.1",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/AzuExtendedPlayerInventory/"
     },
     {
       "id": "maxplayercount",
@@ -143,7 +169,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "MaxPlayerCount",
-      "version": "1.2.4"
+      "version": "1.2.4",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/MaxPlayerCount/"
     },
     {
       "id": "azuanticheat",
@@ -153,7 +181,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "AzuAntiCheat",
-      "version": "4.3.11"
+      "version": "4.3.11",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/AzuAntiCheat/"
     },
     {
       "id": "azuclock",
@@ -163,7 +193,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "AzuClock",
-      "version": "1.0.5"
+      "version": "1.0.5",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/AzuClock/"
     },
     {
       "id": "wackyepicmmosystem",
@@ -173,7 +205,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "WackyMole",
       "thunderstoreName": "WackyEpicMMOSystem",
-      "version": "1.9.60"
+      "version": "1.9.60",
+      "author": "WackyMole",
+      "url": "https://thunderstore.io/c/valheim/p/WackyMole/WackyEpicMMOSystem/"
     },
     {
       "id": "guilds",
@@ -183,7 +217,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "Guilds",
-      "version": "1.1.13"
+      "version": "1.1.13",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/Guilds/"
     },
     {
       "id": "groups",
@@ -193,7 +229,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "Groups",
-      "version": "1.2.10"
+      "version": "1.2.10",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/Groups/"
     },
     {
       "id": "vbnettweaks",
@@ -203,7 +241,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "VitByr",
       "thunderstoreName": "VBNetTweaks",
-      "version": "0.2.0"
+      "version": "0.2.0",
+      "author": "VitByr",
+      "url": "https://thunderstore.io/c/valheim/p/VitByr/VBNetTweaks/"
     },
     {
       "id": "servercharacters",
@@ -213,7 +253,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "ServerCharacters",
-      "version": "1.4.16"
+      "version": "1.4.16",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/ServerCharacters/"
     },
     {
       "id": "tombstonelock",
@@ -223,7 +265,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "TombstoneLock",
-      "version": "1.0.7"
+      "version": "1.0.7",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/TombstoneLock/"
     },
     {
       "id": "protectyourseed",
@@ -233,7 +277,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "coemt",
       "thunderstoreName": "ProtectYourSeed",
-      "version": "0.0.7"
+      "version": "0.0.7",
+      "author": "coemt",
+      "url": "https://thunderstore.io/c/valheim/p/coemt/ProtectYourSeed/"
     },
     {
       "id": "trashitems",
@@ -243,7 +289,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "virtuaCode",
       "thunderstoreName": "TrashItems",
-      "version": "1.2.8"
+      "version": "1.2.8",
+      "author": "virtuaCode",
+      "url": "https://thunderstore.io/c/valheim/p/virtuaCode/TrashItems/"
     },
     {
       "id": "creaturelevelandlootcontrol",
@@ -253,7 +301,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "CreatureLevelAndLootControl",
-      "version": "4.6.4"
+      "version": "4.6.4",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/CreatureLevelAndLootControl/"
     },
     {
       "id": "jewelcrafting",
@@ -263,7 +313,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "Jewelcrafting",
-      "version": "2.0.1"
+      "version": "2.0.1",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/Jewelcrafting/"
     },
     {
       "id": "fastercrafting",
@@ -273,7 +325,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "1010101110",
       "thunderstoreName": "fastercrafting",
-      "version": "0.0.3"
+      "version": "0.0.3",
+      "author": "1010101110",
+      "url": "https://thunderstore.io/c/valheim/p/1010101110/fastercrafting/"
     },
     {
       "id": "multiplayerboatdamage",
@@ -283,7 +337,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "1010101110",
       "thunderstoreName": "multiplayerboatdamage",
-      "version": "0.0.1"
+      "version": "0.0.1",
+      "author": "1010101110",
+      "url": "https://thunderstore.io/c/valheim/p/1010101110/multiplayerboatdamage/"
     },
     {
       "id": "spawn-that",
@@ -293,7 +349,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "ASharpPen",
       "thunderstoreName": "Spawn_That",
-      "version": "1.2.18"
+      "version": "1.2.18",
+      "author": "ASharpPen",
+      "url": "https://thunderstore.io/c/valheim/p/ASharpPen/Spawn_That/"
     },
     {
       "id": "azucontainersizes",
@@ -303,7 +361,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "AzuContainerSizes",
-      "version": "1.1.4"
+      "version": "1.1.4",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/AzuContainerSizes/"
     },
     {
       "id": "speedypaths",
@@ -313,7 +373,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Nextek",
       "thunderstoreName": "SpeedyPaths",
-      "version": "1.0.9"
+      "version": "1.0.9",
+      "author": "Nextek",
+      "url": "https://thunderstore.io/c/valheim/p/Nextek/SpeedyPaths/"
     },
     {
       "id": "yamldotnet",
@@ -323,7 +385,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "ValheimModding",
       "thunderstoreName": "YamlDotNet",
-      "version": "16.3.1"
+      "version": "16.3.1",
+      "author": "ValheimModding",
+      "url": "https://thunderstore.io/c/valheim/p/ValheimModding/YamlDotNet/"
     },
     {
       "id": "jotunn",
@@ -333,7 +397,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "ValheimModding",
       "thunderstoreName": "Jotunn",
-      "version": "2.29.0"
+      "version": "2.29.0",
+      "author": "ValheimModding",
+      "url": "https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/"
     },
     {
       "id": "hookgenpatcher",
@@ -343,7 +409,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "ValheimModding",
       "thunderstoreName": "HookGenPatcher",
-      "version": "0.0.4"
+      "version": "0.0.4",
+      "author": "ValheimModding",
+      "url": "https://thunderstore.io/c/valheim/p/ValheimModding/HookGenPatcher/"
     },
     {
       "id": "fastlink",
@@ -353,7 +421,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "FastLink",
-      "version": "1.4.8"
+      "version": "1.4.8",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/FastLink/"
     },
     {
       "id": "marketplace-and-server-npcs-revamped",
@@ -363,7 +433,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "KGvalheim",
       "thunderstoreName": "Marketplace_And_Server_NPCs_Revamped",
-      "version": "9.7.6"
+      "version": "9.7.6",
+      "author": "KGvalheim",
+      "url": "https://thunderstore.io/c/valheim/p/KGvalheim/Marketplace_And_Server_NPCs_Revamped/"
     },
     {
       "id": "valheiminfinitefire",
@@ -373,7 +445,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "MidnightMods",
       "thunderstoreName": "ValheimInfiniteFire",
-      "version": "1.1.0"
+      "version": "1.1.0",
+      "author": "MidnightMods",
+      "url": "https://thunderstore.io/c/valheim/p/MidnightMods/ValheimInfiniteFire/"
     },
     {
       "id": "timeditemdestruction",
@@ -383,7 +457,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "TimedItemDestruction",
-      "version": "1.0.3"
+      "version": "1.0.3",
+      "author": "Smoothbrain",
+      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/TimedItemDestruction/"
     },
     {
       "id": "timeoutlimit",
@@ -393,7 +469,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "MSchmoecker",
       "thunderstoreName": "TimeoutLimit",
-      "version": "0.2.0"
+      "version": "0.2.0",
+      "author": "MSchmoecker",
+      "url": "https://thunderstore.io/c/valheim/p/MSchmoecker/TimeoutLimit/"
     },
     {
       "id": "spearfishing",
@@ -403,7 +481,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "Korppis",
       "thunderstoreName": "Spearfishing",
-      "version": "1.0.4"
+      "version": "1.0.4",
+      "author": "Korppis",
+      "url": "https://thunderstore.io/c/valheim/p/Korppis/Spearfishing/"
     },
     {
       "id": "arcane-ward",
@@ -413,7 +493,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "KGvalheim",
       "thunderstoreName": "Arcane_Ward",
-      "version": "0.7.0"
+      "version": "0.7.0",
+      "author": "KGvalheim",
+      "url": "https://thunderstore.io/c/valheim/p/KGvalheim/Arcane_Ward/"
     },
     {
       "id": "comfyautorepair",
@@ -423,7 +505,9 @@
       "source": "Thunderstore",
       "thunderstoreNamespace": "ComfyMods",
       "thunderstoreName": "ComfyAutoRepair",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "author": "ComfyMods",
+      "url": "https://thunderstore.io/c/valheim/p/ComfyMods/ComfyAutoRepair/"
     },
     {
       "id": "server-devcommands",
@@ -432,7 +516,9 @@
       "required": false,
       "source": "Thunderstore",
       "thunderstoreNamespace": "JereKuusela",
-      "thunderstoreName": "Server_devcommands"
+      "thunderstoreName": "Server_devcommands",
+      "author": "JereKuusela",
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Server_devcommands/"
     },
     {
       "id": "devtoggle",
@@ -441,7 +527,9 @@
       "required": false,
       "source": "Thunderstore",
       "thunderstoreNamespace": "YouDied",
-      "thunderstoreName": "DevToggle"
+      "thunderstoreName": "DevToggle",
+      "author": "YouDied",
+      "url": "https://thunderstore.io/c/valheim/p/YouDied/DevToggle/"
     },
     {
       "id": "azus-unofficial-configmanager",
@@ -450,7 +538,9 @@
       "required": false,
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
-      "thunderstoreName": "Azus_UnOfficial_ConfigManager"
+      "thunderstoreName": "Azus_UnOfficial_ConfigManager",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/Azus_UnOfficial_ConfigManager/"
     }
   ]
 }

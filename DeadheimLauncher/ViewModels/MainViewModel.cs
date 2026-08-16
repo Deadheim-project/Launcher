@@ -33,6 +33,32 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isBusy;
 
+    /// <summary>
+    /// Erro mostrado dentro da janela, num aviso que o jogador fecha quando
+    /// quiser. Popup é pior aqui: rouba o foco, some com um Enter distraído
+    /// levando a mensagem junto, e some também com o texto que dizia o que
+    /// fazer. Aqui a mensagem fica na tela até ser lida.
+    /// </summary>
+    [ObservableProperty]
+    private string? _erroTexto;
+
+    /// <summary>Detalhe longo (lista de mods que falharam), recolhido por padrão.</summary>
+    [ObservableProperty]
+    private string? _erroDetalhe;
+
+    public bool MostrarErro => !string.IsNullOrWhiteSpace(ErroTexto);
+    public bool MostrarErroDetalhe => !string.IsNullOrWhiteSpace(ErroDetalhe);
+
+    partial void OnErroTextoChanged(string? value) => OnPropertyChanged(nameof(MostrarErro));
+    partial void OnErroDetalheChanged(string? value) => OnPropertyChanged(nameof(MostrarErroDetalhe));
+
+    [RelayCommand]
+    private void LimparErro()
+    {
+        ErroTexto = null;
+        ErroDetalhe = null;
+    }
+
     /// <summary>Quantos mods já foram processados nesta instalação.</summary>
     [ObservableProperty]
     private int _progressoAtual;
@@ -187,6 +213,7 @@ public sealed partial class MainViewModel : ObservableObject
     private async Task PlayAsync()
     {
         IsBusy = true;
+        LimparErro();
         try
         {
             // Rebusca o manifest antes de tudo: é assim que uma versão nova do
@@ -225,12 +252,10 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 // Entrar sem um mod que o servidor exige = ser recusado na porta,
                 // ou desincronizar depois. Melhor parar aqui e dizer qual foi.
-                var lista = string.Join("\n", obrigatoriosQueFalharam.Select(f => $"  • {f.Nome}: {f.Motivo}"));
-                var texto = $"Estes mods obrigatórios não foram instalados:\n\n{lista}\n\n" +
-                            "Entrar no servidor sem eles não vai funcionar. Corrija e tente de novo.";
-
-                StatusText = $"{obrigatoriosQueFalharam.Count} mod(s) obrigatório(s) não instalaram.";
-                MessageBox.Show(texto, "Não dá para entrar ainda", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ErroTexto = $"{obrigatoriosQueFalharam.Count} mod(s) obrigatório(s) não instalaram. " +
+                            "Entrar no servidor sem eles não vai funcionar.";
+                ErroDetalhe = string.Join("\n", obrigatoriosQueFalharam.Select(f => $"• {f.Nome}: {f.Motivo}"));
+                StatusText = "Instalação incompleta.";
                 return;
             }
 
@@ -249,9 +274,8 @@ public sealed partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            var mensagem = ErroAmigavel.Descrever(ex);
-            StatusText = mensagem;
-            MessageBox.Show(mensagem, "Não foi possível iniciar o Valheim", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ErroTexto = ErroAmigavel.Descrever(ex);
+            StatusText = "Não foi possível iniciar o Valheim.";
         }
         finally
         {

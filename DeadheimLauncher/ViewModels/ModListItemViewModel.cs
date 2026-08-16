@@ -18,6 +18,31 @@ public sealed partial class ModListItemViewModel : ObservableObject
     public string VersionLabel =>
         string.IsNullOrWhiteSpace(Entry.Version) ? "mais recente" : "v" + Entry.Version;
 
+    /// <summary>Crédito ao autor do mod. Vazio some da tela em vez de virar "por ".</summary>
+    public string AuthorLabel =>
+        string.IsNullOrWhiteSpace(Entry.Author) ? "" : "por " + Entry.Author;
+
+    public bool TemAutor => !string.IsNullOrWhiteSpace(Entry.Author);
+
+    /// <summary>
+    /// Página oficial do mod, para o crédito ser clicável.
+    ///
+    /// Nunca devolve null: Hyperlink.NavigateUri é do tipo Uri e o WPF avalia o
+    /// binding mesmo com o elemento recolhido, então null viraria erro de
+    /// binding em toda a lista. Quando não há página, o link fica invisível
+    /// (ver TemLink) e este valor nunca é usado.
+    /// </summary>
+    public string Url => string.IsNullOrWhiteSpace(Entry.Url) ? "about:blank" : Entry.Url;
+
+    public bool TemLink => !string.IsNullOrWhiteSpace(Entry.Url);
+
+    /// <summary>
+    /// Autor conhecido, mas sem página. Existe porque Hyperlink.NavigateUri é do
+    /// tipo Uri e estoura o binding com null — o crédito precisa aparecer como
+    /// texto simples nesse caso, não sumir.
+    /// </summary>
+    public bool TemAutorSemLink => TemAutor && !TemLink;
+
     [ObservableProperty]
     private bool _isEnabled;
 

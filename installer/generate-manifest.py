@@ -42,6 +42,7 @@ OPTIONAL_PACKAGES = {
 # mod só, e assim o nome exato do arquivo não precisa ser combinado de antemão.
 # Se um release passar a ter vários zips, troque pelo nome exato.
 OWN_MODS_OWNER = "Deadheim-project"
+OWN_MODS_AUTHOR = "Detalhes"
 OWN_MODS = [
     ("npcs", "NPCs", "Mercador, Teleportador, Correio e Missões."),
     ("Deadheim", "Deadheim", "Mod base do servidor."),
@@ -100,6 +101,11 @@ def main():
             "thunderstoreNamespace": ns,
             "thunderstoreName": name,
             "version": version,
+            # No Thunderstore o namespace é o autor, e a URL da página é
+            # derivável dele. Crédito visível e clicável no launcher é o mínimo
+            # devido a quem fez os mods que o servidor usa.
+            "author": ns,
+            "url": f"https://thunderstore.io/c/valheim/p/{ns}/{name}/",
         }
         if name in GAME_ROOT_PACKAGES:
             entry["target"] = "GameRoot"
@@ -117,6 +123,8 @@ def main():
             "source": "Thunderstore",
             "thunderstoreNamespace": ns,
             "thunderstoreName": name,
+            "author": ns,
+            "url": f"https://thunderstore.io/c/valheim/p/{ns}/{name}/",
         })
 
     own_mods = [
@@ -129,6 +137,10 @@ def main():
             "gitHubOwner": OWN_MODS_OWNER,
             "gitHubRepo": repo,
             "assetPattern": ".zip",
+            "author": OWN_MODS_AUTHOR,
+            # Página de releases, e não a raiz do repositório: é de onde a DLL
+            # sai, e o link continua válido a cada versão nova.
+            "url": f"https://github.com/{OWN_MODS_OWNER}/{repo}/releases",
         }
         for repo, nome, desc in OWN_MODS
     ]

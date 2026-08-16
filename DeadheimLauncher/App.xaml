@@ -113,6 +113,54 @@
                 fundo claro do chrome do Windows. Resultado: o nome do perfil
                 ficava branco no branco, invisível.
             -->
+            <!--
+                Mesma armadilha do ComboBox: o MenuItem padrão desenha o texto
+                num TextBlock interno, que herda o estilo global (claro), sobre o
+                fundo claro do chrome do Windows. Resultado: menu ilegível.
+                Template próprio com Foreground explícito resolve de vez.
+            -->
+            <Style TargetType="ContextMenu">
+                <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="4" />
+            </Style>
+
+            <Style TargetType="MenuItem">
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Padding" Value="12,7" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="MenuItem">
+                            <Border x:Name="Fundo" Background="{TemplateBinding Background}"
+                                    Padding="{TemplateBinding Padding}" CornerRadius="2">
+                                <ContentPresenter ContentSource="Header"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter TargetName="Fundo" Property="Background" Value="{StaticResource AccentBrush}" />
+                                    <Setter Property="Foreground" Value="#17120F" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="#6B625C" />
+                                    <Setter Property="Cursor" Value="Arrow" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="Separator">
+                <Setter Property="Background" Value="{StaticResource BorderBrush2}" />
+                <Setter Property="Height" Value="1" />
+                <Setter Property="Margin" Value="6,4" />
+            </Style>
+
             <Style TargetType="ComboBoxItem">
                 <Setter Property="Background" Value="{StaticResource PanelBrush}" />
                 <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
