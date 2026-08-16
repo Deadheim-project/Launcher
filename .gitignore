@@ -4,3 +4,6 @@ publish/
 installer/Output/
 *.user
 .vs/
+
+# zips de distribuicao ficam em releases, nunca no repositorio
+*.zip
