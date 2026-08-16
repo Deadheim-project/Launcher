@@ -119,12 +119,25 @@
                 fundo claro do chrome do Windows. Resultado: menu ilegível.
                 Template próprio com Foreground explícito resolve de vez.
             -->
+            <!--
+                Template próprio também no ContextMenu, não só no MenuItem: o
+                template padrão desenha uma faixa clara à esquerda (a coluna de
+                ícones/marca de seleção) que ignora o Background e cobria parte
+                do texto dos itens.
+            -->
             <Style TargetType="ContextMenu">
-                <Setter Property="Background" Value="{StaticResource PanelBrush}" />
                 <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
-                <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="Padding" Value="4" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ContextMenu">
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                                    CornerRadius="4" Padding="4" SnapsToDevicePixels="True">
+                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
             <Style TargetType="MenuItem">

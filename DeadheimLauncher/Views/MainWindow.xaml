@@ -109,8 +109,12 @@
                                                       IsEnabled="{Binding IsRequired, Converter={x:Static local:InverseBoolConverter.Instance}}"
                                                       VerticalAlignment="Top" Margin="0,2,10,0" />
                                             <StackPanel Grid.Column="1">
-                                                <WrapPanel>
-                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <!-- Todos alinhados pela base: com tamanhos de fonte
+                                                     diferentes e alinhamentos misturados, nome, versão e
+                                                     autor ficavam visivelmente tortos entre si. -->
+                                                <WrapPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                               FontSize="13" VerticalAlignment="Center" />
                                                     <TextBlock Text="{Binding VersionLabel}" Foreground="{StaticResource MutedTextBrush}"
                                                                Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
                                                     <!-- Crédito ao autor, clicável quando há página oficial.

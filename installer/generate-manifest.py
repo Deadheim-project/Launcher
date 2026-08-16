@@ -156,13 +156,21 @@ def main():
         "thunderstoreMods": thunderstore_mods,
     }
 
-    with open(args.out, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+    texto = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+
+    # Escreve os dois de uma vez, de propósito:
+    #   - manifest.sample.json vai embutido no launcher, como reserva offline
+    #   - manifest.json na raiz é o que os jogadores realmente baixam
+    # Já aconteceu de eu atualizar só o sample e o launcher continuar servindo
+    # a versão antiga pelo raw.githubusercontent, sem nada indicar o problema.
+    destinos = [args.out, "manifest.json"]
+    for caminho in destinos:
+        with open(caminho, "w", encoding="utf-8") as f:
+            f.write(texto)
 
     required = sum(1 for m in thunderstore_mods if m["required"])
     optional = len(thunderstore_mods) - required
-    print(f"Escrito {args.out}")
+    print(f"Escrito {' e '.join(destinos)}")
     print(f"  {len(own_mods)} mod(s) próprio(s)")
     print(f"  {required} obrigatórios, {optional} opcionais")
     return 0
