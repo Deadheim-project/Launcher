@@ -1,0 +1,69 @@
+name: Release do Launcher
+
+# Publica o launcher pronto para download. Roda com o GITHUB_TOKEN que o
+# proprio Actions injeta, entao nao depende de credencial de ninguem.
+#
+#   - push de uma tag v*  -> cria o release daquela versao
+#   - execucao manual     -> util para gerar/regenerar um release sem tag nova
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag do release (ex. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Compilar
+        run: dotnet build DeadheimLauncher.sln -c Release
+
+      # O self-test e o mesmo que roda localmente: perfis, manifest, sincronizacao
+      # com a pasta do jogo e a interface. Release so sai se ele passar.
+      - name: Self-test
+        run: |
+          $exe = "DeadheimLauncher\bin\Release\net8.0-windows\DeadheimLauncher.exe"
+          & $exe --selftest --offline
+          if ($LASTEXITCODE -ne 0) { throw "self-test falhou" }
+
+      - name: Publicar self-contained
+        run: dotnet publish DeadheimLauncher/DeadheimLauncher.csproj -c Release -r win-x64 --self-contained true -o publish/DeadheimLauncher
+
+      - name: Compactar
+        run: Compress-Archive -Path publish/DeadheimLauncher/* -DestinationPath DeadheimLauncher.zip
+
+      - name: Definir a tag
+        id: tag
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "valor=${{ github.event.inputs.version }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          } else {
+            "valor=${{ github.ref_name }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
+      - name: Publicar o release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ steps.tag.outputs.valor }}"
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag DeadheimLauncher.zip --clobber
+          } else {
+            gh release create $tag DeadheimLauncher.zip --title "Deadheim Launcher $tag" --notes "Baixe o DeadheimLauncher.zip, extraia e rode DeadheimLauncher.exe."
+          }
