@@ -9,7 +9,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>DeadheimLauncher</AssemblyName>
     <RootNamespace>DeadheimLauncher</RootNamespace>
-    <ApplicationIcon></ApplicationIcon>
+    <ApplicationIcon>Assets\deadheim.ico</ApplicationIcon>
 
     <!-- asInvoker + DPI. Ver app.manifest. -->
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -21,9 +21,9 @@
     <Product>Deadheim Launcher</Product>
     <Authors>Deadheim</Authors>
     <Description>Gerenciador de mods e perfis do servidor Deadheim de Valheim.</Description>
-    <Version>1.0.0</Version>
-    <FileVersion>1.0.0.0</FileVersion>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Version>1.0.3</Version>
+    <FileVersion>1.0.3.0</FileVersion>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
     <Copyright>Deadheim</Copyright>
   </PropertyGroup>
 
@@ -40,6 +40,12 @@
     <None Update="manifest.sample.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <!-- Embutida no binário: o launcher é distribuído como pasta e um png solto
+       ao lado poderia ser apagado, deixando a janela sem a arte. -->
+  <ItemGroup>
+    <Resource Include="Assets\deadheim.png" />
   </ItemGroup>
 
 </Project>

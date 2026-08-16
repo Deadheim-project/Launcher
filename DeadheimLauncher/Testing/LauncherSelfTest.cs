@@ -54,6 +54,7 @@ public static class LauncherSelfTest
             RunMarkOfTheWebChecks();
             RunGameSyncChecks();
             RunConfigRoutingChecks();
+            RunUpdateRuleChecks();
 
             if (includeNetwork)
             {
@@ -78,6 +79,37 @@ public static class LauncherSelfTest
         }
 
         return Report();
+    }
+
+    // -------------------------------------------------------------- atualizacao
+
+    /// <summary>
+    /// O launcher rebusca o manifest antes de jogar e só rebaixa o que mudou de
+    /// versão. Duas formas de errar, ambas ruins: dizer "precisa" sempre volta a
+    /// baixar 40 mods a cada partida; dizer "não precisa" quando mudou deixa o
+    /// jogador numa versão diferente da do servidor, que é desync na certa.
+    /// </summary>
+    private static void RunUpdateRuleChecks()
+    {
+        Check("atualizar: versão igual à do servidor não rebaixa",
+            !ViewModels.MainViewModel.PrecisaAtualizar("2.29.0", "2.29.0", estaNoDisco: true));
+
+        Check("atualizar: versão diferente da do servidor rebaixa",
+            ViewModels.MainViewModel.PrecisaAtualizar("2.28.0", "2.29.0", estaNoDisco: true));
+
+        Check("atualizar: comparação de versão ignora caixa",
+            !ViewModels.MainViewModel.PrecisaAtualizar("1.0.0-RC1", "1.0.0-rc1", estaNoDisco: true));
+
+        // Perfil dizendo que tem o mod, mas a pasta sumiu (jogador limpou, antivírus
+        // removeu): tem que reinstalar, senão entra no servidor sem o mod.
+        Check("atualizar: arquivos ausentes no disco forçam reinstalação",
+            ViewModels.MainViewModel.PrecisaAtualizar("2.29.0", "2.29.0", estaNoDisco: false));
+
+        Check("atualizar: mod nunca instalado é baixado",
+            ViewModels.MainViewModel.PrecisaAtualizar(null, "2.29.0", estaNoDisco: true));
+
+        Check("atualizar: mod sem versão fixada é sempre rebaixado",
+            ViewModels.MainViewModel.PrecisaAtualizar("2.29.0", null, estaNoDisco: true));
     }
 
     // ------------------------------------------------------------------ config
@@ -201,6 +233,65 @@ public static class LauncherSelfTest
 
         Check("UI: nenhum binding quebrado", errosDeBinding.Count == 0,
             errosDeBinding.Count == 0 ? "" : string.Join(" | ", errosDeBinding.Take(4)));
+
+        RunProfileDialogChecks();
+    }
+
+    /// <summary>
+    /// A tela de criar perfil já quebrou por altura fixa: os botões Confirmar e
+    /// Cancelar ficavam fora da janela, e como ela era ResizeMode=NoResize não
+    /// dava nem para esticar. Compila sem erro nenhum — só aparece abrindo.
+    /// </summary>
+    private static void RunProfileDialogChecks()
+    {
+        try
+        {
+            var dialogo = new Views.InputDialog(
+                "Nome do novo perfil:", "Novo Perfil",
+                hint: "Cada perfil guarda sua própria seleção de mods.",
+                validar: Views.InputDialog.ValidarNomeDePerfil)
+            {
+                Left = -10000,
+                Top = -10000,
+                ShowInTaskbar = false
+            };
+
+            dialogo.Show();
+            dialogo.UpdateLayout();
+
+            var conteudo = (System.Windows.FrameworkElement)dialogo.Content;
+            conteudo.Measure(new System.Windows.Size(dialogo.Width, double.PositiveInfinity));
+            var alturaNecessaria = conteudo.DesiredSize.Height;
+
+            // Medir ActualHeight logo após o Show() é instável (o WPF ainda não
+            // fechou o layout). O que importa afinal é a regra: ou a janela
+            // acompanha o conteúdo, ou a altura fixa é suficiente. Altura fixa
+            // menor que o conteúdo foi exatamente o que cortou os botões.
+            var acompanhaConteudo = dialogo.SizeToContent == System.Windows.SizeToContent.Height
+                                    || dialogo.SizeToContent == System.Windows.SizeToContent.WidthAndHeight;
+
+            Check("UI: tela de perfil não corta o conteúdo",
+                acompanhaConteudo || dialogo.Height >= alturaNecessaria,
+                acompanhaConteudo
+                    ? $"janela acompanha o conteúdo ({alturaNecessaria:F0}px)"
+                    : $"altura fixa {dialogo.Height:F0}px, conteúdo {alturaNecessaria:F0}px");
+
+            dialogo.Close();
+            Check("UI: tela de perfil abre sem erro de XAML", true);
+        }
+        catch (Exception ex)
+        {
+            Check("UI: tela de perfil abre sem erro de XAML", false, ex.Message);
+        }
+
+        // A validação existe para o erro aparecer no próprio campo, em vez de a
+        // janela fechar em silêncio como acontecia com nome vazio ou repetido.
+        Check("UI: nome de perfil vazio é recusado",
+            Views.InputDialog.ValidarNomeDePerfil("   ") is not null);
+        Check("UI: nome de perfil com caractere de caminho é recusado",
+            Views.InputDialog.ValidarNomeDePerfil("meu/perfil") is not null);
+        Check("UI: nome de perfil válido é aceito",
+            Views.InputDialog.ValidarNomeDePerfil("Hardcore") is null);
     }
 
     /// <summary>Captura os avisos que o WPF emite quando um binding não resolve.</summary>

@@ -3,105 +3,210 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DeadheimLauncher.ViewModels"
         xmlns:local="clr-namespace:DeadheimLauncher.Converters"
-        Title="Deadheim Launcher" Height="620" Width="520"
+        Title="Deadheim" Height="600" Width="940" MinHeight="520" MinWidth="820"
         Background="{StaticResource BgBrush}"
         WindowStartupLocation="CenterScreen">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
 
-    <Grid Margin="18">
+    <!--
+        Layout no espírito do Battle.net: a arte ocupa o palco, a barra de baixo
+        concentra a ação (perfil, progresso, JOGAR), e a lista de mods sai da
+        frente — vira um painel que só aparece quando pedido. Quem abre o
+        launcher quer clicar em Jogar, não auditar 45 mods.
+    -->
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Cabeçalho -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
-            <TextBlock Text="Deadheim Launcher" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" />
-            <Button Content="Configurações" Margin="16,0,0,0" Padding="10,4"
-                    Command="{Binding OpenSettingsCommand}" VerticalAlignment="Center" />
-        </StackPanel>
+        <!-- ================= palco ================= -->
+        <Grid Grid.Row="0">
+            <!-- Arte de fundo, sangrando para a direita e esmaecida para o texto
+                 continuar legível por cima. -->
+            <Image Source="/Assets/deadheim.png" Stretch="UniformToFill"
+                   HorizontalAlignment="Right" Opacity="0.5" />
+            <Rectangle>
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#F213100E" Offset="0.0" />
+                        <GradientStop Color="#D813100E" Offset="0.45" />
+                        <GradientStop Color="#5513100E" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Height="120" VerticalAlignment="Bottom">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#0013100E" Offset="0" />
+                        <GradientStop Color="#13100E" Offset="1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
 
-        <!-- Seletor de perfil -->
-        <Border Grid.Row="1" Background="{StaticResource PanelBrush}" Padding="12" Margin="0,0,0,12">
-            <StackPanel>
-                <TextBlock Text="Perfil" FontWeight="SemiBold" Margin="0,0,0,6" />
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" ItemsSource="{Binding Profiles}"
-                              SelectedItem="{Binding SelectedProfile}" />
-                    <Button Grid.Column="1" Content="Novo" Margin="8,0,0,0" Command="{Binding CreateProfileCommand}" />
-                    <Button Grid.Column="2" Content="Duplicar" Margin="8,0,0,0" Command="{Binding DuplicateProfileCommand}" />
-                    <Button Grid.Column="3" Content="Excluir" Margin="8,0,0,0" Command="{Binding DeleteProfileCommand}" />
-                </Grid>
-            </StackPanel>
-        </Border>
+            <!-- Cabeçalho -->
+            <Grid VerticalAlignment="Top" Margin="34,26,26,0">
+                <StackPanel HorizontalAlignment="Left">
+                    <TextBlock Text="DEADHEIM" FontSize="46" FontWeight="Bold"
+                               FontFamily="Segoe UI Black" Foreground="{StaticResource TextBrush}" />
+                    <StackPanel Orientation="Horizontal" Margin="2,-6,0,0">
+                        <Border Width="26" Height="3" CornerRadius="2" VerticalAlignment="Center"
+                                Background="{StaticResource AccentBrush}" />
+                        <TextBlock Text="SERVIDOR DE VALHEIM" FontSize="11" Margin="8,0,0,0"
+                                   VerticalAlignment="Center" FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedTextBrush}" />
+                    </StackPanel>
+                </StackPanel>
 
-        <!-- Lista de mods -->
-        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" Padding="12">
-            <DockPanel>
-                <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Mods" FontWeight="SemiBold" VerticalAlignment="Center" />
-                    <Button Grid.Column="1" Content="Atualizar lista" Command="{Binding RefreshManifestCommand}" />
-                </Grid>
+                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Content="Configurações"
+                        Style="{StaticResource BotaoSecundario}" Padding="12,6"
+                        Command="{Binding OpenSettingsCommand}" />
+            </Grid>
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Mods}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="#3A3A42" BorderThickness="0,0,0,1" Padding="0,8">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
-                                                  IsEnabled="{Binding IsRequired, Converter={x:Static local:InverseBoolConverter.Instance}}"
-                                                  VerticalAlignment="Top" Margin="0,2,10,0" />
-                                        <StackPanel Grid.Column="1">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                                <TextBlock Text="{Binding VersionLabel}" Foreground="{StaticResource MutedTextBrush}"
-                                                           Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
-                                                <TextBlock Text="{Binding SourceLabel}" Foreground="{StaticResource MutedTextBrush}"
-                                                           Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
-                                                <TextBlock Text="obrigatório" Foreground="{StaticResource AccentBrush}"
-                                                           Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center"
-                                                           Visibility="{Binding IsRequired, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+            <!-- ===== painel de mods, sobreposto e fechado por padrão ===== -->
+            <Border Background="#F21A1614" BorderBrush="{StaticResource BorderBrush2}"
+                    BorderThickness="1" CornerRadius="6" Margin="34,110,26,18"
+                    Visibility="{Binding IsChecked, ElementName=BotaoMods,
+                                 Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                <DockPanel Margin="16">
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="MODS DO SERVIDOR" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{Binding Mods.Count, StringFormat={}({0})}"
+                                       Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="6,0,0,0" />
+                        </StackPanel>
+                        <Button HorizontalAlignment="Right" Content="Atualizar lista" Padding="10,5"
+                                Style="{StaticResource BotaoSecundario}" Command="{Binding RefreshManifestCommand}" />
+                    </Grid>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Mods}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#2C2521" BorderThickness="0,0,0,1" Padding="0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
+                                                      IsEnabled="{Binding IsRequired, Converter={x:Static local:InverseBoolConverter.Instance}}"
+                                                      VerticalAlignment="Top" Margin="0,2,10,0" />
+                                            <StackPanel Grid.Column="1">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding VersionLabel}" Foreground="{StaticResource MutedTextBrush}"
+                                                               Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding SourceLabel}" Foreground="{StaticResource MutedTextBrush}"
+                                                               Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center" />
+                                                    <TextBlock Text="obrigatório" Foreground="{StaticResource AccentBrush}"
+                                                               Margin="8,0,0,0" FontSize="11" VerticalAlignment="Center"
+                                                               Visibility="{Binding IsRequired, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Description}" Foreground="{StaticResource MutedTextBrush}"
+                                                           TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0" />
+                                                <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource AccentBrush}"
+                                                           FontSize="11" Margin="0,2,0,0" />
                                             </StackPanel>
-                                            <TextBlock Text="{Binding Description}" Foreground="{StaticResource MutedTextBrush}"
-                                                       TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0" />
-                                            <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource AccentBrush}"
-                                                       FontSize="11" Margin="0,2,0,0" />
-                                        </StackPanel>
-                                    </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- ================= barra de ação ================= -->
+        <Border Grid.Row="1" Background="#1A1614" BorderBrush="{StaticResource BorderBrush2}"
+                BorderThickness="0,1,0,0" Padding="26,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- perfil -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="PERFIL" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,5" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Grid.Column="0" Height="30" ItemsSource="{Binding Profiles}"
+                                  SelectedItem="{Binding SelectedProfile}" />
+                        <!-- Menu em vez de três botões: a barra de baixo é estreita,
+                             e criar/duplicar/excluir perfil é ação rara. -->
+                        <Button Grid.Column="1" Content="⋯" Margin="6,0,0,0" Padding="9,4" FontSize="13"
+                                Style="{StaticResource BotaoSecundario}" ToolTip="Gerenciar perfis"
+                                Click="AbrirMenuDePerfil">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Novo perfil" Command="{Binding CreateProfileCommand}" />
+                                    <MenuItem Header="Duplicar perfil" Command="{Binding DuplicateProfileCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="Excluir perfil" Command="{Binding DeleteProfileCommand}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- status e progresso -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0">
+                    <Grid Margin="0,0,0,6">
+                        <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource MutedTextBrush}"
+                                   FontSize="12" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding ProgressoTexto}" HorizontalAlignment="Right" FontSize="12"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   Visibility="{Binding MostrarProgresso, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+                    </Grid>
+
+                    <!-- Barra de progresso: instalar ~40 mods leva minutos e sem
+                         isso a janela parece travada. -->
+                    <ProgressBar Height="6" Minimum="0" Maximum="{Binding ProgressoTotal}"
+                                 Value="{Binding ProgressoAtual}"
+                                 Background="#0E0C0B" Foreground="{StaticResource AccentBrush}"
+                                 BorderThickness="0"
+                                 Visibility="{Binding MostrarProgresso, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+                </StackPanel>
+
+                <!-- ações -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ToggleButton x:Name="BotaoMods" Content="MODS" MinWidth="86" Height="44"
+                                  Cursor="Hand" Foreground="{StaticResource TextBrush}"
+                                  FontWeight="SemiBold" Margin="0,0,10,0">
+                        <ToggleButton.Template>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Border x:Name="Fundo" Background="{StaticResource PanelBrush}"
+                                        BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                                        CornerRadius="3">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </DockPanel>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="Fundo" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Setter TargetName="Fundo" Property="Background" Value="{StaticResource PanelHoverBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Fundo" Property="Background" Value="{StaticResource PanelHoverBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </ToggleButton.Template>
+                    </ToggleButton>
+
+                    <Button Content="JOGAR" FontSize="17" FontWeight="Bold" MinWidth="180" Height="44"
+                            Command="{Binding PlayCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={x:Static local:InverseBoolConverter.Instance}}" />
+                </StackPanel>
+            </Grid>
         </Border>
-
-        <!-- Status -->
-        <TextBlock Grid.Row="3" Text="{Binding StatusText}" Foreground="{StaticResource MutedTextBrush}"
-                    Margin="0,10,0,0" TextWrapping="Wrap" />
-
-        <!-- Play -->
-        <Button Grid.Row="4" Content="JOGAR" FontSize="16" Padding="0,12" Margin="0,10,0,0"
-                Command="{Binding PlayCommand}" IsEnabled="{Binding IsBusy, Converter={x:Static local:InverseBoolConverter.Instance}}" />
     </Grid>
 </Window>

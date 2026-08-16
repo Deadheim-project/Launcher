@@ -3,32 +3,196 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <SolidColorBrush x:Key="BgBrush" Color="#1E1E22" />
-            <SolidColorBrush x:Key="PanelBrush" Color="#2A2A30" />
-            <SolidColorBrush x:Key="AccentBrush" Color="#6FA8DC" />
-            <SolidColorBrush x:Key="TextBrush" Color="#E8E8EC" />
-            <SolidColorBrush x:Key="MutedTextBrush" Color="#9A9AA5" />
+            <!-- Paleta do Deadheim: carvão quente com brasa e osso, em vez do
+                 cinza-azulado genérico de antes. -->
+            <SolidColorBrush x:Key="BgBrush" Color="#13100E" />
+            <SolidColorBrush x:Key="PanelBrush" Color="#1D1917" />
+            <SolidColorBrush x:Key="PanelHoverBrush" Color="#272220" />
+            <SolidColorBrush x:Key="BorderBrush2" Color="#3A322D" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#C4602A" />
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#DD7539" />
+            <SolidColorBrush x:Key="AccentPressedBrush" Color="#A24C1F" />
+            <SolidColorBrush x:Key="TextBrush" Color="#EDE6DC" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#998C80" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#D4574B" />
+            <SolidColorBrush x:Key="OkBrush" Color="#7FA86B" />
 
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="FontFamily" Value="Segoe UI" />
+            </Style>
+
+            <!-- Botão com template próprio: o chrome padrão do Windows ignora
+                 Background no hover e voltava a ficar azul-claro. -->
             <Style TargetType="Button">
                 <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-                <Setter Property="Foreground" Value="#15181C" />
-                <Setter Property="Padding" Value="14,8" />
+                <Setter Property="Foreground" Value="#17120F" />
+                <Setter Property="Padding" Value="14,7" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Fundo" Background="{TemplateBinding Background}"
+                                    CornerRadius="3" Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Fundo" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Fundo" Property="Background" Value="{StaticResource AccentPressedBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Fundo" Property="Background" Value="#3A322D" />
+                                    <Setter Property="Foreground" Value="#7A7069" />
+                                    <Setter Property="Cursor" Value="Arrow" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Botão secundário: mesma forma, sem o peso da brasa. -->
+            <Style x:Key="BotaoSecundario" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Fundo" Background="{TemplateBinding Background}"
+                                    BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                                    CornerRadius="3" Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Fundo" Property="Background" Value="{StaticResource PanelHoverBrush}" />
+                                    <Setter TargetName="Fundo" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="#6B625C" />
+                                    <Setter Property="Cursor" Value="Arrow" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="TextBox">
+                <Setter Property="Background" Value="#0E0C0B" />
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Style.Triggers>
+                    <Trigger Property="IsFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                    </Trigger>
+                </Style.Triggers>
             </Style>
 
             <Style TargetType="CheckBox">
                 <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
                 <Setter Property="Margin" Value="0,4" />
+                <Setter Property="Cursor" Value="Hand" />
             </Style>
 
-            <Style TargetType="TextBlock">
+            <!--
+                O ComboBox precisa de template próprio, e não é preciosismo: o
+                template padrão desenha o item selecionado num TextBlock interno,
+                que herdava o estilo global de TextBlock (texto claro) sobre o
+                fundo claro do chrome do Windows. Resultado: o nome do perfil
+                ficava branco no branco, invisível.
+            -->
+            <Style TargetType="ComboBoxItem">
+                <Setter Property="Background" Value="{StaticResource PanelBrush}" />
                 <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBoxItem">
+                            <Border x:Name="Fundo" Background="{TemplateBinding Background}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter TargetName="Fundo" Property="Background" Value="{StaticResource AccentBrush}" />
+                                    <Setter Property="Foreground" Value="#17120F" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
             <Style TargetType="ComboBox">
-                <Setter Property="Padding" Value="6,4" />
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="Background" Value="#0E0C0B" />
+                <Setter Property="FontFamily" Value="Segoe UI" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBox">
+                            <Grid>
+                                <ToggleButton x:Name="Alternador" Focusable="False" ClickMode="Press"
+                                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border x:Name="Caixa" Background="{StaticResource PanelBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                                                    CornerRadius="3">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="22" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Path Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          Data="M 0 0 L 4 4 L 8 0 Z" Fill="{StaticResource MutedTextBrush}" />
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Caixa" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <!-- Foreground explícito: é o que impede o texto de
+                                     voltar a sumir se o estilo global mudar. -->
+                                <ContentPresenter Margin="10,0,26,0" VerticalAlignment="Center"
+                                                  IsHitTestVisible="False"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  TextElement.Foreground="{StaticResource TextBrush}" />
+
+                                <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False"
+                                       IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
+                                       PopupAnimation="Slide">
+                                    <Border Background="{StaticResource PanelBrush}"
+                                            BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                                            CornerRadius="3" MinWidth="{TemplateBinding ActualWidth}"
+                                            MaxHeight="260">
+                                        <ScrollViewer>
+                                            <ItemsPresenter />
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
         </ResourceDictionary>
     </Application.Resources>
