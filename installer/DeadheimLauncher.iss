@@ -33,7 +33,12 @@
 ; ------------------------------------------------------------------------------
 
 #define MyAppName "Deadheim Launcher"
-#define MyAppVersion "1.0.0"
+
+; A versão vem de fora quando o CI compila (iscc /DMyAppVersion=1.0.4). O valor
+; abaixo é só o padrão de quem gera na mão.
+#ifndef MyAppVersion
+  #define MyAppVersion "1.0.0"
+#endif
 #define MyAppPublisher "Deadheim"
 #define MyAppExeName "DeadheimLauncher.exe"
 

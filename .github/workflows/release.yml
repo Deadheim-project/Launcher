@@ -71,6 +71,23 @@ jobs:
           if (-not (Test-Path DeadheimLauncher.zip)) { throw "zip nao foi gerado" }
           "{0:N1} MB" -f ((Get-Item DeadheimLauncher.zip).Length / 1MB)
 
+      # O instalador e o que a maioria vai baixar: um arquivo, dois cliques,
+      # atalho na area de trabalho. Zip com 466 arquivos e barreira para quem
+      # nao mexe com isso.
+      - name: Instalar o Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Gerar o instalador
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $versao = $tag -replace '^v', ''
+          if ($versao -notmatch '^\d+(\.\d+){1,3}$') { $versao = "1.0.0" }
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=$versao installer\DeadheimLauncher.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc falhou" }
+          $setup = "installer\Output\DeadheimLauncherSetup.exe"
+          if (-not (Test-Path $setup)) { throw "instalador nao foi gerado" }
+          "instalador: {0:N1} MB" -f ((Get-Item $setup).Length / 1MB)
+
       # A tag vem direto das variaveis do evento. Passar por $GITHUB_OUTPUT so
       # adicionaria um ponto de falha de codificacao entre um passo e outro.
       - name: Publicar o release
@@ -81,10 +98,24 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($tag)) { throw "tag vazia" }
           Write-Host "publicando release $tag"
 
+          $setup = "installer\Output\DeadheimLauncherSetup.exe"
+          $notas = @"
+## Como instalar
+
+Baixe o **DeadheimLauncherSetup.exe** e execute. Ele cria o atalho na area de
+trabalho e abre o launcher no fim. Nao pede senha de administrador.
+
+Se o Windows mostrar *"O Windows protegeu o seu PC"*, clique em **Mais
+informacoes** e depois em **Executar assim mesmo** - o aviso aparece porque o
+instalador ainda nao tem assinatura digital paga, nao porque haja algo errado.
+
+O ``DeadheimLauncher.zip`` e a versao sem instalador, para quem preferir.
+"@
+
           gh release view $tag 2>&1 | Out-Null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag DeadheimLauncher.zip --clobber
+            gh release upload $tag $setup DeadheimLauncher.zip --clobber
           } else {
-            gh release create $tag DeadheimLauncher.zip --title "Deadheim Launcher $tag" --notes "Baixe o DeadheimLauncher.zip, extraia e rode DeadheimLauncher.exe."
+            gh release create $tag $setup DeadheimLauncher.zip --title "Deadheim Launcher $tag" --notes $notas
           }
           if ($LASTEXITCODE -ne 0) { throw "gh release falhou" }
