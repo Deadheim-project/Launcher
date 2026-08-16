@@ -74,6 +74,48 @@ public sealed class ProfileService
         if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
     }
 
+    /// <summary>
+    /// Apaga do perfil os mods que não estão mais no manifest do servidor e
+    /// devolve quais foram. Retirar um mod do pack é uma decisão do servidor
+    /// tanto quanto adicionar: se ele continuar no disco do jogador, vai ser
+    /// carregado pelo BepInEx e pode ser recusado pelo anticheat ou brigar com
+    /// os que ficaram.
+    ///
+    /// Só mexe no que o próprio launcher instalou (pastas com id conhecido).
+    /// Mod que o jogador pôs na mão em BepInEx/plugins não é problema daqui.
+    /// </summary>
+    public IReadOnlyList<string> RemoverModsForaDoManifest(Profile profile, IEnumerable<string> idsDoManifest)
+    {
+        var validos = new HashSet<string>(idsDoManifest, StringComparer.OrdinalIgnoreCase);
+        var removidos = new List<string>();
+
+        foreach (var raiz in new[] { AppPaths.ProfilePluginsDir(profile.Name), AppPaths.ProfileGameRootDir(profile.Name) })
+        {
+            if (!Directory.Exists(raiz)) continue;
+
+            foreach (var pasta in Directory.GetDirectories(raiz))
+            {
+                var id = Path.GetFileName(pasta);
+                if (validos.Contains(id)) continue;
+
+                Directory.Delete(pasta, recursive: true);
+                removidos.Add(id);
+            }
+        }
+
+        // O perfil não pode seguir afirmando ter instalado o que já saiu.
+        foreach (var id in profile.InstalledVersions.Keys.Where(k => !validos.Contains(k)).ToList())
+        {
+            profile.InstalledVersions.Remove(id);
+            if (!removidos.Contains(id)) removidos.Add(id);
+        }
+
+        profile.EnabledModIds = profile.EnabledModIds.Where(validos.Contains).ToList();
+
+        if (removidos.Count > 0) Save(profile);
+        return removidos;
+    }
+
     public void Rename(string oldName, string newName)
     {
         var oldDir = AppPaths.ProfileDir(oldName);

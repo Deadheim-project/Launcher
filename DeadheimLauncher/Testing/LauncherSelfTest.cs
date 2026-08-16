@@ -55,6 +55,7 @@ public static class LauncherSelfTest
             RunGameSyncChecks();
             RunConfigRoutingChecks();
             RunUpdateRuleChecks();
+            RunCleanupChecks();
 
             if (includeNetwork)
             {
@@ -110,6 +111,56 @@ public static class LauncherSelfTest
 
         Check("atualizar: mod sem versão fixada é sempre rebaixado",
             ViewModels.MainViewModel.PrecisaAtualizar("2.29.0", null, estaNoDisco: true));
+    }
+
+    // --------------------------------------------------------------- limpeza
+
+    /// <summary>
+    /// Quando o servidor tira um mod do pack, ele tem que sumir do disco do
+    /// jogador. Ficar para trás não é inofensivo: o BepInEx carrega tudo que
+    /// está em plugins, então o mod removido continua ativo — e pode ser
+    /// justamente o que o servidor mandou tirar.
+    /// </summary>
+    private static void RunCleanupChecks()
+    {
+        const string perfil = "LimpezaTest";
+        var service = new ProfileService();
+        var profile = service.LoadOrCreate(perfil);
+
+        var plugins = AppPaths.ProfilePluginsDir(perfil);
+        foreach (var id in new[] { "raidsystem", "modremovido" })
+        {
+            Directory.CreateDirectory(Path.Combine(plugins, id));
+            File.WriteAllText(Path.Combine(plugins, id, $"{id}.dll"), "dll");
+            profile.InstalledVersions[id] = "1.0.0";
+            profile.EnabledModIds.Add(id);
+        }
+
+        // O BepInEx mora no gameroot: precisa sobreviver, está no manifest.
+        var gameroot = Path.Combine(AppPaths.ProfileGameRootDir(perfil), "bepinexpack-valheim");
+        Directory.CreateDirectory(gameroot);
+        File.WriteAllText(Path.Combine(gameroot, "winhttp.dll"), "loader");
+        service.Save(profile);
+
+        var removidos = service.RemoverModsForaDoManifest(profile, new[] { "raidsystem", "bepinexpack-valheim" });
+
+        Check("limpeza: mod fora do manifest é apagado do disco",
+            !Directory.Exists(Path.Combine(plugins, "modremovido")), string.Join(", ", removidos));
+        Check("limpeza: mod que continua no manifest é preservado",
+            File.Exists(Path.Combine(plugins, "raidsystem", "raidsystem.dll")));
+        Check("limpeza: pacote de raiz do jogo não é apagado por engano",
+            File.Exists(Path.Combine(gameroot, "winhttp.dll")));
+
+        var recarregado = service.LoadOrCreate(perfil);
+        Check("limpeza: perfil deixa de listar o mod removido",
+            !recarregado.InstalledVersions.ContainsKey("modremovido")
+            && !recarregado.EnabledModIds.Contains("modremovido"));
+        Check("limpeza: perfil mantém o mod que ficou",
+            recarregado.InstalledVersions.ContainsKey("raidsystem"));
+
+        // Nada mudou no manifest: não pode sair apagando por precaução.
+        var semMudanca = service.RemoverModsForaDoManifest(recarregado, new[] { "raidsystem", "bepinexpack-valheim" });
+        Check("limpeza: sem mudança no manifest, nada é apagado", semMudanca.Count == 0);
     }
 
     // ------------------------------------------------------------------ config

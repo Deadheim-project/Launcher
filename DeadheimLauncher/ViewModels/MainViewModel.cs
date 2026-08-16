@@ -202,6 +202,16 @@ public sealed partial class MainViewModel : ObservableObject
 
                 if (!string.IsNullOrWhiteSpace(_manifest.PackVersion) && _manifest.PackVersion != versaoAnterior)
                     StatusText = $"Servidor atualizado para {_manifest.PackVersion}. Aplicando...";
+
+                // Mod que o servidor tirou do pack precisa sair do disco também.
+                // Se ficar, o BepInEx carrega assim mesmo e o jogador pode ser
+                // recusado pelo anticheat ou quebrar com os que ficaram.
+                var removidos = _profileService.RemoverModsForaDoManifest(
+                    _activeProfile, _manifest.AllMods.Select(m => m.Id));
+
+                if (removidos.Count > 0)
+                    StatusText = $"{removidos.Count} mod(s) removido(s) pelo servidor: {string.Join(", ", removidos.Take(3))}"
+                                 + (removidos.Count > 3 ? "..." : "");
             }
             catch (Exception ex)
             {
