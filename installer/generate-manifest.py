@@ -69,8 +69,13 @@ ADMIN_MODS = [
      "Deixa estruturas invisíveis, invulneráveis ou atravessáveis."),
     ("YouDied", "DevToggle",
      "Atalho para ligar e desligar o modo dev."),
+]
+
+# Melhorias que qualquer jogador pode querer, e que não são ferramenta de
+# administração. Nenhuma é exigida pelo servidor.
+OPTIONAL_MODS = [
     ("Azumatt", "Azus_UnOfficial_ConfigManager",
-     "Menu dentro do jogo para editar a configuração dos mods."),
+     "Menu dentro do jogo para ajustar a configuração dos mods, com F1."),
 ]
 
 
@@ -138,6 +143,22 @@ def main():
             # porque não precisam casar com o servidor como os mods do pack.
             "required": False,
             "category": "Admin",
+            "source": "Thunderstore",
+            "thunderstoreNamespace": ns,
+            "thunderstoreName": name,
+            "author": ns,
+            "url": f"https://thunderstore.io/c/valheim/p/{ns}/{name}/",
+        })
+
+    for ns, name, desc in OPTIONAL_MODS:
+        if any(m["thunderstoreName"] == name for m in thunderstore_mods):
+            continue
+        thunderstore_mods.append({
+            "id": slugify(name),
+            "name": name.replace("_", " "),
+            "description": desc,
+            "required": False,
+            "category": "Opcional",
             "source": "Thunderstore",
             "thunderstoreNamespace": ns,
             "thunderstoreName": name,

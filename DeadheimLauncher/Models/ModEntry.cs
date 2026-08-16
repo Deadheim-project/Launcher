@@ -9,8 +9,11 @@ public enum ModSource
 /// <summary>Em que aba o mod aparece.</summary>
 public enum ModCategory
 {
-    /// <summary>O que o servidor exige para jogar.</summary>
+    /// <summary>O que o servidor exige para jogar. Não dá para desmarcar.</summary>
     Servidor,
+
+    /// <summary>Melhorias que o jogador escolhe se quer ou não.</summary>
+    Opcional,
 
     /// <summary>Ferramentas de administração, fora do caminho de quem só quer jogar.</summary>
     Admin

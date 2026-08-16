@@ -140,20 +140,48 @@
                             Padding="10,5" Margin="0,0,0,-34" Panel.ZIndex="1"
                             Style="{StaticResource BotaoSecundario}" Command="{Binding RefreshManifestCommand}" />
 
-                    <!-- Abas: ferramentas de admin fora do caminho de quem só quer jogar. -->
+                    <!-- Três abas: o que o servidor exige, o que é escolha do
+                         jogador, e as ferramentas de admin fora do caminho. -->
                     <TabControl>
                         <TabItem Header="{Binding ModsDoServidor.Count, StringFormat=SERVIDOR ({0})}">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding ModsDoServidor}"
-                                              ItemTemplate="{StaticResource ItemDeMod}" />
-                            </ScrollViewer>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="11" Margin="0,0,0,10"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           Text="Exigidos para entrar no Deadheim. São instalados na versão que o servidor usa e não podem ser desmarcados." />
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding ModsDoServidor}"
+                                                  ItemTemplate="{StaticResource ItemDeMod}" />
+                                </ScrollViewer>
+                            </DockPanel>
+                        </TabItem>
+
+                        <TabItem Header="{Binding ModsOpcionais.Count, StringFormat=OPCIONAIS ({0})}">
+                            <DockPanel>
+                                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,120,0"
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               Text="Melhorias de sua escolha. Não são exigidas pelo servidor — entrar sem elas funciona igual." />
+                                    <Button Content="Marcar todos" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Padding="10,5" FontSize="11" Style="{StaticResource BotaoSecundario}"
+                                            Command="{Binding AlternarTodosCommand}" CommandParameter="Opcional" />
+                                </Grid>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding ModsOpcionais}"
+                                                  ItemTemplate="{StaticResource ItemDeMod}" />
+                                </ScrollViewer>
+                            </DockPanel>
                         </TabItem>
 
                         <TabItem Header="{Binding ModsDeAdmin.Count, StringFormat=ADMIN ({0})}">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="11" Margin="0,0,0,10"
-                                           Foreground="{StaticResource MutedTextBrush}"
-                                           Text="Ferramentas de administração. Nenhuma é exigida pelo servidor — marque só o que for usar. O anticheat pode recusar sua entrada com algumas delas ativas." />
+                                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,120,0"
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               Text="Ferramentas de administração. Marque só o que for usar — o anticheat pode recusar sua entrada com algumas delas ativas." />
+                                    <Button Content="Marcar todos" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Padding="10,5" FontSize="11" Style="{StaticResource BotaoSecundario}"
+                                            Command="{Binding AlternarTodosCommand}" CommandParameter="Admin" />
+                                </Grid>
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <ItemsControl ItemsSource="{Binding ModsDeAdmin}"
                                                   ItemTemplate="{StaticResource ItemDeMod}" />

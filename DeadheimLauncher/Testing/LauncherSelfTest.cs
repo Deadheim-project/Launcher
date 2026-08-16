@@ -315,8 +315,11 @@ public static class LauncherSelfTest
                 await Task.Delay(2500);
                 janela.UpdateLayout();
 
-                var itens = (janela.DataContext as ViewModels.MainViewModel)?.Mods.Count ?? 0;
+                var vm = janela.DataContext as ViewModels.MainViewModel;
+                var itens = vm?.Mods.Count ?? 0;
                 Check("UI: lista de mods é populada", itens > 0, $"{itens} itens");
+
+                if (vm is not null) VerificarAbasEMarcarTodos(vm);
             }
             finally
             {
@@ -334,7 +337,44 @@ public static class LauncherSelfTest
 
         Check("UI: nenhum binding quebrado", errosDeBinding.Count == 0,
             errosDeBinding.Count == 0 ? "" : string.Join(" | ", errosDeBinding.Take(4)));
+    }
 
+    /// <summary>
+    /// As três abas e o "marcar todos". A regra que mais importa é o botão nunca
+    /// desmarcar um mod obrigatório: o servidor exige, e sair sem ele significa
+    /// ser recusado na entrada — sem o jogador entender por quê.
+    /// </summary>
+    private static void VerificarAbasEMarcarTodos(ViewModels.MainViewModel vm)
+    {
+        var somaDasAbas = vm.ModsDoServidor.Count + vm.ModsOpcionais.Count + vm.ModsDeAdmin.Count;
+        Check("UI: as abas cobrem a lista inteira, sem repetir",
+            somaDasAbas == vm.Mods.Count,
+            $"servidor {vm.ModsDoServidor.Count} + opcionais {vm.ModsOpcionais.Count} + admin {vm.ModsDeAdmin.Count} = {somaDasAbas}, total {vm.Mods.Count}");
+
+        Check("UI: a aba do servidor só tem obrigatórios",
+            vm.ModsDoServidor.All(m => m.IsRequired));
+
+        Check("UI: abas de opcionais e admin não têm obrigatórios",
+            vm.ModsOpcionais.Concat(vm.ModsDeAdmin).All(m => !m.IsRequired));
+
+        if (vm.ModsDeAdmin.Count == 0)
+        {
+            Skip("UI: marcar todos liga a aba inteira (aba de admin vazia)");
+            return;
+        }
+
+        foreach (var m in vm.ModsDeAdmin) m.IsEnabled = false;
+        vm.AlternarTodosCommand.Execute("Admin");
+        Check("UI: marcar todos liga a aba inteira", vm.ModsDeAdmin.All(m => m.IsEnabled));
+
+        // Segundo clique desmarca: um botão só, que faz o que a lista pede.
+        vm.AlternarTodosCommand.Execute("Admin");
+        Check("UI: clicar de novo desmarca a aba", vm.ModsDeAdmin.All(m => !m.IsEnabled));
+
+        // E o principal: nunca pode mexer no que o servidor exige.
+        vm.AlternarTodosCommand.Execute("Servidor");
+        Check("UI: marcar todos não desmarca mod obrigatório",
+            vm.ModsDoServidor.All(m => m.IsEnabled));
     }
 
 

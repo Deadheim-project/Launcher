@@ -33,11 +33,37 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>Mods do servidor: o que é preciso para jogar.</summary>
     public ObservableCollection<ModListItemViewModel> ModsDoServidor { get; } = new();
 
+    /// <summary>Melhorias que o jogador escolhe se quer.</summary>
+    public ObservableCollection<ModListItemViewModel> ModsOpcionais { get; } = new();
+
     /// <summary>
     /// Ferramentas de administração, em aba separada. Ficam fora do caminho de
     /// quem só quer entrar e jogar, e nenhuma é obrigatória.
     /// </summary>
     public ObservableCollection<ModListItemViewModel> ModsDeAdmin { get; } = new();
+
+    /// <summary>
+    /// Marca ou desmarca de uma vez a aba inteira. Obrigatórios são pulados: o
+    /// servidor exige, e desmarcar levaria a ser recusado na entrada.
+    /// </summary>
+    [RelayCommand]
+    private void AlternarTodos(string categoria)
+    {
+        var lista = categoria switch
+        {
+            "Opcional" => ModsOpcionais,
+            "Admin" => ModsDeAdmin,
+            _ => ModsDoServidor
+        };
+
+        var opcionais = lista.Where(m => !m.IsRequired).ToList();
+        if (opcionais.Count == 0) return;
+
+        // Se algum está desmarcado, marca todos; se já estão todos marcados,
+        // desmarca. Um botão só, que faz o que a lista pede no momento.
+        var marcarTodos = opcionais.Any(m => !m.IsEnabled);
+        foreach (var mod in opcionais) mod.IsEnabled = marcarTodos;
+    }
 
     [ObservableProperty]
     private string _statusText = "Iniciando...";
@@ -208,6 +234,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         Mods.Clear();
         ModsDoServidor.Clear();
+        ModsOpcionais.Clear();
         ModsDeAdmin.Clear();
 
         foreach (var entry in _manifest.AllMods)
@@ -215,10 +242,17 @@ public sealed partial class MainViewModel : ObservableObject
             var enabled = entry.Required || _activeProfile.EnabledModIds.Contains(entry.Id);
             var item = new ModListItemViewModel(entry, enabled);
 
-            // Mods fica com tudo: é a lista que instala e sincroniza. As duas
+            // Mods fica com tudo: é a lista que instala e sincroniza. As três
             // coleções por categoria existem só para a interface.
             Mods.Add(item);
-            (entry.Category == ModCategory.Admin ? ModsDeAdmin : ModsDoServidor).Add(item);
+
+            var destino = entry.Category switch
+            {
+                ModCategory.Admin => ModsDeAdmin,
+                ModCategory.Opcional => ModsOpcionais,
+                _ => ModsDoServidor
+            };
+            destino.Add(item);
         }
     }
 

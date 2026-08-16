@@ -584,9 +584,9 @@
     {
       "id": "azus-unofficial-configmanager",
       "name": "Azus UnOfficial ConfigManager",
-      "description": "Menu dentro do jogo para editar a configuração dos mods.",
+      "description": "Menu dentro do jogo para ajustar a configuração dos mods, com F1.",
       "required": false,
-      "category": "Admin",
+      "category": "Opcional",
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "Azus_UnOfficial_ConfigManager",
