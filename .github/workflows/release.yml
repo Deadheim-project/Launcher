@@ -2,9 +2,6 @@ name: Release do Launcher
 
 # Publica o launcher pronto para download. Roda com o GITHUB_TOKEN que o
 # proprio Actions injeta, entao nao depende de credencial de ninguem.
-#
-#   - push de uma tag v*  -> cria o release daquela versao
-#   - execucao manual     -> util para gerar/regenerar um release sem tag nova
 on:
   push:
     tags:
@@ -12,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Tag do release (ex. v1.0.0)"
+        description: "Tag do release (ex. v1.0.1)"
         required: true
-        default: "v1.0.0"
+        default: "v1.0.1"
 
 permissions:
   contents: write
@@ -22,6 +19,9 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
 
     steps:
       - uses: actions/checkout@v4
@@ -33,15 +33,13 @@ jobs:
       - name: Compilar
         run: dotnet build DeadheimLauncher.sln -c Release
 
-      # O self-test e o mesmo que roda localmente: perfis, manifest, sincronizacao
-      # com a pasta do jogo e a interface. Release so sai se ele passar.
+      # Mesmo self-test que roda localmente. O release so sai se ele passar.
+      # O teste de interface se pula sozinho aqui: runner nao tem desktop.
       - name: Self-test
         run: |
           $exe = "DeadheimLauncher\bin\Release\net8.0-windows\DeadheimLauncher.exe"
           & $exe --selftest --offline
           $codigo = $LASTEXITCODE
-          # O self-test tambem grava um log; em falha ele e a unica forma de saber
-          # qual verificacao quebrou, ja que a saida do runner some do console.
           $log = Join-Path $env:TEMP "DeadheimLauncher-selftest.log"
           if ($codigo -ne 0 -and (Test-Path $log)) {
             Write-Host "----- log do self-test -----"
@@ -52,26 +50,28 @@ jobs:
       - name: Publicar self-contained
         run: dotnet publish DeadheimLauncher/DeadheimLauncher.csproj -c Release -r win-x64 --self-contained true -o publish/DeadheimLauncher
 
+      # 7-Zip vem no runner e e bem mais rapido que Compress-Archive para as
+      # centenas de arquivos de um publish self-contained.
       - name: Compactar
-        run: Compress-Archive -Path publish/DeadheimLauncher/* -DestinationPath DeadheimLauncher.zip
-
-      - name: Definir a tag
-        id: tag
         run: |
-          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            "valor=${{ github.event.inputs.version }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          } else {
-            "valor=${{ github.ref_name }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          }
+          7z a -tzip -mx=5 DeadheimLauncher.zip .\publish\DeadheimLauncher\*
+          if (-not (Test-Path DeadheimLauncher.zip)) { throw "zip nao foi gerado" }
+          "{0:N1} MB" -f ((Get-Item DeadheimLauncher.zip).Length / 1MB)
 
+      # A tag vem direto das variaveis do evento. Passar por $GITHUB_OUTPUT so
+      # adicionaria um ponto de falha de codificacao entre um passo e outro.
       - name: Publicar o release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $tag = "${{ steps.tag.outputs.valor }}"
-          gh release view $tag 2>$null
+          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.version }}" } else { "${{ github.ref_name }}" }
+          if ([string]::IsNullOrWhiteSpace($tag)) { throw "tag vazia" }
+          Write-Host "publicando release $tag"
+
+          gh release view $tag 2>&1 | Out-Null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag DeadheimLauncher.zip --clobber
           } else {
             gh release create $tag DeadheimLauncher.zip --title "Deadheim Launcher $tag" --notes "Baixe o DeadheimLauncher.zip, extraia e rode DeadheimLauncher.exe."
           }
+          if ($LASTEXITCODE -ne 0) { throw "gh release falhou" }
