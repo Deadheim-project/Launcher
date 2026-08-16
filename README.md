@@ -72,8 +72,35 @@ entregues batem exatamente com as fixadas pelo pack, os 37 obrigatórios
 instalam, e o perfil sincroniza para um Valheim limpo com o BepInEx na raiz e
 39 DLLs em `plugins`.
 
-Os 2 `SKIP` são a mesma causa: os repositórios do `Deadheim-project` respondem
-404 (privados ou vazios) — ver abaixo.
+## De onde vem cada mod
+
+A regra é fixa e vale para o manifest inteiro:
+
+- **Mods de terceiros → Thunderstore.** Versão fixada pelo pack
+  `Deadheimmods/Deadheim`, expandida por `installer/generate-manifest.py`.
+- **Mods do servidor → GitHub Releases**, nos repositórios do
+  `Deadheim-project`. Nunca do Thunderstore, mesmo que o pack os contenha.
+
+Hoje as DLLs dos mods próprios foram extraídas do pack `Deadheimmods/Deadheim`
+15.0.5 e publicadas em `dist/` no repositório de cada mod, com um workflow que
+as anexa como release. É **interino**: os `.csproj` desses mods referenciam
+assemblies do Valheim por caminho absoluto, então o runner do GitHub não
+consegue compilá-los. Quando as referências forem resolvíveis, o workflow passa
+a compilar em vez de empacotar um binário versionado.
+
+`NPCs` é o único que não está no pack e precisa do release publicado à parte.
+
+## Configuração do servidor
+
+Pacote que traz uma pasta `config/` está entregando a configuração do servidor
+(dano de raide, preços da loja...). Esses `.cfg` vão para `BepInEx/config`, não
+para dentro da pasta do mod: parados em `plugins/<mod>/config/` o BepInEx os
+ignora, cada mod recria um `.cfg` padrão, e o jogador roda com regras
+diferentes das do servidor **sem nenhum erro aparecer**.
+
+Ao contrário de `plugins`, o `config` do jogo não é limpo antes de sincronizar —
+o que o jogador ajustou por conta própria (tecla, escala de HUD) sobrevive; só
+os arquivos que o servidor manda são sobrescritos.
 
 ## O que falta pra virar distribuição de verdade
 
