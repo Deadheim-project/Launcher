@@ -99,23 +99,28 @@ jobs:
           Write-Host "publicando release $tag"
 
           $setup = "installer\Output\DeadheimLauncherSetup.exe"
-          $notas = @"
-## Como instalar
 
-Baixe o **DeadheimLauncherSetup.exe** e execute. Ele cria o atalho na area de
-trabalho e abre o launcher no fim. Nao pede senha de administrador.
-
-Se o Windows mostrar *"O Windows protegeu o seu PC"*, clique em **Mais
-informacoes** e depois em **Executar assim mesmo** - o aviso aparece porque o
-instalador ainda nao tem assinatura digital paga, nao porque haja algo errado.
-
-O ``DeadheimLauncher.zip`` e a versao sem instalador, para quem preferir.
-"@
+          # Nada de here-string aqui: o terminador "@ do PowerShell tem que ficar
+          # na coluna 0, e isso encerraria o bloco YAML no meio do passo,
+          # quebrando o arquivo inteiro. Array de linhas resolve e fica indentado.
+          $linhas = @(
+            '## Como instalar',
+            '',
+            'Baixe o **DeadheimLauncherSetup.exe** e execute. Ele cria o atalho na area de',
+            'trabalho e abre o launcher no fim. Nao pede senha de administrador.',
+            '',
+            'Se o Windows mostrar *"O Windows protegeu o seu PC"*, clique em **Mais',
+            'informacoes** e depois em **Executar assim mesmo**. O aviso aparece porque o',
+            'instalador ainda nao tem assinatura digital paga, nao porque haja algo errado.',
+            '',
+            'O `DeadheimLauncher.zip` e a versao sem instalador, para quem preferir.'
+          )
+          Set-Content -Path notas-release.md -Value $linhas -Encoding utf8
 
           gh release view $tag 2>&1 | Out-Null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag $setup DeadheimLauncher.zip --clobber
           } else {
-            gh release create $tag $setup DeadheimLauncher.zip --title "Deadheim Launcher $tag" --notes $notas
+            gh release create $tag $setup DeadheimLauncher.zip --title "Deadheim Launcher $tag" --notes-file notas-release.md
           }
           if ($LASTEXITCODE -ne 0) { throw "gh release falhou" }
