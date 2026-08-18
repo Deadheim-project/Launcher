@@ -28,6 +28,16 @@ UA = {"User-Agent": "DeadheimLauncher-manifest-generator"}
 # pasta do Valheim (winhttp.dll ao lado do valheim.exe).
 GAME_ROOT_PACKAGES = {"BepInExPack_Valheim"}
 
+# Mods que ainda constam do pack publicado mas sairam do servidor. Ficam listados
+# aqui, e nao removidos silenciosamente, porque o pack no Thunderstore continua
+# declarando a dependencia: sem esta lista, a proxima geracao traria o mod de volta.
+#
+# Marketplace_And_Server_NPCs_Revamped: substituido pelo mod de NPCs proprio
+# (Deadheim-project/npcs). Removido do servidor em 18/08/2026; o conteudo dele --
+# 248 quests, 54 mercadores, 59 quadros de missao, 2 redes de teleporte -- foi
+# importado e agora acompanha o nosso mod.
+EXCLUDED_PACKAGES = {"Marketplace_And_Server_NPCs_Revamped"}
+
 # Mods de conveniência/admin que rodam só no cliente: podem ficar de fora sem
 # quebrar a entrada no servidor, então entram como opcionais.
 OPTIONAL_PACKAGES = {
@@ -69,13 +79,19 @@ ADMIN_MODS = [
      "Deixa estruturas invisíveis, invulneráveis ou atravessáveis."),
     ("YouDied", "DevToggle",
      "Atalho para ligar e desligar o modo dev."),
+    ("Azumatt", "Azus_UnOfficial_ConfigManager",
+     "Menu dentro do jogo para ajustar a configuração dos mods, com F1."),
 ]
 
 # Melhorias que qualquer jogador pode querer, e que não são ferramenta de
 # administração. Nenhuma é exigida pelo servidor.
 OPTIONAL_MODS = [
-    ("Azumatt", "Azus_UnOfficial_ConfigManager",
-     "Menu dentro do jogo para ajustar a configuração dos mods, com F1."),
+    ("MSchmoecker", "VNEI",
+     "Mostra todos os itens e receitas do jogo numa janela de consulta."),
+    ("ComfyMods", "Gizmo",
+     "Permite girar peças em qualquer eixo na hora de construir."),
+    ("castix", "ValheimFPSBoost",
+     "Reduz alguns detalhes gráficos internos para ganhar FPS. O ganho varia por máquina."),
 ]
 
 
@@ -112,6 +128,9 @@ def main():
     thunderstore_mods = []
     for dep in deps:
         ns, name, version = parse_dependency(dep)
+        if name in EXCLUDED_PACKAGES:
+            print(f"  ignorando {ns}/{name}: nao roda mais no servidor")
+            continue
         entry = {
             "id": slugify(name),
             "name": name.replace("_", " "),
