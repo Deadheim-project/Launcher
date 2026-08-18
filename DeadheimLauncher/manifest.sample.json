@@ -1,5 +1,5 @@
 {
-  "_comment": "Gerado por installer/generate-manifest.py a partir de Deadheimmods/Deadheim v15.0.5. Não edite à mão: publique a nova versão do pack e rode o script de novo.",
+  "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
   "packVersion": "15.0.5",
   "ownMods": [
     {

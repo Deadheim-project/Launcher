@@ -1,17 +1,34 @@
 #!/usr/bin/env python3
 """
-Gera o manifest.json do launcher a partir do modpack Deadheim publicado no
-Thunderstore.
+Compara o manifest.json (fonte de verdade autoral, editado à mão) com o que
+está publicado no pack Deadheim do Thunderstore.
 
-Por que gerar em vez de manter na mão: o pack tem ~40 mods com versão fixada.
-Manter isso manualmente sincronizado com o servidor é erro na certa — e mod em
-versão diferente da do servidor é causa clássica de desync e de crash ao
-entrar. Aqui a fonte da verdade é o próprio pack: publicou versão nova do
-Deadheim, roda isso de novo e commita o resultado.
+Por que virou um checador e não um gerador: o manifest declara as versões que
+o SERVIDOR roda de fato (BepInEx/plugins/ em loboda.dathost.net), não as
+versões mais recentes do pack. Gerar o manifest a partir do pack publicado
+foi a causa de um desalinhamento real -- o pack levou a versão do Jotunn (e
+de outros mods) na frente do servidor, o manifest seguiu o pack, e jogadores
+levavam "Incompatible version" ao entrar. Editar o manifest à mão, com o
+servidor como referência, evita isso: publicar o pack não muda mais o que o
+launcher instala.
+
+Fluxo pra atualizar um mod, agora:
+  1. Sobe a versão nova em BepInEx/plugins/ no servidor (com backup).
+  2. Confirma que o servidor sobe e aceita conexão normalmente.
+  3. Só então edita manifest.json à mão, fixando essa versão.
+  4. (Opcional) publica a versão nova do pack no Thunderstore, pra quem usa
+     outro mod manager -- isso é downstream do manifest, não o contrário.
 
 Uso:
-    python installer/generate-manifest.py
-    python installer/generate-manifest.py --out DeadheimLauncher/manifest.sample.json
+    python installer/generate-manifest.py --check
+        Mostra onde o pack publicado diverge do manifest.json atual. Não
+        escreve nada. Saída 1 se houver divergência, 0 se bater tudo.
+
+    python installer/generate-manifest.py --write [--out ARQUIVO]
+        Bootstrap explícito: reescreve manifest.json (e manifest.sample.json)
+        a partir do pack publicado, do zero. Uso raro -- normalmente só pra
+        começar um manifest novo do nada. Confirma antes de rodar isso contra
+        um manifest que já está em produção.
 """
 
 import argparse
@@ -24,13 +41,15 @@ PACK_NAME = "Deadheim"
 API = "https://thunderstore.io/api/experimental/package/{ns}/{name}/"
 UA = {"User-Agent": "DeadheimLauncher-manifest-generator"}
 
+MANIFEST_PATH = "manifest.json"
+
 # O pacote do BepInEx não é um plugin: ele é o carregador, e vai na raiz da
 # pasta do Valheim (winhttp.dll ao lado do valheim.exe).
 GAME_ROOT_PACKAGES = {"BepInExPack_Valheim"}
 
 # Mods que ainda constam do pack publicado mas sairam do servidor. Ficam listados
 # aqui, e nao removidos silenciosamente, porque o pack no Thunderstore continua
-# declarando a dependencia: sem esta lista, a proxima geracao traria o mod de volta.
+# declarando a dependencia: sem esta lista, o check acusaria "faltando" à toa.
 #
 # Marketplace_And_Server_NPCs_Revamped: substituido pelo mod de NPCs proprio
 # (Deadheim-project/npcs). Removido do servidor em 18/08/2026; o conteudo dele --
@@ -39,7 +58,8 @@ GAME_ROOT_PACKAGES = {"BepInExPack_Valheim"}
 EXCLUDED_PACKAGES = {"Marketplace_And_Server_NPCs_Revamped"}
 
 # Mods de conveniência/admin que rodam só no cliente: podem ficar de fora sem
-# quebrar a entrada no servidor, então entram como opcionais.
+# quebrar a entrada no servidor, então entram como opcionais e não são
+# comparados por versão (não precisam bater com o servidor).
 OPTIONAL_PACKAGES = {
     "Server_devcommands",
     "DevToggle",
@@ -47,10 +67,6 @@ OPTIONAL_PACKAGES = {
 }
 
 # Mods de autoria própria, que não vêm do Thunderstore e sim de GitHub Releases.
-#
-# assetPattern ".zip" casa com qualquer zip do release: são repositórios de um
-# mod só, e assim o nome exato do arquivo não precisa ser combinado de antemão.
-# Se um release passar a ter vários zips, troque pelo nome exato.
 OWN_MODS_OWNER = "Deadheim-project"
 OWN_MODS_AUTHOR = "Detalhes"
 OWN_MODS = [
@@ -61,11 +77,6 @@ OWN_MODS = [
     ("donationshop", "Donation Shop", "Loja de doações."),
 ]
 
-# Ferramentas de administração. Ficam numa aba separada para não atrapalhar
-# quem só quer entrar e jogar, e nenhuma é obrigatória.
-#
-# Os nomes foram conferidos um a um contra a API do Thunderstore: namespace
-# errado vira 404 na máquina de quem clicar.
 ADMIN_MODS = [
     ("JereKuusela", "Server_devcommands",
      "Liga os devcommands e o teleporte que funciona de verdade. Base das outras ferramentas."),
@@ -83,8 +94,6 @@ ADMIN_MODS = [
      "Menu dentro do jogo para ajustar a configuração dos mods, com F1."),
 ]
 
-# Melhorias que qualquer jogador pode querer, e que não são ferramenta de
-# administração. Nenhuma é exigida pelo servidor.
 OPTIONAL_MODS = [
     ("MSchmoecker", "VNEI",
      "Mostra todos os itens e receitas do jogo numa janela de consulta."),
@@ -113,36 +122,22 @@ def slugify(name):
     return name.lower().replace("_", "-").replace(" ", "-")
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="DeadheimLauncher/manifest.sample.json")
-    args = ap.parse_args()
-
-    pack = fetch(API.format(ns=PACK_NAMESPACE, name=PACK_NAME))
-    latest = pack["latest"]
-    pack_version = latest["version_number"]
-    deps = latest["dependencies"]
-
-    print(f"Pack {PACK_NAMESPACE}/{PACK_NAME} v{pack_version} -> {len(deps)} dependências")
-
+def build_thunderstore_mods_from_pack(deps):
+    """Reconstroi a lista de mods do pack publicado, no mesmo formato do manifest."""
     thunderstore_mods = []
     for dep in deps:
         ns, name, version = parse_dependency(dep)
         if name in EXCLUDED_PACKAGES:
-            print(f"  ignorando {ns}/{name}: nao roda mais no servidor")
             continue
         entry = {
             "id": slugify(name),
             "name": name.replace("_", " "),
-            "description": f"Do modpack Deadheim {pack_version}.",
+            "description": f"Do modpack Deadheim.",
             "required": name not in OPTIONAL_PACKAGES,
             "source": "Thunderstore",
             "thunderstoreNamespace": ns,
             "thunderstoreName": name,
             "version": version,
-            # No Thunderstore o namespace é o autor, e a URL da página é
-            # derivável dele. Crédito visível e clicável no launcher é o mínimo
-            # devido a quem fez os mods que o servidor usa.
             "author": ns,
             "url": f"https://thunderstore.io/c/valheim/p/{ns}/{name}/",
         }
@@ -155,17 +150,9 @@ def main():
         if any(m["thunderstoreName"] == name for m in thunderstore_mods):
             continue
         thunderstore_mods.append({
-            "id": slugify(name),
-            "name": name.replace("_", " "),
-            "description": desc,
-            # Nenhuma ferramenta de admin é obrigatória, e sem versão fixada
-            # porque não precisam casar com o servidor como os mods do pack.
-            "required": False,
-            "category": "Admin",
-            "source": "Thunderstore",
-            "thunderstoreNamespace": ns,
-            "thunderstoreName": name,
-            "author": ns,
+            "id": slugify(name), "name": name.replace("_", " "), "description": desc,
+            "required": False, "category": "Admin", "source": "Thunderstore",
+            "thunderstoreNamespace": ns, "thunderstoreName": name, "author": ns,
             "url": f"https://thunderstore.io/c/valheim/p/{ns}/{name}/",
         })
 
@@ -173,41 +160,93 @@ def main():
         if any(m["thunderstoreName"] == name for m in thunderstore_mods):
             continue
         thunderstore_mods.append({
-            "id": slugify(name),
-            "name": name.replace("_", " "),
-            "description": desc,
-            "required": False,
-            "category": "Opcional",
-            "source": "Thunderstore",
-            "thunderstoreNamespace": ns,
-            "thunderstoreName": name,
-            "author": ns,
+            "id": slugify(name), "name": name.replace("_", " "), "description": desc,
+            "required": False, "category": "Opcional", "source": "Thunderstore",
+            "thunderstoreNamespace": ns, "thunderstoreName": name, "author": ns,
             "url": f"https://thunderstore.io/c/valheim/p/{ns}/{name}/",
         })
 
-    own_mods = [
+    return thunderstore_mods
+
+
+def own_mods_entries():
+    return [
         {
-            "id": slugify(repo),
-            "name": nome,
-            "description": desc,
-            "required": True,
-            "source": "GitHub",
-            "gitHubOwner": OWN_MODS_OWNER,
-            "gitHubRepo": repo,
-            "assetPattern": ".zip",
-            "author": OWN_MODS_AUTHOR,
-            # Página de releases, e não a raiz do repositório: é de onde a DLL
-            # sai, e o link continua válido a cada versão nova.
+            "id": slugify(repo), "name": nome, "description": desc, "required": True,
+            "source": "GitHub", "gitHubOwner": OWN_MODS_OWNER, "gitHubRepo": repo,
+            "assetPattern": ".zip", "author": OWN_MODS_AUTHOR,
             "url": f"https://github.com/{OWN_MODS_OWNER}/{repo}/releases",
         }
         for repo, nome, desc in OWN_MODS
     ]
 
+
+def cmd_check():
+    try:
+        with open(MANIFEST_PATH, encoding="utf-8") as f:
+            current = json.load(f)
+    except FileNotFoundError:
+        print(f"faltando {MANIFEST_PATH} -- nada pra comparar", file=sys.stderr)
+        return 1
+
+    pack = fetch(API.format(ns=PACK_NAMESPACE, name=PACK_NAME))
+    latest = pack["latest"]
+    pack_version = latest["version_number"]
+    pack_mods = build_thunderstore_mods_from_pack(latest["dependencies"])
+    pack_by_name = {m["thunderstoreName"]: m for m in pack_mods}
+
+    current_mods = {m["thunderstoreName"]: m for m in current.get("thunderstoreMods", [])}
+
+    print(f"Pack publicado: {PACK_NAMESPACE}/{PACK_NAME} v{pack_version}")
+    print(f"Manifest atual: {MANIFEST_PATH} (packVersion registrado: {current.get('packVersion', '?')})")
+    print()
+
+    divergiu = False
+
+    for name, pack_mod in pack_by_name.items():
+        cur = current_mods.get(name)
+        pack_ver = pack_mod.get("version")
+        if pack_ver is None:
+            continue  # mod sem versão fixada no pack (admin/opcional) -- não comparável
+        if cur is None:
+            print(f"  [NO MANIFEST] {name}: pack tem v{pack_ver}, manifest não lista esse mod")
+            divergiu = True
+            continue
+        cur_ver = cur.get("version")
+        if cur_ver != pack_ver:
+            print(f"  [DIVERGE] {name}: manifest fixa v{cur_ver}, pack publicado está em v{pack_ver}")
+            divergiu = True
+
+    if not divergiu:
+        print("Nenhuma divergência de versão entre o manifest e o pack publicado.")
+        return 0
+
+    print()
+    print("Isso é só um aviso -- o pack publicado não é a fonte de verdade do launcher.")
+    print("Se o servidor já roda a versão nova, atualize manifest.json à mão.")
+    print("Se não, ignore: o manifest reflete o servidor, não o pack.")
+    return 1
+
+
+def cmd_write(out_path):
+    print("!! --write reescreve manifest.json inteiro a partir do pack publicado.")
+    print("!! Isso by-passa qualquer versão fixada à mão para refletir o servidor.")
+    print("!! Uso esperado: bootstrap de um manifest novo, não manutenção de rotina.")
+
+    pack = fetch(API.format(ns=PACK_NAMESPACE, name=PACK_NAME))
+    latest = pack["latest"]
+    pack_version = latest["version_number"]
+    thunderstore_mods = build_thunderstore_mods_from_pack(latest["dependencies"])
+    own_mods = own_mods_entries()
+
     manifest = {
         "_comment": (
-            f"Gerado por installer/generate-manifest.py a partir de "
-            f"{PACK_NAMESPACE}/{PACK_NAME} v{pack_version}. Não edite à mão: "
-            f"publique a nova versão do pack e rode o script de novo."
+            "Fonte de verdade autoral: edite à mão. As versões aqui devem bater "
+            "com o que roda em BepInEx/plugins/ no servidor de producao "
+            "(loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do "
+            "Thunderstore. Rode installer/generate-manifest.py --check para ver "
+            "onde o pack publicado diverge deste manifest, so como aviso; ele "
+            "nao sobrescreve mais o arquivo."
         ),
         "packVersion": pack_version,
         "ownMods": own_mods,
@@ -215,13 +254,7 @@ def main():
     }
 
     texto = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
-
-    # Escreve os dois de uma vez, de propósito:
-    #   - manifest.sample.json vai embutido no launcher, como reserva offline
-    #   - manifest.json na raiz é o que os jogadores realmente baixam
-    # Já aconteceu de eu atualizar só o sample e o launcher continuar servindo
-    # a versão antiga pelo raw.githubusercontent, sem nada indicar o problema.
-    destinos = [args.out, "manifest.json"]
+    destinos = [out_path, MANIFEST_PATH]
     for caminho in destinos:
         with open(caminho, "w", encoding="utf-8") as f:
             f.write(texto)
@@ -232,6 +265,21 @@ def main():
     print(f"  {len(own_mods)} mod(s) próprio(s)")
     print(f"  {required} obrigatórios, {optional} opcionais")
     return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    mode = ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--check", action="store_true",
+                       help="compara o manifest atual com o pack publicado, sem escrever nada (padrão recomendado)")
+    mode.add_argument("--write", action="store_true",
+                       help="bootstrap: reescreve o manifest do zero a partir do pack publicado")
+    ap.add_argument("--out", default="DeadheimLauncher/manifest.sample.json")
+    args = ap.parse_args()
+
+    if args.check:
+        return cmd_check()
+    return cmd_write(args.out)
 
 
 if __name__ == "__main__":
