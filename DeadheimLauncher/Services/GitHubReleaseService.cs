@@ -39,6 +39,27 @@ public sealed class GitHubReleaseService
             throw new InvalidOperationException(await DiagnoseNotFoundAsync(mod, ct));
         }
 
+        // O GitHub devolve 403 tanto para "sem permissão" quanto para "voce
+        // estourou o limite de requisições por hora". Só o cabeçalho distingue,
+        // e confundir os dois manda o jogador atrás de um problema de permissão
+        // que não existe — foi o que aconteceu em produção.
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+            && response.Headers.TryGetValues("x-ratelimit-remaining", out var restantes)
+            && restantes.FirstOrDefault() == "0")
+        {
+            var quando = "em alguns minutos";
+            if (response.Headers.TryGetValues("x-ratelimit-reset", out var reset)
+                && long.TryParse(reset.FirstOrDefault(), out var epoch))
+            {
+                var minutos = (int)Math.Ceiling(
+                    (DateTimeOffset.FromUnixTimeSeconds(epoch) - DateTimeOffset.UtcNow).TotalMinutes);
+                if (minutos > 0) quando = $"em {minutos} minuto(s)";
+            }
+
+            throw new InvalidOperationException(
+                $"o GitHub limitou temporariamente os downloads deste computador. Tente de novo {quando}.");
+        }
+
         response.EnsureSuccessStatusCode();
 
         using var stream = await response.Content.ReadAsStreamAsync(ct);

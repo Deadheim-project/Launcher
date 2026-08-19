@@ -56,6 +56,7 @@ public static class LauncherSelfTest
             RunConfigRoutingChecks();
             RunUpdateRuleChecks();
             RunAutoUpdateChecks();
+            RunManifestFingerprintChecks();
             RunCleanupChecks();
 
             if (includeNetwork)
@@ -150,6 +151,62 @@ public static class LauncherSelfTest
         Check("launcher: versão do binário é legível",
             System.Text.RegularExpressions.Regex.IsMatch(AutoAtualizacaoService.VersaoAtual, @"^\d+\.\d+\.\d+$"),
             AutoAtualizacaoService.VersaoAtual);
+    }
+
+    // ------------------------------------------------- digital do manifest
+
+    /// <summary>
+    /// A digital é o que impede o launcher de reconsultar a origem de todo mod a
+    /// cada partida. Sem ela, mods sem versão fixada (os do servidor) eram
+    /// reresolvidos sempre, estourando o limite de 60 requisições por hora da
+    /// API do GitHub e fazendo o download falhar com 403.
+    /// </summary>
+    private static void RunManifestFingerprintChecks()
+    {
+        static ModManifest Montar(string id, string? versao, bool obrigatorio = true, string? descricao = null) => new()
+        {
+            ThunderstoreMods = new List<ModEntry>
+            {
+                new()
+                {
+                    Id = id, Name = id, Version = versao, Required = obrigatorio,
+                    Description = descricao ?? "",
+                    Source = ModSource.Thunderstore,
+                    ThunderstoreNamespace = "ns", ThunderstoreName = id
+                }
+            }
+        };
+
+        Check("digital: manifest igual gera a mesma digital",
+            Montar("jotunn", "2.29.0").CalcularDigital() == Montar("jotunn", "2.29.0").CalcularDigital());
+
+        Check("digital: versão diferente muda a digital",
+            Montar("jotunn", "2.29.0").CalcularDigital() != Montar("jotunn", "2.29.1").CalcularDigital());
+
+        Check("digital: mod diferente muda a digital",
+            Montar("jotunn", "2.29.0").CalcularDigital() != Montar("groups", "2.29.0").CalcularDigital());
+
+        // Texto não entra na conta: corrigir uma descrição não pode obrigar
+        // todo jogador a rebaixar 40 mods.
+        Check("digital: mudar só a descrição não força reinstalação",
+            Montar("jotunn", "2.29.0", descricao: "antes").CalcularDigital()
+            == Montar("jotunn", "2.29.0", descricao: "depois").CalcularDigital());
+
+        // Deixar de ser obrigatório muda o que é instalado, então conta.
+        Check("digital: mudar obrigatoriedade muda a digital",
+            Montar("jotunn", "2.29.0").CalcularDigital() != Montar("jotunn", "2.29.0", obrigatorio: false).CalcularDigital());
+
+        // Ordem no arquivo não deve gerar reinstalação em massa.
+        var a = new ModManifest { ThunderstoreMods = new List<ModEntry>
+        {
+            new() { Id = "a", Source = ModSource.Thunderstore }, new() { Id = "b", Source = ModSource.Thunderstore }
+        }};
+        var b = new ModManifest { ThunderstoreMods = new List<ModEntry>
+        {
+            new() { Id = "b", Source = ModSource.Thunderstore }, new() { Id = "a", Source = ModSource.Thunderstore }
+        }};
+        Check("digital: ordem dos mods no arquivo não altera a digital",
+            a.CalcularDigital() == b.CalcularDigital());
     }
 
     // --------------------------------------------------------------- limpeza

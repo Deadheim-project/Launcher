@@ -372,6 +372,28 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Confere se cada mod habilitado ainda está no disco. A digital sozinha não
+    /// basta: o jogador pode ter limpado a pasta, ou um antivírus pode ter
+    /// removido um arquivo, e aí o manifest "já aplicado" seria mentira.
+    /// </summary>
+    private bool TudoPresenteNoDisco()
+    {
+        foreach (var modVm in Mods.Where(m => m.IsEnabled))
+        {
+            var emPlugins = Path.Combine(AppPaths.ProfilePluginsDir(_activeProfile.Name), modVm.Entry.Id);
+            var naRaiz = AppPaths.ProfileGameDir(_activeProfile.Name);
+
+            // O carregador não vira pasta com o id do mod: ele se funde na raiz.
+            var presente = modVm.Entry.Target == InstallTarget.GameRoot
+                ? Directory.Exists(Path.Combine(naRaiz, "BepInEx", "core"))
+                : Directory.Exists(emPlugins);
+
+            if (!presente) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
     /// Regra pura, separada para poder ser testada: errar para "não precisa"
     /// significa jogador preso numa versão velha sem nenhum aviso, que é o pior
     /// tipo de defeito aqui.
@@ -400,13 +422,24 @@ public sealed partial class MainViewModel : ObservableObject
         _activeProfile.EnabledModIds = Mods.Where(m => m.IsEnabled).Select(m => m.Entry.Id).ToList();
         _profileService.Save(_activeProfile);
 
-        // Só entra na fila o que está faltando ou fora da versão que o servidor
-        // pede. Reinstalar os ~40 mods a cada clique em Jogar levaria minutos e
-        // centenas de MB à toa — e é o que fazia antes.
+        // Se o manifest é o mesmo da última vez e tudo continua no disco, não há
+        // nada a fazer — nem uma consulta. É o que impede o launcher de
+        // reconsultar a origem de todo mod sem versão fixada a cada partida, que
+        // era o que estourava o limite da API do GitHub e fazia o download falhar.
+        var digital = _manifest.CalcularDigital();
+        if (_activeProfile.ManifestAplicado == digital && TudoPresenteNoDisco())
+        {
+            StatusText = "Mods já estão na versão do servidor.";
+            return falhas;
+        }
+
+        // Fora isso, entra na fila só o que falta ou está fora da versão pedida.
         var habilitados = Mods.Where(m => m.IsEnabled).Where(PrecisaAtualizar).ToList();
 
         if (habilitados.Count == 0)
         {
+            _activeProfile.ManifestAplicado = digital;
+            _profileService.Save(_activeProfile);
             StatusText = "Mods já estão na versão do servidor.";
             return falhas;
         }
@@ -438,6 +471,13 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         ProgressoTotal = 0;
+
+        // Só registra a digital se tudo passou. Com falha no meio, a próxima
+        // partida tem que tentar de novo em vez de dar o conjunto por aplicado.
+        if (falhas.Count == 0)
+        {
+            _activeProfile.ManifestAplicado = _manifest.CalcularDigital();
+        }
 
         // Remove do disco mods que foram desabilitados neste perfil.
         foreach (var modVm in Mods.Where(m => !m.IsEnabled))

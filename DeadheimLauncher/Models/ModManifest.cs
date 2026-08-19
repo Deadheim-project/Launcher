@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+
 namespace DeadheimLauncher.Models;
 
 /// <summary>Raiz do manifest.json: lista completa de mods oferecidos pelo servidor Deadheim.</summary>
@@ -13,4 +16,36 @@ public sealed class ModManifest
     public List<ModEntry> ThunderstoreMods { get; set; } = new();
 
     public IEnumerable<ModEntry> AllMods => OwnMods.Concat(ThunderstoreMods);
+
+    /// <summary>
+    /// Impressão digital do que este manifest manda instalar.
+    ///
+    /// Só entra o que muda a instalação — id, versão e origem de cada mod. Nome,
+    /// descrição e link ficam de fora de propósito: corrigir um texto não pode
+    /// obrigar todo jogador a rebaixar 40 mods.
+    ///
+    /// É o que permite o launcher perceber que nada mudou desde a última partida
+    /// e não consultar origem nenhuma — sem isso, mod sem versão fixada era
+    /// reconsultado a cada clique em Jogar, estourando o limite da API do GitHub.
+    /// </summary>
+    public string CalcularDigital()
+    {
+        var partes = AllMods
+            .OrderBy(m => m.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(m => string.Join('|',
+                m.Id,
+                m.Version ?? "",
+                m.Source.ToString(),
+                m.ThunderstoreNamespace ?? "",
+                m.ThunderstoreName ?? "",
+                m.GitHubOwner ?? "",
+                m.GitHubRepo ?? "",
+                m.AssetPattern ?? "",
+                m.Target.ToString(),
+                m.Required ? "1" : "0"));
+
+        var texto = string.Join('\n', partes);
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(texto));
+        return Convert.ToHexString(bytes)[..16];
+    }
 }
