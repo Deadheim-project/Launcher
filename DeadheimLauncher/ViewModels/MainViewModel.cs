@@ -72,6 +72,18 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isBusy;
 
     /// <summary>
+    /// Jogar só libera depois que a lista de mods foi carregada e conferida.
+    ///
+    /// Não basta olhar IsBusy: se o manifest falhar ao carregar, a janela para
+    /// de estar ocupada mas fica sem lista nenhuma — e apertar Jogar ali abriria
+    /// o Valheim sem os mods do servidor, que é justamente o que o launcher
+    /// existe para evitar.
+    /// </summary>
+    public bool PodeJogar => !IsBusy && Mods.Count > 0;
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(PodeJogar));
+
+    /// <summary>
     /// Erro mostrado dentro da janela, num aviso que o jogador fecha quando
     /// quiser. Popup é pior aqui: rouba o foco, some com um Enter distraído
     /// levando a mensagem junto, e some também com o texto que dizia o que
@@ -254,6 +266,8 @@ public sealed partial class MainViewModel : ObservableObject
             };
             destino.Add(item);
         }
+
+        OnPropertyChanged(nameof(PodeJogar));
     }
 
     [RelayCommand]

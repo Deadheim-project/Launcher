@@ -745,6 +745,14 @@ public static class LauncherSelfTest
                 !ghResolved.FileName.Contains("macos", StringComparison.OrdinalIgnoreCase),
                 ghResolved.FileName);
         }
+        catch (Exception ex) when (ex.Message.Contains("limitou temporariamente", StringComparison.OrdinalIgnoreCase))
+        {
+            // Cota da API do GitHub esgotada não é defeito do launcher — e o
+            // caminho que os jogadores usam nem passa por ela, porque os mods
+            // do servidor têm versão e arquivo declarados no manifest.
+            Skip($"GitHub: resolve o release mais recente ({ex.Message})");
+            Skip("GitHub: não escolhe asset de outra plataforma");
+        }
         catch (Exception ex)
         {
             Check("GitHub: resolve o release mais recente", false, ex.Message);

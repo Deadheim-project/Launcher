@@ -10,9 +10,10 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "npcs",
-      "assetPattern": ".zip",
+      "assetPattern": "Npcs.zip",
       "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/npcs/releases"
+      "url": "https://github.com/Deadheim-project/npcs/releases",
+      "version": "1.0.0"
     },
     {
       "id": "deadheim",
@@ -22,9 +23,10 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "Deadheim",
-      "assetPattern": ".zip",
+      "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/Deadheim/releases"
+      "url": "https://github.com/Deadheim-project/Deadheim/releases",
+      "version": "1.0.0"
     },
     {
       "id": "raidsystem",
@@ -34,9 +36,10 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "RaidSystem",
-      "assetPattern": ".zip",
+      "assetPattern": "RaidSystem.zip",
       "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/RaidSystem/releases"
+      "url": "https://github.com/Deadheim-project/RaidSystem/releases",
+      "version": "1.0.0"
     },
     {
       "id": "hearthstone",
@@ -46,9 +49,10 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "Hearthstone",
-      "assetPattern": ".zip",
+      "assetPattern": "Hearthstone.zip",
       "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/Hearthstone/releases"
+      "url": "https://github.com/Deadheim-project/Hearthstone/releases",
+      "version": "1.0.0"
     },
     {
       "id": "donationshop",
@@ -58,9 +62,10 @@
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
       "gitHubRepo": "donationshop",
-      "assetPattern": ".zip",
+      "assetPattern": "DonationShop.zip",
       "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/donationshop/releases"
+      "url": "https://github.com/Deadheim-project/donationshop/releases",
+      "version": "1.0.0"
     }
   ],
   "thunderstoreMods": [

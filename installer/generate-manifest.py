@@ -69,12 +69,19 @@ OPTIONAL_PACKAGES = {
 # Mods de autoria própria, que não vêm do Thunderstore e sim de GitHub Releases.
 OWN_MODS_OWNER = "Deadheim-project"
 OWN_MODS_AUTHOR = "Detalhes"
+# (repositório, nome, descrição, tag do release, nome do arquivo)
+#
+# Tag e arquivo são declarados de propósito: com eles a URL de download é
+# montada direto, sem consultar a API do GitHub. Sem versão fixada, o launcher
+# precisava perguntar "qual é o último release?" para cada mod a cada partida —
+# 5 chamadas que estouram o limite de 60/hora de quem não usa credencial e
+# fazem o download falhar com 403.
 OWN_MODS = [
-    ("npcs", "NPCs", "Mercador, Teleportador, Correio e Missões."),
-    ("Deadheim", "Deadheim", "Mod base do servidor."),
-    ("RaidSystem", "Raid System", "Sistema de raides."),
-    ("Hearthstone", "Hearthstone", "Pedra de retorno."),
-    ("donationshop", "Donation Shop", "Loja de doações."),
+    ("npcs", "NPCs", "Mercador, Teleportador, Correio e Missões.", "v1.0.0", "Npcs.zip"),
+    ("Deadheim", "Deadheim", "Mod base do servidor.", "v1.0.0", "Deadheim.zip"),
+    ("RaidSystem", "Raid System", "Sistema de raides.", "v1.0.0", "RaidSystem.zip"),
+    ("Hearthstone", "Hearthstone", "Pedra de retorno.", "v1.0.0", "Hearthstone.zip"),
+    ("donationshop", "Donation Shop", "Loja de doações.", "v1.0.0", "DonationShop.zip"),
 ]
 
 ADMIN_MODS = [
@@ -174,10 +181,10 @@ def own_mods_entries():
         {
             "id": slugify(repo), "name": nome, "description": desc, "required": True,
             "source": "GitHub", "gitHubOwner": OWN_MODS_OWNER, "gitHubRepo": repo,
-            "assetPattern": ".zip", "author": OWN_MODS_AUTHOR,
+            "assetPattern": arquivo, "version": tag.lstrip("v"), "author": OWN_MODS_AUTHOR,
             "url": f"https://github.com/{OWN_MODS_OWNER}/{repo}/releases",
         }
-        for repo, nome, desc in OWN_MODS
+        for repo, nome, desc, tag, arquivo in OWN_MODS
     ]
 
 

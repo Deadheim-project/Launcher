@@ -307,9 +307,11 @@
                         </ToggleButton.Template>
                     </ToggleButton>
 
+                    <!-- Só libera depois da lista carregada e conferida: sem isso
+                         dava para abrir o Valheim sem os mods do servidor. -->
                     <Button Content="JOGAR" FontSize="17" FontWeight="Bold" MinWidth="180" Height="44"
                             Command="{Binding PlayCommand}"
-                            IsEnabled="{Binding IsBusy, Converter={x:Static local:InverseBoolConverter.Instance}}" />
+                            IsEnabled="{Binding PodeJogar}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

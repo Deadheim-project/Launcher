@@ -20,6 +20,23 @@ public sealed class GitHubReleaseService
         if (mod.Source != ModSource.GitHub || string.IsNullOrWhiteSpace(mod.GitHubOwner) || string.IsNullOrWhiteSpace(mod.GitHubRepo))
             throw new InvalidOperationException($"Mod '{mod.Id}' não é uma fonte GitHub válida.");
 
+        // Versão e arquivo declarados no manifest? Então a URL de download é
+        // previsível e não há por que perguntar nada à API.
+        //
+        // Isso não é otimização: a API do GitHub permite 60 requisições por hora
+        // a quem não usa credencial, e o launcher tem 5 mods próprios. Perguntar
+        // "qual é o último release?" a cada partida esgotava a cota e derrubava
+        // o download com 403 — que ainda por cima parece erro de permissão.
+        if (!string.IsNullOrWhiteSpace(mod.Version) && !string.IsNullOrWhiteSpace(mod.AssetPattern)
+            && mod.AssetPattern.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            var tag = mod.Version.StartsWith('v') ? mod.Version : "v" + mod.Version;
+            return new ResolvedModVersion(
+                mod.Version,
+                $"https://github.com/{mod.GitHubOwner}/{mod.GitHubRepo}/releases/download/{tag}/{mod.AssetPattern}",
+                mod.AssetPattern);
+        }
+
         var url = $"https://api.github.com/repos/{mod.GitHubOwner}/{mod.GitHubRepo}/releases/latest";
 
         using var response = await HttpRetry.SendAsync(_http, () =>
