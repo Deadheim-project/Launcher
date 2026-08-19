@@ -376,13 +376,23 @@ public sealed partial class MainViewModel : ObservableObject
     /// </summary>
     private bool PrecisaAtualizar(ModListItemViewModel modVm)
     {
-        var pastaDoMod = Path.Combine(AppPaths.ProfilePluginsDir(_activeProfile.Name), modVm.Entry.Id);
-        var pastaNaRaiz = Path.Combine(AppPaths.ProfileGameRootDir(_activeProfile.Name), modVm.Entry.Id);
-        var estaNoDisco = Directory.Exists(pastaDoMod) || Directory.Exists(pastaNaRaiz);
-
         _activeProfile.InstalledVersions.TryGetValue(modVm.Entry.Id, out var instalada);
+        return PrecisaAtualizar(instalada, modVm.Entry.Version, EstaNoDisco(modVm.Entry));
+    }
 
-        return PrecisaAtualizar(instalada, modVm.Entry.Version, estaNoDisco);
+    /// <summary>
+    /// Onde procurar o mod instalado.
+    ///
+    /// O carregador não vira pasta com o id dele: funde na raiz de jogo do
+    /// perfil. Procurá-lo como se fosse um plugin dava "não está no disco" toda
+    /// vez, e o BepInEx era rebaixado a cada partida — 49 MB por clique em Jogar.
+    /// </summary>
+    private bool EstaNoDisco(ModEntry entry)
+    {
+        if (entry.Target == InstallTarget.GameRoot)
+            return Directory.Exists(Path.Combine(AppPaths.ProfileBepInExDir(_activeProfile.Name), "core"));
+
+        return Directory.Exists(Path.Combine(AppPaths.ProfilePluginsDir(_activeProfile.Name), entry.Id));
     }
 
     /// <summary>
@@ -391,21 +401,7 @@ public sealed partial class MainViewModel : ObservableObject
     /// removido um arquivo, e aí o manifest "já aplicado" seria mentira.
     /// </summary>
     private bool TudoPresenteNoDisco()
-    {
-        foreach (var modVm in Mods.Where(m => m.IsEnabled))
-        {
-            var emPlugins = Path.Combine(AppPaths.ProfilePluginsDir(_activeProfile.Name), modVm.Entry.Id);
-            var naRaiz = AppPaths.ProfileGameDir(_activeProfile.Name);
-
-            // O carregador não vira pasta com o id do mod: ele se funde na raiz.
-            var presente = modVm.Entry.Target == InstallTarget.GameRoot
-                ? Directory.Exists(Path.Combine(naRaiz, "BepInEx", "core"))
-                : Directory.Exists(emPlugins);
-
-            if (!presente) return false;
-        }
-        return true;
-    }
+        => Mods.Where(m => m.IsEnabled).All(m => EstaNoDisco(m.Entry));
 
     /// <summary>
     /// Regra pura, separada para poder ser testada: errar para "não precisa"

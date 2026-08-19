@@ -57,6 +57,7 @@ public static class LauncherSelfTest
             RunUpdateRuleChecks();
             RunAutoUpdateChecks();
             RunManifestFingerprintChecks();
+            RunReinstallChecks();
             RunCleanupChecks();
 
             if (includeNetwork)
@@ -151,6 +152,47 @@ public static class LauncherSelfTest
         Check("launcher: versão do binário é legível",
             System.Text.RegularExpressions.Regex.IsMatch(AutoAtualizacaoService.VersaoAtual, @"^\d+\.\d+\.\d+$"),
             AutoAtualizacaoService.VersaoAtual);
+    }
+
+    // ----------------------------------------- reinstalacao desnecessaria
+
+    /// <summary>
+    /// O carregador não vira pasta com o id dele — funde na raiz de jogo do
+    /// perfil. Quem procurar por &lt;perfil&gt;/game/bepinexpack-valheim nunca acha,
+    /// conclui "não está instalado" e rebaixa 49 MB a cada partida. Foi o que
+    /// aconteceu quando a arquitetura mudou e só metade das checagens
+    /// acompanhou.
+    /// </summary>
+    private static void RunReinstallChecks()
+    {
+        const string perfil = "ReinstallTest";
+        new ProfileService().LoadOrCreate(perfil);
+
+        var carregador = new ModEntry
+        {
+            Id = "bepinexpack-valheim", Name = "BepInEx", Required = true,
+            Version = "5.4.2333", Target = InstallTarget.GameRoot,
+            Source = ModSource.Thunderstore, ThunderstoreNamespace = "denikson",
+            ThunderstoreName = "BepInExPack_Valheim"
+        };
+
+        // Como o instalador realmente deixa: fundido na raiz, sem pasta do id.
+        var core = Path.Combine(AppPaths.ProfileBepInExDir(perfil), "core");
+        Directory.CreateDirectory(core);
+        File.WriteAllText(Path.Combine(core, "BepInEx.Preloader.dll"), "preloader");
+
+        var comoPlugin = Directory.Exists(
+            Path.Combine(AppPaths.ProfilePluginsDir(perfil), carregador.Id));
+        Check("reinstalar: o carregador não cria pasta com o id do mod", !comoPlugin);
+
+        // A regra de versão precisa enxergá-lo instalado mesmo assim.
+        Check("reinstalar: carregador já instalado não é rebaixado",
+            !ViewModels.MainViewModel.PrecisaAtualizar("5.4.2333", "5.4.2333", estaNoDisco: true));
+
+        // E se a árvore sumir, tem que rebaixar.
+        Directory.Delete(core, recursive: true);
+        Check("reinstalar: carregador ausente é rebaixado",
+            ViewModels.MainViewModel.PrecisaAtualizar("5.4.2333", "5.4.2333", estaNoDisco: false));
     }
 
     // ------------------------------------------------- digital do manifest

@@ -21,9 +21,9 @@
     <Product>Deadheim Launcher</Product>
     <Authors>Deadheim</Authors>
     <Description>Gerenciador de mods e perfis do servidor Deadheim de Valheim.</Description>
-    <Version>1.1.4</Version>
-    <FileVersion>1.1.4.0</FileVersion>
-    <AssemblyVersion>1.1.4.0</AssemblyVersion>
+    <Version>1.1.5</Version>
+    <FileVersion>1.1.5.0</FileVersion>
+    <AssemblyVersion>1.1.5.0</AssemblyVersion>
     <Copyright>Deadheim</Copyright>
   </PropertyGroup>
 
