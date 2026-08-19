@@ -26,7 +26,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "1.0.0"
+      "version": "6.1.1"
     },
     {
       "id": "raidsystem",
@@ -417,18 +417,6 @@
       "version": "0.0.4",
       "author": "ValheimModding",
       "url": "https://thunderstore.io/c/valheim/p/ValheimModding/HookGenPatcher/"
-    },
-    {
-      "id": "fastlink",
-      "name": "FastLink",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "Azumatt",
-      "thunderstoreName": "FastLink",
-      "version": "1.4.8",
-      "author": "Azumatt",
-      "url": "https://thunderstore.io/c/valheim/p/Azumatt/FastLink/"
     },
     {
       "id": "marketplace-and-server-npcs-revamped",

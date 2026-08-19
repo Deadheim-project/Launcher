@@ -59,6 +59,7 @@ public static class LauncherSelfTest
             RunManifestFingerprintChecks();
             RunReinstallChecks();
             RunCleanupChecks();
+            RunFastLinkCleanupChecks();
 
             if (includeNetwork)
             {
@@ -305,6 +306,28 @@ public static class LauncherSelfTest
         Check("limpeza: sem mudança no manifest, nada é apagado", semMudanca.Count == 0);
     }
 
+    private static void RunFastLinkCleanupChecks()
+    {
+        const string perfil = "FastLinkCleanupTest";
+        new ProfileService().LoadOrCreate(perfil);
+        var config = AppPaths.ProfileConfigDir(perfil);
+        Directory.CreateDirectory(config);
+        File.WriteAllText(Path.Combine(config, "Azumatt.FastLink_servers.yml"),
+            "password: senha-de-teste\r\naddress: servidor.exemplo\r\n");
+        File.WriteAllText(Path.Combine(config, "Azumatt.FastLink.cfg"), "Enabled = true");
+        var plugin = Path.Combine(AppPaths.ProfilePluginsDir(perfil), "fastlink");
+        Directory.CreateDirectory(plugin);
+        File.WriteAllText(Path.Combine(plugin, "FastLink.dll"), "dll");
+
+        var removed = FastLinkCleanupService.RemoveLegacyFiles(perfil);
+
+        Check("FastLink: instalação antiga é detectada", removed);
+        Check("FastLink: plugin e configurações antigos são apagados",
+            !Directory.Exists(plugin)
+            && !File.Exists(Path.Combine(config, "Azumatt.FastLink_servers.yml"))
+            && !File.Exists(Path.Combine(config, "Azumatt.FastLink.cfg")));
+    }
+
     // ------------------------------------------------------------------ config
 
     /// <summary>
@@ -501,6 +524,8 @@ public static class LauncherSelfTest
         var created = service.Load();
         Check("settings.json é criado na primeira execução", File.Exists(AppPaths.SettingsFile));
         Check("settings novo tem perfil ativo padrão", created.LastActiveProfile == "Default", created.LastActiveProfile);
+        Check("settings novo já traz a senha da conexão direta",
+            !string.IsNullOrWhiteSpace(created.ServerPassword));
 
         created.ValheimPath = @"C:\Fake\Valheim";
         created.LastActiveProfile = "Hardcore";
@@ -682,11 +707,22 @@ public static class LauncherSelfTest
         Check("preparar deixa o carregamento desligado por padrão",
             File.Exists(doorstopIni) && File.ReadAllText(doorstopIni).Contains("enabled=false"));
 
-        var argumentos = ValheimLaunchService.MontarArgumentosDeInicializacao("SyncTest");
+        var conexao = new LauncherSettings
+        {
+            ServerHost = "servidor.exemplo",
+            ServerPort = 2456,
+            ServerPassword = "senha local"
+        };
+        var argumentos = ValheimLaunchService.MontarArgumentosDeInicializacao("SyncTest", conexao);
         Check("argumentos ligam o Doorstop apontando para o perfil",
             argumentos.Contains("--doorstop-enabled true")
             && argumentos.Contains(AppPaths.ProfileBepInExDir("SyncTest"))
             && argumentos.Contains("BepInEx.Preloader.dll"),
+            argumentos);
+        Check("argumentos conectam diretamente no servidor sem FastLink",
+            argumentos.Contains("+connect servidor.exemplo:2456")
+            && argumentos.Contains("-password \"senha local\"")
+            && !argumentos.Contains("FastLink", StringComparison.OrdinalIgnoreCase),
             argumentos);
 
         var settings = new LauncherSettings { ValheimPath = fakeGame };

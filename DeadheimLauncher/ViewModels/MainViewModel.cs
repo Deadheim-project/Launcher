@@ -211,6 +211,7 @@ public sealed partial class MainViewModel : ObservableObject
         try
         {
             _settings = _settingsService.Load();
+            FastLinkCleanupService.RemoveLegacyFiles(PerfilUnico);
 
             StatusText = "Baixando lista de mods do servidor...";
             _manifest = await _manifestService.GetManifestAsync(_settings.ManifestUrl);
@@ -351,7 +352,7 @@ public sealed partial class MainViewModel : ObservableObject
             _launchService.PrepararJogo(valheimPath, _activeProfile.Name);
 
             StatusText = "Iniciando o Valheim...";
-            _launchService.LaunchGame(valheimPath, _activeProfile.Name);
+            _launchService.LaunchGame(valheimPath, _activeProfile.Name, _settings);
             StatusText = "Valheim iniciado.";
         }
         catch (Exception ex)

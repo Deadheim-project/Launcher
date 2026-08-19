@@ -13,4 +13,11 @@ public sealed class LauncherSettings
     public string ManifestUrl { get; set; } =
         "https://raw.githubusercontent.com/Deadheim-project/Launcher/main/manifest.json";
     public string LastActiveProfile { get; set; } = "Default";
+    public string ServerHost { get; set; } = "loboda.dathost.net";
+    public int ServerPort { get; set; } = 20486;
+    /// <summary>
+    /// Senha do servidor oficial, distribuída no launcher para que todos os
+    /// jogadores entrem diretamente sem depender do FastLink ou digitá-la.
+    /// </summary>
+    public string? ServerPassword { get; set; } = "Nt1ieJzMGTs";
 }

@@ -18,6 +18,9 @@ public partial class SettingsWindow : Window
 
         ValheimPathBox.Text = settings.ValheimPath ?? "";
         ManifestUrlBox.Text = settings.ManifestUrl;
+        ServerHostBox.Text = settings.ServerHost;
+        ServerPortBox.Text = settings.ServerPort.ToString();
+        ServerPasswordBox.Password = settings.ServerPassword ?? "";
     }
 
     private void Browse_Click(object sender, RoutedEventArgs e)
@@ -33,6 +36,14 @@ public partial class SettingsWindow : Window
     {
         _settings.ValheimPath = string.IsNullOrWhiteSpace(ValheimPathBox.Text) ? null : ValheimPathBox.Text;
         _settings.ManifestUrl = ManifestUrlBox.Text.Trim();
+        _settings.ServerHost = ServerHostBox.Text.Trim();
+        if (!int.TryParse(ServerPortBox.Text, out var port) || port is < 1 or > 65535)
+        {
+            MessageBox.Show(this, "Informe uma porta válida entre 1 e 65535.", "Configurações");
+            return;
+        }
+        _settings.ServerPort = port;
+        _settings.ServerPassword = ServerPasswordBox.Password;
         _settingsService.Save(_settings);
         DialogResult = true;
         Close();

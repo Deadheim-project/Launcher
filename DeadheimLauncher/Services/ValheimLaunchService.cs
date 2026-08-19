@@ -14,6 +14,11 @@ public sealed class BepInExNotFoundException : Exception
     public BepInExNotFoundException(string message) : base(message) { }
 }
 
+public sealed class ServerConnectionNotConfiguredException : Exception
+{
+    public ServerConnectionNotConfiguredException(string message) : base(message) { }
+}
+
 /// <summary>
 /// Localiza a instalação do Valheim, sincroniza os plugins do perfil ativo
 /// para BepInEx/plugins e inicia o jogo. Procura no caminho padrão do Steam,
@@ -106,11 +111,18 @@ public sealed class ValheimLaunchService
     /// Argumentos que mandam o Doorstop carregar o BepInEx do perfil, e não o do
     /// jogo. Separado para poder ser verificado sem abrir o Valheim.
     /// </summary>
-    public static string MontarArgumentosDeInicializacao(string profileName)
+    public static string MontarArgumentosDeInicializacao(string profileName, LauncherSettings settings)
     {
+        if (string.IsNullOrWhiteSpace(settings.ServerHost) || settings.ServerPort is < 1 or > 65535)
+            throw new ServerConnectionNotConfiguredException("O endereço do servidor está inválido. Confira as Configurações.");
+        if (string.IsNullOrWhiteSpace(settings.ServerPassword))
+            throw new ServerConnectionNotConfiguredException("Informe a senha do servidor nas Configurações antes de jogar.");
+
         var preloader = Path.Combine(AppPaths.ProfileBepInExDir(profileName), "core", "BepInEx.Preloader.dll");
         return "--doorstop-enabled true " +
-               $"--doorstop-target-assembly \"{preloader}\"";
+               $"--doorstop-target-assembly \"{preloader}\" " +
+               $"+connect {settings.ServerHost.Trim()}:{settings.ServerPort} " +
+               $"-password \"{EscapeArgument(settings.ServerPassword)}\"";
     }
 
     /// <summary>
@@ -121,7 +133,7 @@ public sealed class ValheimLaunchService
     /// argumentos. Com a Steam aberta, o jogo continua contando tempo e
     /// aparecendo como "jogando"; o overlay costuma funcionar normalmente.
     /// </summary>
-    public void LaunchGame(string valheimPath, string profileName)
+    public void LaunchGame(string valheimPath, string profileName, LauncherSettings settings)
     {
         var exe = Path.Combine(valheimPath, "valheim.exe");
         if (!File.Exists(exe))
@@ -130,11 +142,13 @@ public sealed class ValheimLaunchService
         Process.Start(new ProcessStartInfo
         {
             FileName = exe,
-            Arguments = MontarArgumentosDeInicializacao(profileName),
+            Arguments = MontarArgumentosDeInicializacao(profileName, settings),
             WorkingDirectory = valheimPath,
             UseShellExecute = true
         });
     }
+
+    private static string EscapeArgument(string value) => value.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
     private static void CopyDirectory(string sourceDir, string destDir)
     {

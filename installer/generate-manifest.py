@@ -55,7 +55,7 @@ GAME_ROOT_PACKAGES = {"BepInExPack_Valheim"}
 # (Deadheim-project/npcs). Removido do servidor em 18/08/2026; o conteudo dele --
 # 248 quests, 54 mercadores, 59 quadros de missao, 2 redes de teleporte -- foi
 # importado e agora acompanha o nosso mod.
-EXCLUDED_PACKAGES = {"Marketplace_And_Server_NPCs_Revamped"}
+EXCLUDED_PACKAGES = {"Marketplace_And_Server_NPCs_Revamped", "FastLink"}
 
 # Mods de conveniência/admin que rodam só no cliente: podem ficar de fora sem
 # quebrar a entrada no servidor, então entram como opcionais e não são
