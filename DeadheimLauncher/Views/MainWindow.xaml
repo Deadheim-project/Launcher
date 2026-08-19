@@ -136,18 +136,26 @@
                     Visibility="{Binding IsChecked, ElementName=BotaoMods,
                                  Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                 <DockPanel Margin="16">
+                    <!-- Sem título separado nem contadores: as próprias abas dizem
+                         do que é cada lista, e um cabeçalho "MODS" acima de uma aba
+                         "MODS" só repetiria a palavra. -->
                     <Button DockPanel.Dock="Top" HorizontalAlignment="Right" Content="Atualizar lista"
-                            Padding="10,5" Margin="0,0,0,-34" Panel.ZIndex="1"
-                            Style="{StaticResource BotaoSecundario}" Command="{Binding RefreshManifestCommand}" />
+                            Padding="10,5" Margin="0,0,0,-36" Panel.ZIndex="1"
+                            Style="{StaticResource BotaoSecundario}"
+                            Command="{Binding RefreshManifestCommand}" />
 
                     <!-- Três abas: o que o servidor exige, o que é escolha do
                          jogador, e as ferramentas de admin fora do caminho. -->
                     <TabControl>
-                        <TabItem Header="{Binding ModsDoServidor.Count, StringFormat=SERVIDOR ({0})}">
+                        <TabItem Header="MODS">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="11" Margin="0,0,0,10"
-                                           Foreground="{StaticResource MutedTextBrush}"
-                                           Text="Exigidos para entrar no Deadheim. São instalados na versão que o servidor usa e não podem ser desmarcados." />
+                                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                    <TextBlock Text="Os mods do servidor" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,3,0,0"
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               Text="O launcher instala e mantém atualizados, na mesma versão que o Deadheim usa. Não há o que configurar aqui." />
+                                </StackPanel>
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <ItemsControl ItemsSource="{Binding ModsDoServidor}"
                                                   ItemTemplate="{StaticResource ItemDeMod}" />
@@ -155,12 +163,16 @@
                             </DockPanel>
                         </TabItem>
 
-                        <TabItem Header="{Binding ModsOpcionais.Count, StringFormat=OPCIONAIS ({0})}">
+                        <TabItem Header="OPCIONAIS">
                             <DockPanel>
-                                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,120,0"
-                                               Foreground="{StaticResource MutedTextBrush}"
-                                               Text="Melhorias de sua escolha. Não são exigidas pelo servidor — entrar sem elas funciona igual." />
+                                <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                                    <StackPanel Margin="0,0,120,0">
+                                        <TextBlock Text="Melhorias que você escolhe" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,3,0,0"
+                                                   Foreground="{StaticResource MutedTextBrush}"
+                                                   Text="Conveniências para o seu jogo. O servidor não exige nenhuma: com ou sem elas, você entra igual." />
+                                    </StackPanel>
                                     <Button Content="Marcar todos" HorizontalAlignment="Right" VerticalAlignment="Top"
                                             Padding="10,5" FontSize="11" Style="{StaticResource BotaoSecundario}"
                                             Command="{Binding AlternarTodosCommand}" CommandParameter="Opcional" />
@@ -172,12 +184,35 @@
                             </DockPanel>
                         </TabItem>
 
-                        <TabItem Header="{Binding ModsDeAdmin.Count, StringFormat=ADMIN ({0})}">
+                        <TabItem Header="ADMIN">
                             <DockPanel>
-                                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                                    <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,0,120,0"
-                                               Foreground="{StaticResource MutedTextBrush}"
-                                               Text="Ferramentas de administração. Marque só o que for usar — o anticheat pode recusar sua entrada com algumas delas ativas." />
+                                <!-- Aviso forte, não uma linha discreta. O texto descreve
+                                     só o que dá para afirmar: o AzuAntiCheat do servidor
+                                     usa uma lista de mods permitidos e libera quem é
+                                     admin ou moderador. Como o jogo comunica a recusa
+                                     não está documentado, então não afirmamos nada
+                                     sobre isso. -->
+                                <Border DockPanel.Dock="Top" Background="#2A1A17" CornerRadius="4"
+                                        BorderBrush="{StaticResource DangerBrush}" BorderThickness="1"
+                                        Padding="12,10" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="SOMENTE PARA ADMINISTRADORES DO SERVIDOR"
+                                                   FontWeight="Bold" FontSize="11"
+                                                   Foreground="{StaticResource DangerBrush}" />
+                                        <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,4,0,0"
+                                                   Foreground="{StaticResource TextBrush}"
+                                                   Text="O Deadheim usa anticheat: o servidor mantém a lista de mods permitidos e só libera estas ferramentas para quem está como admin ou moderador. Se você não é, marcar aqui pode impedir você de entrar — e nada disso é necessário para jogar." />
+                                    </StackPanel>
+                                </Border>
+
+                                <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                                    <StackPanel Margin="0,0,120,0">
+                                        <TextBlock Text="Ferramentas de administração" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,3,0,0"
+                                                   Foreground="{StaticResource MutedTextBrush}"
+                                                   Text="Comandos e edição de mundo, para quem administra o Deadheim." />
+                                    </StackPanel>
                                     <Button Content="Marcar todos" HorizontalAlignment="Right" VerticalAlignment="Top"
                                             Padding="10,5" FontSize="11" Style="{StaticResource BotaoSecundario}"
                                             Command="{Binding AlternarTodosCommand}" CommandParameter="Admin" />

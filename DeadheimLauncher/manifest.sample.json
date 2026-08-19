@@ -586,12 +586,48 @@
       "name": "Azus UnOfficial ConfigManager",
       "description": "Menu dentro do jogo para ajustar a configuração dos mods, com F1.",
       "required": false,
-      "category": "Opcional",
+      "category": "Admin",
       "source": "Thunderstore",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "Azus_UnOfficial_ConfigManager",
       "author": "Azumatt",
       "url": "https://thunderstore.io/c/valheim/p/Azumatt/Azus_UnOfficial_ConfigManager/"
+    },
+    {
+      "id": "vnei",
+      "name": "VNEI",
+      "description": "Mostra todos os itens e receitas do jogo numa janela de consulta.",
+      "required": false,
+      "category": "Opcional",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "MSchmoecker",
+      "thunderstoreName": "VNEI",
+      "author": "MSchmoecker",
+      "url": "https://thunderstore.io/c/valheim/p/MSchmoecker/VNEI/"
+    },
+    {
+      "id": "gizmo",
+      "name": "Gizmo",
+      "description": "Permite girar peças em qualquer eixo na hora de construir.",
+      "required": false,
+      "category": "Opcional",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "ComfyMods",
+      "thunderstoreName": "Gizmo",
+      "author": "ComfyMods",
+      "url": "https://thunderstore.io/c/valheim/p/ComfyMods/Gizmo/"
+    },
+    {
+      "id": "valheimfpsboost",
+      "name": "ValheimFPSBoost",
+      "description": "Reduz alguns detalhes gráficos internos para ganhar FPS. O ganho varia por máquina.",
+      "required": false,
+      "category": "Opcional",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "castix",
+      "thunderstoreName": "ValheimFPSBoost",
+      "author": "castix",
+      "url": "https://thunderstore.io/c/valheim/p/castix/ValheimFPSBoost/"
     }
   ]
 }
