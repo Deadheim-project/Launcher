@@ -612,6 +612,11 @@ public static class LauncherSelfTest
             ownMod is not null && !string.IsNullOrWhiteSpace(ownMod.GitHubOwner) && !string.IsNullOrWhiteSpace(ownMod.GitHubRepo),
             ownMod is null ? "nenhum mod próprio" : $"{ownMod.GitHubOwner}/{ownMod.GitHubRepo}");
 
+        var velas = fromSample.OwnMods.FirstOrDefault(m => m.Id == "velas");
+        Check("manifest exige Velas com ServerSync",
+            velas is { Required: true, Version: "0.2.0", AssetPattern: "Velas.zip" },
+            velas is null ? "Velas ausente" : $"v{velas.Version} / {velas.AssetPattern}");
+
         var tsMod = fromSample.ThunderstoreMods.FirstOrDefault();
         Check("mod Thunderstore traz namespace/nome preenchidos",
             tsMod is not null && !string.IsNullOrWhiteSpace(tsMod.ThunderstoreNamespace) && !string.IsNullOrWhiteSpace(tsMod.ThunderstoreName));

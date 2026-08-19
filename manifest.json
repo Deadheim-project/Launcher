@@ -1,6 +1,6 @@
 {
   "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
-  "packVersion": "15.0.5",
+  "packVersion": "15.0.6",
   "ownMods": [
     {
       "id": "npcs",
@@ -27,6 +27,19 @@
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
       "version": "6.1.1"
+    },
+    {
+      "id": "velas",
+      "name": "Velas",
+      "description": "Velas personalizadas e de clãs, sincronizadas pelo servidor.",
+      "required": true,
+      "source": "GitHub",
+      "gitHubOwner": "Deadheim-project",
+      "gitHubRepo": "Velas",
+      "assetPattern": "Velas.zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/Velas/releases",
+      "version": "0.2.0"
     },
     {
       "id": "raidsystem",
