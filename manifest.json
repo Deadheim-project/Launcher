@@ -1,6 +1,6 @@
 {
   "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
-  "packVersion": "15.0.6",
+  "packVersion": "15.0.7",
   "ownMods": [
     {
       "id": "npcs",
@@ -39,7 +39,7 @@
       "assetPattern": "Velas.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Velas/releases",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "id": "raidsystem",
