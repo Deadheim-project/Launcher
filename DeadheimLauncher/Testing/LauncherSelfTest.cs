@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -450,6 +450,8 @@ public static class LauncherSelfTest
                 Check("UI: lista de mods é populada", itens > 0, $"{itens} itens");
 
                 if (vm is not null) VerificarAbasEMarcarTodos(vm);
+
+                VerificarJanelaDeConfiguracoes(janela);
             }
             finally
             {
@@ -467,6 +469,43 @@ public static class LauncherSelfTest
 
         Check("UI: nenhum binding quebrado", errosDeBinding.Count == 0,
             errosDeBinding.Count == 0 ? "" : string.Join(" | ", errosDeBinding.Take(4)));
+    }
+
+    /// <summary>
+    /// A janela de Configurações abre e traz o botão de desinstalar. Ela só é
+    /// vista quando alguém clica em Configurações, então um erro de XAML aqui
+    /// passaria despercebido até chegar no jogador — e justo na tela para onde
+    /// se manda quem já está com problema.
+    /// </summary>
+    private static void VerificarJanelaDeConfiguracoes(System.Windows.Window? dono)
+    {
+        Views.SettingsWindow? janela = null;
+        try
+        {
+            janela = new Views.SettingsWindow(
+                new LauncherSettings(), new SettingsService(),
+                new ProfileService(), new Profile { Name = "Default" })
+            {
+                Left = -10000,
+                Top = -10000,
+                ShowInTaskbar = false
+            };
+            if (dono is not null && dono.IsVisible) janela.Owner = dono;
+            janela.Show();
+            janela.UpdateLayout();
+
+            Check("UI: janela de configurações abre sem erro de XAML", true);
+            Check("UI: configurações tem o botão de desinstalar mods",
+                janela.FindName("UninstallButton") is System.Windows.Controls.Button);
+        }
+        catch (Exception ex)
+        {
+            Check("UI: janela de configurações abre sem erro de XAML", false, ex.Message);
+        }
+        finally
+        {
+            janela?.Close();
+        }
     }
 
     /// <summary>
@@ -602,6 +641,59 @@ public static class LauncherSelfTest
         service.Delete("Hardcore2");
         Check("excluir remove a pasta do perfil", !Directory.Exists(AppPaths.ProfileDir("Hardcore2")));
         Check("excluir não afeta os outros perfis", service.ListProfiles().Contains("Default"));
+
+        RunDesinstalarChecks();
+    }
+
+    /// <summary>
+    /// Botão "Desinstalar mods" das Configurações. O que não pode acontecer:
+    /// levar junto a escolha de opcionais do jogador, ou deixar InstalledVersions
+    /// preenchido — nesse segundo caso o Jogar seguinte acharia que está tudo no
+    /// disco, não baixaria nada, e o Valheim subiria sem mod nenhum contra um
+    /// servidor que exige todos.
+    /// </summary>
+    private static void RunDesinstalarChecks()
+    {
+        var service = new ProfileService();
+        var perfil = service.LoadOrCreate("Default");
+
+        perfil.EnabledModIds = new List<string> { "npcs", "vnei" };
+        perfil.InstalledVersions["npcs"] = "1.0.0";
+        perfil.InstalledVersions["vnei"] = "0.17.5";
+        service.Save(perfil);
+
+        // Duas pastas de mod e um config, como numa instalação de verdade.
+        foreach (var id in new[] { "npcs", "vnei" })
+        {
+            var dir = Path.Combine(AppPaths.ProfilePluginsDir("Default"), id);
+            Directory.CreateDirectory(dir);
+            File.WriteAllText(Path.Combine(dir, id + ".dll"), "conteudo de teste");
+        }
+        Directory.CreateDirectory(AppPaths.ProfileConfigDir("Default"));
+        File.WriteAllText(Path.Combine(AppPaths.ProfileConfigDir("Default"), "algum.cfg"), "chave=valor");
+
+        var removidos = service.RemoverModsInstalados(perfil);
+
+        Check("desinstalar conta os mods que removeu", removidos == 2, $"removidos={removidos}");
+        // Sobra o esqueleto de pastas, de propósito. O que não pode sobrar é
+        // arquivo: qualquer .dll ou .cfg que ficasse seria carregado de novo.
+        Check("desinstalar não deixa arquivo nenhum na árvore de jogo",
+            Directory.GetFiles(AppPaths.ProfileGameDir("Default"), "*", SearchOption.AllDirectories).Length == 0);
+        Check("desinstalar leva os .cfg junto",
+            !File.Exists(Path.Combine(AppPaths.ProfileConfigDir("Default"), "algum.cfg")));
+        Check("desinstalar recria a pasta de plugins vazia",
+            Directory.Exists(AppPaths.ProfilePluginsDir("Default")) &&
+            Directory.GetDirectories(AppPaths.ProfilePluginsDir("Default")).Length == 0);
+        Check("desinstalar zera as versões instaladas", perfil.InstalledVersions.Count == 0);
+        Check("desinstalar preserva a escolha de opcionais",
+            perfil.EnabledModIds.Contains("npcs") && perfil.EnabledModIds.Contains("vnei"));
+
+        var relido = service.LoadOrCreate("Default");
+        Check("desinstalar persiste no profile.json",
+            relido.InstalledVersions.Count == 0 && relido.EnabledModIds.Count == 2);
+
+        Check("desinstalar de novo não quebra com nada instalado",
+            service.RemoverModsInstalados(relido) == 0);
     }
 
     // ---------------------------------------------------------------- manifest
