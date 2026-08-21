@@ -27,6 +27,11 @@ $repoRoot  = Split-Path -Parent $PSScriptRoot
 $project   = Join-Path $repoRoot 'DeadheimLauncher\DeadheimLauncher.csproj'
 $publishTo = Join-Path $repoRoot 'publish\DeadheimLauncher'
 $issFile   = Join-Path $PSScriptRoot 'DeadheimLauncher.iss'
+$projectXml = [xml](Get-Content -LiteralPath $project -Raw)
+$appVersion = $projectXml.Project.PropertyGroup |
+    Where-Object { $_.Version } |
+    Select-Object -ExpandProperty Version -First 1
+if ([string]::IsNullOrWhiteSpace($appVersion)) { throw "Version ausente em $project" }
 
 Write-Host "==> Verificando o launcher (self-test offline)" -ForegroundColor Cyan
 dotnet build $project -c $Configuration
@@ -59,7 +64,7 @@ if (-not $iscc) {
 }
 
 Write-Host "==> Compilando o instalador" -ForegroundColor Cyan
-& $iscc $issFile
+& $iscc "/DMyAppVersion=$appVersion" $issFile
 if ($LASTEXITCODE -ne 0) { throw "iscc falhou" }
 
 Write-Host "==> Instalador em installer\Output\DeadheimLauncherSetup.exe" -ForegroundColor Green

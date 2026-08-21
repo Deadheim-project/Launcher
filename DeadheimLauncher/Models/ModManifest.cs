@@ -48,4 +48,19 @@ public sealed class ModManifest
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(texto));
         return Convert.ToHexString(bytes)[..16];
     }
+
+    /// <summary>
+    /// Digital do estado realmente aplicado ao perfil. O manifesto sozinho não basta:
+    /// marcar ou desmarcar um opcional/admin também muda o conjunto que deve existir no
+    /// disco, mesmo quando o servidor não publicou uma nova versão do pack.
+    /// </summary>
+    public string CalcularDigitalDaInstalacao(IEnumerable<string> idsHabilitados)
+    {
+        var selecao = string.Join('|', idsHabilitados
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .Select(id => id.ToLowerInvariant()));
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(CalcularDigital() + "\n" + selecao));
+        return Convert.ToHexString(bytes)[..16];
+    }
 }

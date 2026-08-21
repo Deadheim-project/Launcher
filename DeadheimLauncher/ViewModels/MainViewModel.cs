@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Net.Http;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,6 +21,7 @@ public sealed partial class MainViewModel : ObservableObject
     private LauncherSettings _settings = new();
     private ModManifest _manifest = new();
     private Profile _activeProfile = new();
+    private bool _alterandoSelecao;
 
     /// <summary>
     /// Nome fixo do único perfil. O launcher atende um servidor só, então manter
@@ -62,7 +64,16 @@ public sealed partial class MainViewModel : ObservableObject
         // Se algum está desmarcado, marca todos; se já estão todos marcados,
         // desmarca. Um botão só, que faz o que a lista pede no momento.
         var marcarTodos = opcionais.Any(m => !m.IsEnabled);
-        foreach (var mod in opcionais) mod.IsEnabled = marcarTodos;
+        _alterandoSelecao = true;
+        try
+        {
+            foreach (var mod in opcionais) mod.IsEnabled = marcarTodos;
+        }
+        finally
+        {
+            _alterandoSelecao = false;
+        }
+        PersistirSelecaoAtual();
     }
 
     [ObservableProperty]
@@ -245,6 +256,8 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _activeProfile = _profileService.LoadOrCreate(PerfilUnico);
 
+        foreach (var itemAntigo in Mods)
+            itemAntigo.PropertyChanged -= AoAlterarSelecaoDoMod;
         Mods.Clear();
         ModsDoServidor.Clear();
         ModsOpcionais.Clear();
@@ -254,6 +267,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             var enabled = entry.Required || _activeProfile.EnabledModIds.Contains(entry.Id);
             var item = new ModListItemViewModel(entry, enabled);
+            item.PropertyChanged += AoAlterarSelecaoDoMod;
 
             // Mods fica com tudo: é a lista que instala e sincroniza. As três
             // coleções por categoria existem só para a interface.
@@ -271,6 +285,27 @@ public sealed partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(PodeJogar));
     }
 
+    private void AoAlterarSelecaoDoMod(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!_alterandoSelecao && e.PropertyName == nameof(ModListItemViewModel.IsEnabled))
+            PersistirSelecaoAtual();
+    }
+
+    /// <summary>
+    /// Checkboxes são configuração do perfil, não estado temporário da tela. Persistir no
+    /// clique impede que a atualização do manifesto (feita antes de Jogar) reconstrua a lista
+    /// com a seleção antiga e silenciosamente ignore opcionais ou ferramentas de admin.
+    /// </summary>
+    private void PersistirSelecaoAtual()
+    {
+        if (Mods.Count == 0 || string.IsNullOrWhiteSpace(_activeProfile.Name)) return;
+        _activeProfile.EnabledModIds = Mods.Where(m => m.IsEnabled)
+            .Select(m => m.Entry.Id)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        _profileService.Save(_activeProfile);
+    }
+
     [RelayCommand]
     private async Task RefreshManifestAsync()
     {
@@ -278,6 +313,7 @@ public sealed partial class MainViewModel : ObservableObject
         StatusText = "Atualizando lista de mods...";
         try
         {
+            PersistirSelecaoAtual();
             _manifest = await _manifestService.GetManifestAsync(_settings.ManifestUrl);
             CarregarPerfil();
             StatusText = "Lista de mods atualizada.";
@@ -299,6 +335,7 @@ public sealed partial class MainViewModel : ObservableObject
         LimparErro();
         try
         {
+            PersistirSelecaoAtual();
             // Rebusca o manifest antes de tudo: é assim que uma versão nova do
             // modpack publicada pelo servidor chega ao jogador sem ele fazer
             // nada. Se a rede falhar aqui, seguimos com a lista que já temos em
@@ -437,7 +474,8 @@ public sealed partial class MainViewModel : ObservableObject
         // nada a fazer — nem uma consulta. É o que impede o launcher de
         // reconsultar a origem de todo mod sem versão fixada a cada partida, que
         // era o que estourava o limite da API do GitHub e fazia o download falhar.
-        var digital = _manifest.CalcularDigital();
+        var digital = _manifest.CalcularDigitalDaInstalacao(
+            Mods.Where(m => m.IsEnabled).Select(m => m.Entry.Id));
         if (_activeProfile.ManifestAplicado == digital && TudoPresenteNoDisco())
         {
             StatusText = "Mods já estão na versão do servidor.";
@@ -487,7 +525,7 @@ public sealed partial class MainViewModel : ObservableObject
         // partida tem que tentar de novo em vez de dar o conjunto por aplicado.
         if (falhas.Count == 0)
         {
-            _activeProfile.ManifestAplicado = _manifest.CalcularDigital();
+            _activeProfile.ManifestAplicado = digital;
         }
 
         // Remove do disco mods que foram desabilitados neste perfil.

@@ -250,6 +250,14 @@ public static class LauncherSelfTest
         }};
         Check("digital: ordem dos mods no arquivo não altera a digital",
             a.CalcularDigital() == b.CalcularDigital());
+
+        var escolha = Montar("gizmo", "1.0.0", obrigatorio: false);
+        Check("digital: marcar opcional muda a instalação",
+            escolha.CalcularDigitalDaInstalacao(Array.Empty<string>()) !=
+            escolha.CalcularDigitalDaInstalacao(new[] { "gizmo" }));
+        Check("digital: ordem da seleção não altera a instalação",
+            escolha.CalcularDigitalDaInstalacao(new[] { "gizmo", "vnei" }) ==
+            escolha.CalcularDigitalDaInstalacao(new[] { "VNEI", "GIZMO" }));
     }
 
     // --------------------------------------------------------------- limpeza
@@ -485,9 +493,17 @@ public static class LauncherSelfTest
             return;
         }
 
-        foreach (var m in vm.ModsDeAdmin) m.IsEnabled = false;
+        foreach (var m in vm.ModsOpcionais.Concat(vm.ModsDeAdmin)) m.IsEnabled = false;
+        vm.AlternarTodosCommand.Execute("Opcional");
         vm.AlternarTodosCommand.Execute("Admin");
-        Check("UI: marcar todos liga a aba inteira", vm.ModsDeAdmin.All(m => m.IsEnabled));
+        Check("UI: marcar todos liga opcionais e admin",
+            vm.ModsOpcionais.Concat(vm.ModsDeAdmin).All(m => m.IsEnabled));
+
+        var persistido = new ProfileService().LoadOrCreate("Default");
+        var idsSelecionados = vm.ModsOpcionais.Concat(vm.ModsDeAdmin).Select(m => m.Entry.Id).ToList();
+        Check("UI: seleção de opcionais e admin é persistida imediatamente",
+            idsSelecionados.All(id => persistido.EnabledModIds.Contains(id, StringComparer.OrdinalIgnoreCase)),
+            $"{idsSelecionados.Count} selecionados, {persistido.EnabledModIds.Count} persistidos");
 
         // Segundo clique desmarca: um botão só, que faz o que a lista pede.
         vm.AlternarTodosCommand.Execute("Admin");
@@ -951,11 +967,11 @@ public static class LauncherSelfTest
         const string profile = "DeadheimFull";
         new ProfileService().LoadOrCreate(profile);
 
-        var required = manifest.ThunderstoreMods.Where(m => m.Required).ToList();
+        var selected = manifest.ThunderstoreMods.ToList();
         var failed = new List<string>();
         var installedCount = 0;
 
-        foreach (var mod in required)
+        foreach (var mod in selected)
         {
             try
             {
@@ -968,9 +984,16 @@ public static class LauncherSelfTest
             }
         }
 
-        Check($"instala os {required.Count} mods obrigatórios do pack",
+        Check($"instala os {selected.Count} mods selecionados do pack",
             failed.Count == 0,
             failed.Count == 0 ? $"{installedCount} instalados" : string.Join(" | ", failed));
+
+        var opcionaisEAdmin = selected.Where(m => m.Category is ModCategory.Opcional or ModCategory.Admin).ToList();
+        var opcionaisEAdminPresentes = opcionaisEAdmin.All(m =>
+            Directory.Exists(Path.Combine(AppPaths.ProfilePluginsDir(profile), m.Id)));
+        Check("perfil completo instala opcionais e ferramentas de admin selecionados",
+            opcionaisEAdminPresentes,
+            $"{opcionaisEAdmin.Count} verificados: {string.Join(", ", opcionaisEAdmin.Select(m => m.Id))}");
 
         var pluginsRoot = AppPaths.ProfilePluginsDir(profile);
         var dllCount = Directory.Exists(pluginsRoot)
