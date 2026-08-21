@@ -614,7 +614,7 @@ public static class LauncherSelfTest
 
         var velas = fromSample.OwnMods.FirstOrDefault(m => m.Id == "velas");
         Check("manifest exige Velas com ServerSync",
-            velas is { Required: true, Version: "0.2.1", AssetPattern: "Velas.zip" },
+            velas is { Required: true, Version: "0.2.2", AssetPattern: "Velas.zip" },
             velas is null ? "Velas ausente" : $"v{velas.Version} / {velas.AssetPattern}");
 
         var tsMod = fromSample.ThunderstoreMods.FirstOrDefault();
