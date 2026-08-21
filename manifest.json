@@ -516,6 +516,18 @@
       "url": "https://thunderstore.io/c/valheim/p/ComfyMods/ComfyAutoRepair/"
     },
     {
+      "id": "structure-tweaks",
+      "name": "Structure Tweaks",
+      "description": "Deixa estruturas invisíveis, invulneráveis ou atravessáveis. O autor exige o mod em todos os clientes e no servidor: sem ele, o jogador ve uma parede normal onde os outros veem nada.",
+      "required": true,
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "JereKuusela",
+      "thunderstoreName": "Structure_Tweaks",
+      "version": "1.36.0",
+      "author": "JereKuusela",
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Structure_Tweaks/"
+    },
+    {
       "id": "server-devcommands",
       "name": "Server devcommands",
       "description": "Liga os devcommands e o teleporte que funciona de verdade. Base das outras ferramentas.",
@@ -562,18 +574,6 @@
       "thunderstoreName": "Upgrade_World",
       "author": "JereKuusela",
       "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Upgrade_World/"
-    },
-    {
-      "id": "structure-tweaks",
-      "name": "Structure Tweaks",
-      "description": "Deixa estruturas invisíveis, invulneráveis ou atravessáveis.",
-      "required": false,
-      "category": "Admin",
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "JereKuusela",
-      "thunderstoreName": "Structure_Tweaks",
-      "author": "JereKuusela",
-      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Structure_Tweaks/"
     },
     {
       "id": "devtoggle",
