@@ -582,12 +582,20 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenSettings()
     {
-        var window = new Views.SettingsWindow(_settings, _settingsService)
+        var window = new Views.SettingsWindow(_settings, _settingsService, _profileService, _activeProfile)
         {
             Owner = Application.Current.MainWindow
         };
         window.ShowDialog();
         _settings = _settingsService.Load();
+
+        // Desinstalar mexeu no perfil por fora daqui: recarrega para a lista
+        // parar de dizer que os mods continuam instalados.
+        if (window.ModsForamRemovidos)
+        {
+            CarregarPerfil();
+            StatusText = "Mods desinstalados. Clique em Jogar para instalar de novo.";
+        }
     }
 
 }

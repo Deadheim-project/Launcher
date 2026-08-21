@@ -75,6 +75,40 @@ public sealed class ProfileService
     }
 
     /// <summary>
+    /// Apaga tudo o que o launcher instalou — a árvore de jogo inteira do perfil
+    /// (BepInEx, plugins e config) — e devolve quantas pastas de mod saíram.
+    ///
+    /// Existe porque "reinstala do zero" é a resposta certa para a maioria dos
+    /// problemas que chegam: download interrompido, .dll pela metade, config
+    /// editada na mão que não bate mais com a do servidor. Sem isso a única
+    /// saída era mandar o jogador achar %AppData% e apagar pasta na mão, o que
+    /// dá errado de formas piores que o problema original.
+    ///
+    /// O que NÃO sai: profile.json, que fica em profiles/&lt;perfil&gt;/ e não dentro
+    /// de game/ — então a escolha de opcionais do jogador sobrevive. Só
+    /// InstalledVersions é zerado, porque nada mais está no disco: se o perfil
+    /// seguisse afirmando ter a versão instalada, o Jogar seguinte não baixaria
+    /// nada e o jogo subiria sem mod nenhum.
+    ///
+    /// A instalação do Valheim não é tocada — o launcher nunca escreve lá.
+    /// </summary>
+    public int RemoverModsInstalados(Profile profile)
+    {
+        var plugins = AppPaths.ProfilePluginsDir(profile.Name);
+        var quantidade = Directory.Exists(plugins) ? Directory.GetDirectories(plugins).Length : 0;
+
+        var game = AppPaths.ProfileGameDir(profile.Name);
+        if (Directory.Exists(game)) Directory.Delete(game, recursive: true);
+
+        // Recria o esqueleto: o resto do launcher assume que a pasta existe.
+        Directory.CreateDirectory(AppPaths.ProfilePluginsDir(profile.Name));
+
+        profile.InstalledVersions.Clear();
+        Save(profile);
+        return quantidade;
+    }
+
+    /// <summary>
     /// Apaga do perfil os mods que não estão mais no manifest do servidor e
     /// devolve quais foram. Retirar um mod do pack é uma decisão do servidor
     /// tanto quanto adicionar: se ele continuar no disco do jogador, vai ser

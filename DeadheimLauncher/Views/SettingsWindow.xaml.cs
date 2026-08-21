@@ -9,12 +9,24 @@ public partial class SettingsWindow : Window
 {
     private readonly LauncherSettings _settings;
     private readonly SettingsService _settingsService;
+    private readonly ProfileService _profileService;
+    private readonly Profile _profile;
 
-    public SettingsWindow(LauncherSettings settings, SettingsService settingsService)
+    /// <summary>
+    /// Fica true quando o jogador desinstala os mods. A janela principal precisa
+    /// saber para redesenhar a lista: as versões instaladas sumiram do perfil e
+    /// continuar mostrando "instalado" seria mentira.
+    /// </summary>
+    public bool ModsForamRemovidos { get; private set; }
+
+    public SettingsWindow(LauncherSettings settings, SettingsService settingsService,
+        ProfileService profileService, Profile profile)
     {
         InitializeComponent();
         _settings = settings;
         _settingsService = settingsService;
+        _profileService = profileService;
+        _profile = profile;
 
         ValheimPathBox.Text = settings.ValheimPath ?? "";
         ManifestUrlBox.Text = settings.ManifestUrl;
@@ -53,5 +65,45 @@ public partial class SettingsWindow : Window
     {
         DialogResult = false;
         Close();
+    }
+
+    /// <summary>
+    /// Apaga os mods instalados. Pede confirmação porque é irreversível do ponto
+    /// de vista do jogador — mesmo que o próximo Jogar baixe tudo de novo, são
+    /// centenas de MB e alguns minutos de espera que ninguém quer por engano.
+    /// </summary>
+    private void Uninstall_Click(object sender, RoutedEventArgs e)
+    {
+        var resposta = MessageBox.Show(this,
+            "Isso apaga os mods instalados pelo launcher. Nada da sua pasta do Valheim " +
+            "e nenhum personagem é afetado, e o próximo Jogar baixa tudo de novo.\n\n" +
+            "Feche o Valheim antes de continuar.\n\nDesinstalar agora?",
+            "Desinstalar mods", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+        if (resposta != MessageBoxResult.Yes) return;
+
+        try
+        {
+            UninstallButton.IsEnabled = false;
+            var quantidade = _profileService.RemoverModsInstalados(_profile);
+            ModsForamRemovidos = true;
+
+            MessageBox.Show(this,
+                quantidade == 0
+                    ? "Não havia mod instalado. Está tudo limpo."
+                    : $"Pronto: {quantidade} mod(s) removidos. Clique em Jogar para instalar de novo.",
+                "Desinstalar mods", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            // O caso real é o Valheim aberto segurando as .dll. ErroAmigavel já
+            // traduz "sendo usado por outro processo" em algo acionável.
+            MessageBox.Show(this, ErroAmigavel.Descrever(ex, "desinstalar os mods"),
+                "Desinstalar mods", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            UninstallButton.IsEnabled = true;
+        }
     }
 }
