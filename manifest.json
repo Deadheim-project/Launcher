@@ -228,6 +228,18 @@
       "url": "https://thunderstore.io/c/valheim/p/WackyMole/WackyEpicMMOSystem/"
     },
     {
+      "id": "wackyitemrequiresskilllevel",
+      "name": "WackyItemRequiresSkillLevel",
+      "description": "Exige nível de habilidade para equipar ou fabricar itens.",
+      "required": true,
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "WackyMole",
+      "thunderstoreName": "WackyItemRequiresSkillLevel",
+      "version": "1.4.6",
+      "author": "WackyMole",
+      "url": "https://thunderstore.io/c/valheim/p/WackyMole/WackyItemRequiresSkillLevel/"
+    },
+    {
       "id": "guilds",
       "name": "Guilds",
       "description": "Do modpack Deadheim 15.0.5.",
