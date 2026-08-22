@@ -53,8 +53,8 @@ public sealed class ModInstallerService
         // para uma área de montagem e depois se funde na raiz de jogo do perfil,
         // em vez de virar mais uma subpasta. Fundir importa: apagar e recriar a
         // raiz levaria junto os plugins já instalados.
-        var éCarregador = mod.Target == InstallTarget.GameRoot;
-        var destDir = éCarregador
+        var éPacoteEstrutural = mod.Target != InstallTarget.Plugins;
+        var destDir = éPacoteEstrutural
             ? Path.Combine(Path.GetTempPath(), $"deadheim-montagem-{Guid.NewGuid():N}")
             : Path.Combine(AppPaths.ProfilePluginsDir(profileName), mod.Id);
         Directory.CreateDirectory(destDir);
@@ -97,11 +97,21 @@ public sealed class ModInstallerService
                 File.Copy(tempFile, Path.Combine(destDir, resolved.FileName), overwrite: true);
             }
 
-            if (éCarregador)
+            if (éPacoteEstrutural)
             {
                 FlattenSingleRootFolder(destDir);
                 MarkOfTheWeb.UnblockDirectory(destDir);
-                FundirNaRaizDoPerfil(destDir, AppPaths.ProfileGameDir(profileName));
+                var destinoEstrutural = mod.Target == InstallTarget.GameRoot
+                    ? AppPaths.ProfileGameDir(profileName)
+                    : AppPaths.ProfileBepInExDir(profileName);
+                FundirNaRaizDoPerfil(destDir, destinoEstrutural);
+
+                // Remove a instalação produzida por launchers antigos, que
+                // tratavam patchers como plugins comuns.
+                var legadoComoPlugin = Path.Combine(AppPaths.ProfilePluginsDir(profileName), mod.Id);
+                if (Directory.Exists(legadoComoPlugin)) Directory.Delete(legadoComoPlugin, recursive: true);
+
+                RegistrarPacoteEstrutural(mod, profileName, resolved.Version);
             }
             else
             {
@@ -114,7 +124,7 @@ public sealed class ModInstallerService
         }
         finally
         {
-            if (éCarregador && Directory.Exists(destDir)) Directory.Delete(destDir, recursive: true);
+            if (éPacoteEstrutural && Directory.Exists(destDir)) Directory.Delete(destDir, recursive: true);
             if (File.Exists(tempFile)) File.Delete(tempFile);
         }
 
@@ -154,6 +164,26 @@ public sealed class ModInstallerService
             File.Copy(arquivo, alvo, overwrite: true);
         }
     }
+
+    public static bool PacoteEstruturalEstaInstalado(ModEntry mod, string profileName)
+    {
+        if (mod.Target == InstallTarget.GameRoot)
+            return Directory.Exists(Path.Combine(AppPaths.ProfileBepInExDir(profileName), "core"));
+        if (mod.Target != InstallTarget.BepInExRoot) return false;
+
+        return File.Exists(CaminhoDoRegistroEstrutural(mod, profileName));
+    }
+
+    private static void RegistrarPacoteEstrutural(ModEntry mod, string profileName, string version)
+    {
+        if (mod.Target != InstallTarget.BepInExRoot) return;
+        var registro = CaminhoDoRegistroEstrutural(mod, profileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(registro)!);
+        File.WriteAllText(registro, version);
+    }
+
+    private static string CaminhoDoRegistroEstrutural(ModEntry mod, string profileName)
+        => Path.Combine(AppPaths.ProfileBepInExDir(profileName), ".deadheim", "targets", mod.Id + ".installed");
 
     private static void MoverConfigParaOPerfil(string destDir, string profileName)
     {

@@ -30,7 +30,15 @@ public enum InstallTarget
     /// winhttp.dll, doorstop_config.ini e a pasta BepInEx, que só funcionam
     /// ao lado do valheim.exe. Jogar isso dentro de plugins/ não carregaria nada.
     /// </summary>
-    GameRoot
+    GameRoot,
+
+    /// <summary>
+    /// Raiz do BepInEx do perfil. Pacotes de preloader/patcher, como o
+    /// HookGenPatcher, trazem patchers/ e config/ na raiz do zip e precisam
+    /// conservar essa estrutura em BepInEx/. Se forem tratados como plugin,
+    /// o preloader nunca os encontra.
+    /// </summary>
+    BepInExRoot
 }
 
 /// <summary>

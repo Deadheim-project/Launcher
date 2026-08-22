@@ -944,7 +944,8 @@ public static class LauncherSelfTest
             }
         }
 
-        await RunBepInExInstallCheck(manifest, installer);
+            await RunBepInExInstallCheck(manifest, installer);
+            await RunBepInExRootInstallCheck(manifest, installer);
 
         if (_fullInstall)
         {
@@ -1078,6 +1079,42 @@ public static class LauncherSelfTest
         catch (Exception ex)
         {
             Check("BepInEx: instala na raiz do jogo", false, ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Patchers rodam antes dos plugins. O HookGen dentro de plugins até aparece
+    /// no disco, mas não gera o MMHOOK e o PlanBuild falha no Awake.
+    /// </summary>
+    private static async Task RunBepInExRootInstallCheck(ModManifest manifest, ModInstallerService installer)
+    {
+        var patcher = manifest.ThunderstoreMods.FirstOrDefault(m => m.Target == InstallTarget.BepInExRoot);
+        if (patcher is null)
+        {
+            Skip("patcher: instala na raiz do BepInEx (nenhum pacote BepInExRoot no manifest)");
+            return;
+        }
+
+        const string profile = "BepInExRootTest";
+        try
+        {
+            new ProfileService().LoadOrCreate(profile);
+            await installer.InstallAsync(patcher, profile);
+
+            var bepinex = AppPaths.ProfileBepInExDir(profile);
+            var patcherDll = Directory.GetFiles(Path.Combine(bepinex, "patchers"),
+                "BepInEx.MonoMod.HookGenPatcher.dll", SearchOption.AllDirectories);
+
+            Check("patcher: DLL fica em BepInEx/patchers",
+                patcherDll.Length == 1, string.Join(", ", patcherDll));
+            Check("patcher: não vira plugin comum",
+                !Directory.Exists(Path.Combine(AppPaths.ProfilePluginsDir(profile), patcher.Id)));
+            Check("patcher: instalação estrutural fica registrada",
+                ModInstallerService.PacoteEstruturalEstaInstalado(patcher, profile));
+        }
+        catch (Exception ex)
+        {
+            Check("patcher: instala na raiz do BepInEx", false, ex.Message);
         }
     }
 

@@ -427,8 +427,8 @@ public sealed partial class MainViewModel : ObservableObject
     /// </summary>
     private bool EstaNoDisco(ModEntry entry)
     {
-        if (entry.Target == InstallTarget.GameRoot)
-            return Directory.Exists(Path.Combine(AppPaths.ProfileBepInExDir(_activeProfile.Name), "core"));
+        if (entry.Target != InstallTarget.Plugins)
+            return ModInstallerService.PacoteEstruturalEstaInstalado(entry, _activeProfile.Name);
 
         return Directory.Exists(Path.Combine(AppPaths.ProfilePluginsDir(_activeProfile.Name), entry.Id));
     }
