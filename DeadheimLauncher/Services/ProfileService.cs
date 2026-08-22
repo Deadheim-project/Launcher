@@ -104,10 +104,36 @@ public sealed class ProfileService
     /// personagens também não: o jogo salva em LocalLow, fora daqui, e no
     /// servidor via ServerCharacters.
     /// </summary>
+    /// <summary>
+    /// Arquivos de BepInEx/config que NÃO podem ser reinstalados: guardam a que
+    /// personagem este jogador já está preso no servidor, e não vêm de download
+    /// nenhum.
+    ///
+    /// Sem o vínculo, o Deadheim registra "Primeiro acesso a este servidor" e
+    /// abre a CRIAÇÃO de personagem em vez da seleção. Quem já jogava cria um
+    /// nome novo, o ServerCharacters recusa ("You are not allowed to create more
+    /// than one character on this server") e a pessoa fica sem conseguir entrar
+    /// — com o personagem antigo intacto no servidor, invisível para ela.
+    /// Reinstalar mod não conserta, porque o que sumiu não é mod.
+    /// </summary>
+    private static readonly string[] EstadoQueNaoSeReinstala =
+    {
+        "Detalhes.Deadheim.directjoin.character"
+    };
+
     public int RemoverModsInstalados(Profile profile)
     {
         var plugins = AppPaths.ProfilePluginsDir(profile.Name);
         var quantidade = Directory.Exists(plugins) ? Directory.GetDirectories(plugins).Length : 0;
+
+        // Guarda o vínculo antes de apagar, e devolve depois: é a diferença
+        // entre "reinstalar os mods" e "virar jogador novo".
+        var preservados = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+        foreach (var nome in EstadoQueNaoSeReinstala)
+        {
+            var origem = Path.Combine(AppPaths.ProfileConfigDir(profile.Name), nome);
+            if (File.Exists(origem)) preservados[nome] = File.ReadAllBytes(origem);
+        }
 
         var raiz = AppPaths.ProfileDir(profile.Name);
         if (Directory.Exists(raiz))
@@ -125,6 +151,14 @@ public sealed class ProfileService
 
         // Recria o esqueleto: o resto do launcher assume que a pasta existe.
         Directory.CreateDirectory(AppPaths.ProfilePluginsDir(profile.Name));
+
+        if (preservados.Count > 0)
+        {
+            var config = AppPaths.ProfileConfigDir(profile.Name);
+            Directory.CreateDirectory(config);
+            foreach (var item in preservados)
+                File.WriteAllBytes(Path.Combine(config, item.Key), item.Value);
+        }
 
         profile.InstalledVersions.Clear();
         Save(profile);
