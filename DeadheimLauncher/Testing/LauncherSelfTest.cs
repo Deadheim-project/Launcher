@@ -672,6 +672,13 @@ public static class LauncherSelfTest
         Directory.CreateDirectory(AppPaths.ProfileConfigDir("Default"));
         File.WriteAllText(Path.Combine(AppPaths.ProfileConfigDir("Default"), "algum.cfg"), "chave=valor");
 
+        // O vínculo de personagem do Deadheim. Não vem de download: se sumir, o
+        // mod anuncia "Primeiro acesso a este servidor", abre a criação de
+        // personagem, e quem já jogava toma recusa do ServerCharacters ao tentar
+        // um nome novo. Reinstalar mod não traz de volta.
+        var vinculo = Path.Combine(AppPaths.ProfileConfigDir("Default"), "Detalhes.Deadheim.directjoin.character");
+        File.WriteAllText(vinculo, "prefeito");
+
         // Disposição antiga, de quem usa o launcher desde antes da árvore game/:
         // continua no disco ao lado da nova e nada mais a carrega. Se sobreviver
         // ao botão, quem clicou para limpar fica com centenas de MB de mod velho.
@@ -685,10 +692,14 @@ public static class LauncherSelfTest
         var removidos = service.RemoverModsInstalados(perfil);
 
         Check("desinstalar conta os mods que removeu", removidos == 2, $"removidos={removidos}");
-        // Sobra o esqueleto de pastas, de propósito. O que não pode sobrar é
-        // arquivo: qualquer .dll ou .cfg que ficasse seria carregado de novo.
-        Check("desinstalar não deixa arquivo nenhum na árvore de jogo",
-            Directory.GetFiles(AppPaths.ProfileGameDir("Default"), "*", SearchOption.AllDirectories).Length == 0);
+        // Sobra o esqueleto de pastas, de propósito, e só o estado que não se
+        // reinstala. Qualquer .dll ou .cfg que ficasse seria carregado de novo.
+        var restantes = Directory.GetFiles(AppPaths.ProfileGameDir("Default"), "*", SearchOption.AllDirectories)
+            .Select(Path.GetFileName)
+            .ToList();
+        Check("desinstalar só deixa o estado que não se reinstala",
+            restantes.Count == 1 && restantes[0] == "Detalhes.Deadheim.directjoin.character",
+            string.Join(", ", restantes));
         Check("desinstalar leva os .cfg junto",
             !File.Exists(Path.Combine(AppPaths.ProfileConfigDir("Default"), "algum.cfg")));
         Check("desinstalar recria a pasta de plugins vazia",
@@ -704,6 +715,9 @@ public static class LauncherSelfTest
 
         Check("desinstalar preserva o profile.json em si",
             File.Exists(AppPaths.ProfileFile("Default")));
+
+        Check("desinstalar preserva o vínculo de personagem do Deadheim",
+            File.Exists(vinculo) && File.ReadAllText(vinculo) == "prefeito");
 
         var relido = service.LoadOrCreate("Default");
         Check("desinstalar persiste no profile.json",
