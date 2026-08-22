@@ -1,6 +1,6 @@
 {
   "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
-  "packVersion": "15.0.19",
+  "packVersion": "15.0.20",
   "ownMods": [
     {
       "id": "npcs",
@@ -13,7 +13,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.9"
+      "version": "1.0.10"
     },
     {
       "id": "deadheim",
@@ -442,6 +442,18 @@
       "version": "0.0.4",
       "author": "ValheimModding",
       "url": "https://thunderstore.io/c/valheim/p/ValheimModding/HookGenPatcher/"
+    },
+    {
+      "id": "planbuild",
+      "name": "PlanBuild",
+      "description": "Planeja, copia e compartilha construções e blueprints.",
+      "required": true,
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "MathiasDecrock",
+      "thunderstoreName": "PlanBuild",
+      "version": "0.18.4",
+      "author": "MathiasDecrock",
+      "url": "https://thunderstore.io/c/valheim/p/MathiasDecrock/PlanBuild/"
     },
     {
       "id": "valheiminfinitefire",
