@@ -75,8 +75,9 @@ public partial class SettingsWindow : Window
     private void Uninstall_Click(object sender, RoutedEventArgs e)
     {
         var resposta = MessageBox.Show(this,
-            "Isso apaga os mods instalados pelo launcher. Nada da sua pasta do Valheim " +
-            "e nenhum personagem é afetado, e o próximo Jogar baixa tudo de novo.\n\n" +
+            "Isso apaga os mods instalados pelo launcher, junto com os ajustes deles " +
+            "(teclas de atalho, posição de janelas). O próximo Jogar baixa tudo de novo.\n\n" +
+            "Seu personagem, seu mundo e a pasta do Valheim NÃO são afetados.\n\n" +
             "Feche o Valheim antes de continuar.\n\nDesinstalar agora?",
             "Desinstalar mods", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 

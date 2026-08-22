@@ -672,6 +672,16 @@ public static class LauncherSelfTest
         Directory.CreateDirectory(AppPaths.ProfileConfigDir("Default"));
         File.WriteAllText(Path.Combine(AppPaths.ProfileConfigDir("Default"), "algum.cfg"), "chave=valor");
 
+        // Disposição antiga, de quem usa o launcher desde antes da árvore game/:
+        // continua no disco ao lado da nova e nada mais a carrega. Se sobreviver
+        // ao botão, quem clicou para limpar fica com centenas de MB de mod velho.
+        foreach (var legado in new[] { "plugins", "gameroot", "config", "_tools" })
+        {
+            var dir = Path.Combine(AppPaths.ProfileDir("Default"), legado);
+            Directory.CreateDirectory(dir);
+            File.WriteAllText(Path.Combine(dir, "antigo.dll"), "instalação de uma versão anterior");
+        }
+
         var removidos = service.RemoverModsInstalados(perfil);
 
         Check("desinstalar conta os mods que removeu", removidos == 2, $"removidos={removidos}");
@@ -687,6 +697,13 @@ public static class LauncherSelfTest
         Check("desinstalar zera as versões instaladas", perfil.InstalledVersions.Count == 0);
         Check("desinstalar preserva a escolha de opcionais",
             perfil.EnabledModIds.Contains("npcs") && perfil.EnabledModIds.Contains("vnei"));
+
+        Check("desinstalar leva junto a disposição antiga do perfil",
+            new[] { "plugins", "gameroot", "config", "_tools" }
+                .All(d => !File.Exists(Path.Combine(AppPaths.ProfileDir("Default"), d, "antigo.dll"))));
+
+        Check("desinstalar preserva o profile.json em si",
+            File.Exists(AppPaths.ProfileFile("Default")));
 
         var relido = service.LoadOrCreate("Default");
         Check("desinstalar persiste no profile.json",

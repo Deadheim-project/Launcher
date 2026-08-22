@@ -75,8 +75,8 @@ public sealed class ProfileService
     }
 
     /// <summary>
-    /// Apaga tudo o que o launcher instalou — a árvore de jogo inteira do perfil
-    /// (BepInEx, plugins e config) — e devolve quantas pastas de mod saíram.
+    /// Apaga tudo o que o launcher instalou e devolve quantas pastas de mod
+    /// saíram.
     ///
     /// Existe porque "reinstala do zero" é a resposta certa para a maioria dos
     /// problemas que chegam: download interrompido, .dll pela metade, config
@@ -84,21 +84,44 @@ public sealed class ProfileService
     /// saída era mandar o jogador achar %AppData% e apagar pasta na mão, o que
     /// dá errado de formas piores que o problema original.
     ///
-    /// O que NÃO sai: profile.json, que fica em profiles/&lt;perfil&gt;/ e não dentro
-    /// de game/ — então a escolha de opcionais do jogador sobrevive. Só
-    /// InstalledVersions é zerado, porque nada mais está no disco: se o perfil
-    /// seguisse afirmando ter a versão instalada, o Jogar seguinte não baixaria
-    /// nada e o jogo subiria sem mod nenhum.
+    /// A regra é "apaga tudo menos profile.json", e não "apaga game/", de
+    /// propósito. Perfil de quem usa o launcher desde antes ainda tem a
+    /// disposição antiga ao lado da nova — plugins/, gameroot/, config/, _tools/
+    /// — com centenas de MB de mods que nada mais carrega. Nomear as pastas
+    /// conhecidas de hoje deixaria isso tudo para trás e faria o botão mentir
+    /// para quem clicou nele justamente para limpar. Inverter a regra também
+    /// cobre a próxima mudança de disposição sem precisar lembrar deste método.
     ///
-    /// A instalação do Valheim não é tocada — o launcher nunca escreve lá.
+    /// O que fica: profile.json, ou seja, a escolha de opcionais do jogador. Só
+    /// InstalledVersions é zerado, porque nada mais está no disco.
+    ///
+    /// Não zerar é a falha perigosa aqui, e não apagar demais: um perfil que
+    /// afirma ter mod que sumiu levaria o Jogar seguinte a não baixar nada.
+    /// (O EstaNoDisco do MainViewModel também pega esse caso, então uma remoção
+    /// interrompida no meio se conserta sozinha na próxima partida.)
+    ///
+    /// A instalação do Valheim não é tocada — o launcher nunca escreve lá. Os
+    /// personagens também não: o jogo salva em LocalLow, fora daqui, e no
+    /// servidor via ServerCharacters.
     /// </summary>
     public int RemoverModsInstalados(Profile profile)
     {
         var plugins = AppPaths.ProfilePluginsDir(profile.Name);
         var quantidade = Directory.Exists(plugins) ? Directory.GetDirectories(plugins).Length : 0;
 
-        var game = AppPaths.ProfileGameDir(profile.Name);
-        if (Directory.Exists(game)) Directory.Delete(game, recursive: true);
+        var raiz = AppPaths.ProfileDir(profile.Name);
+        if (Directory.Exists(raiz))
+        {
+            foreach (var dir in Directory.GetDirectories(raiz))
+                Directory.Delete(dir, recursive: true);
+
+            var manter = AppPaths.ProfileFile(profile.Name);
+            foreach (var file in Directory.GetFiles(raiz))
+            {
+                if (!string.Equals(file, manter, StringComparison.OrdinalIgnoreCase))
+                    File.Delete(file);
+            }
+        }
 
         // Recria o esqueleto: o resto do launcher assume que a pasta existe.
         Directory.CreateDirectory(AppPaths.ProfilePluginsDir(profile.Name));
