@@ -770,6 +770,33 @@ public static class LauncherSelfTest
         var fromCache = await service.GetManifestAsync(bogusUrl);
         Check("manifest usa o cache local quando a rede está fora",
             fromCache.AllMods.Any(m => m.Id == "do-cache"));
+
+        // Cache gravado por um launcher mais novo: traz um alvo de instalação que
+        // esta versão não conhece. Isso chegou ao jogador como "The JSON value
+        // could not be converted to ..." na barra de status, porque a leitura do
+        // cache estourava e levava junto o sample embutido. Tem de valer como
+        // cache ausente e seguir para a alternativa seguinte.
+        File.WriteAllText(AppPaths.ManifestCacheFile, """
+            { "ownMods": [], "thunderstoreMods": [
+              { "id": "do-futuro", "name": "DoFuturo", "required": false, "target": "AlvoQueNaoExisteAinda",
+                "source": "Thunderstore", "thunderstoreNamespace": "X", "thunderstoreName": "Y" } ] }
+            """);
+        ModManifest deCacheIlegivel;
+        try
+        {
+            deCacheIlegivel = await service.GetManifestAsync(bogusUrl);
+            Check("manifest: cache que este launcher não entende não derruba a lista", true,
+                $"{deCacheIlegivel.AllMods.Count()} mods do sample embutido");
+        }
+        catch (Exception ex)
+        {
+            Check("manifest: cache que este launcher não entende não derruba a lista", false,
+                $"{ex.GetType().Name}: {ex.Message.Trim()}");
+            deCacheIlegivel = new ModManifest();
+        }
+        Check("manifest: cache ilegível cai no sample em vez de vir vazio",
+            deCacheIlegivel.AllMods.Any() && deCacheIlegivel.AllMods.All(m => m.Id != "do-futuro"));
+
         File.Delete(AppPaths.ManifestCacheFile);
     }
 
@@ -991,10 +1018,56 @@ public static class LauncherSelfTest
     /// as versões fixadas do pack. Um mod que saiu do ar, uma versão despublicada
     /// ou um namespace errado aparecem aqui, e não na máquina do jogador.
     /// </summary>
+    /// <summary>
+    /// Baixa o manifest publicado e o interpreta sem rede de proteção nenhuma.
+    ///
+    /// Existe por um falso PASS real: esta suíte pedia um endereço inválido de
+    /// propósito e deixava GetManifestAsync cair no manifest.sample.json
+    /// embutido. Como GetManifestAsync engole JsonException para o jogador nunca
+    /// ficar sem lista, um manifest publicado que esta versão do launcher não sabe
+    /// ler passava batido aqui e só aparecia na barra de status do jogador, cru
+    /// ("The JSON value could not be converted to ..."). Foi exatamente o que
+    /// aconteceu quando o pack ganhou o alvo BepInExRoot.
+    /// </summary>
+    private static async Task<ModManifest?> CarregarManifestPublicado(HttpClient http)
+    {
+        const string nome = "manifest publicado é legível por esta versão do launcher";
+        var url = new LauncherSettings().ManifestUrl;
+
+        string json;
+        try
+        {
+            json = await http.GetStringAsync(url);
+        }
+        catch (Exception ex)
+        {
+            // Sem rede não é defeito do manifest; não dá para afirmar nada.
+            Skip($"{nome} (manifest inacessível: {ex.Message.Trim()})");
+            return null;
+        }
+
+        try
+        {
+            var manifest = ManifestService.Interpretar(json);
+            Check(nome, manifest is not null, $"pack {manifest?.PackVersion ?? "(sem versão)"}");
+            return manifest;
+        }
+        catch (JsonException ex)
+        {
+            Check(nome, false, ex.Message.Trim());
+            return null;
+        }
+    }
+
     private static async Task RunRealManifestChecks(HttpClient http, ModInstallerService installer)
     {
         var manifestService = new ManifestService(http);
-        var manifest = await manifestService.GetManifestAsync("https://invalid.deadheim.example/manifest.json");
+
+        // O arquivo que os jogadores realmente recebem tem prioridade. Só se ele
+        // estiver fora do ar a suíte volta para a lista embutida — e aí o que roda
+        // abaixo é claramente um ensaio, não a conferência do pack publicado.
+        var manifest = await CarregarManifestPublicado(http)
+                       ?? await manifestService.GetManifestAsync("https://invalid.deadheim.example/manifest.json");
 
         var thunderstore = manifest.ThunderstoreMods;
         Check("manifest real do servidor carrega", thunderstore.Count >= 30,
