@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DeadheimLauncher.Models;
@@ -17,6 +18,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly ManifestService _manifestService;
     private readonly ModInstallerService _installerService;
     private readonly ValheimLaunchService _launchService = new();
+    private readonly DispatcherTimer _gameProcessTimer;
 
     private LauncherSettings _settings = new();
     private ModManifest _manifest = new();
@@ -90,9 +92,18 @@ public sealed partial class MainViewModel : ObservableObject
     /// o Valheim sem os mods do servidor, que é justamente o que o launcher
     /// existe para evitar.
     /// </summary>
-    public bool PodeJogar => !IsBusy && Mods.Count > 0;
+    public bool PodeJogar => !IsBusy && !IsGameRunning && Mods.Count > 0;
 
     partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(PodeJogar));
+
+    [ObservableProperty]
+    private bool _isGameRunning;
+
+    partial void OnIsGameRunningChanged(bool value)
+    {
+        OnPropertyChanged(nameof(PodeJogar));
+        FecharJogoCommand.NotifyCanExecuteChanged();
+    }
 
     /// <summary>
     /// Erro mostrado dentro da janela, num aviso que o jogador fecha quando
@@ -213,6 +224,34 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _manifestService = new ManifestService(_http);
         _installerService = new ModInstallerService(_http, new GitHubReleaseService(_http), new ThunderstoreService(_http));
+
+        _gameProcessTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _gameProcessTimer.Tick += (_, _) => AtualizarEstadoDoJogo();
+        AtualizarEstadoDoJogo();
+        _gameProcessTimer.Start();
+    }
+
+    private void AtualizarEstadoDoJogo()
+    {
+        try { IsGameRunning = _launchService.IsGameRunning(); }
+        catch { IsGameRunning = false; }
+    }
+
+    [RelayCommand(CanExecute = nameof(IsGameRunning))]
+    private void FecharJogo()
+    {
+        try
+        {
+            StatusText = _launchService.RequestGameClose()
+                ? "Fechando o Valheim com segurança..."
+                : "O Valheim está aberto, mas não respondeu ao pedido para fechar.";
+        }
+        catch (Exception ex)
+        {
+            StatusText = ErroAmigavel.Descrever(ex, "fechar o Valheim");
+        }
+
+        AtualizarEstadoDoJogo();
     }
 
     public async Task InitializeAsync()

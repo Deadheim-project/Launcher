@@ -29,6 +29,44 @@ public sealed class ValheimLaunchService
     private const string DefaultSteamPath = @"C:\Program Files (x86)\Steam\steamapps\common\Valheim";
     private const string ValheimSteamAppId = "892970";
 
+    /// <summary>O estado é consultado pelo launcher enquanto a janela está aberta para
+    /// trocar a ação principal sem permitir iniciar uma segunda cópia do jogo.</summary>
+    public bool IsGameRunning()
+    {
+        var processes = Process.GetProcessesByName("valheim");
+        try
+        {
+            return processes.Any(process => !process.HasExited);
+        }
+        finally
+        {
+            foreach (var process in processes) process.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Pede ao Valheim para fechar pela janela normal. Não usa Kill: encerrar o processo à
+    /// força pode interromper a gravação do personagem ou do mundo.
+    /// </summary>
+    public bool RequestGameClose()
+    {
+        var requested = false;
+        var processes = Process.GetProcessesByName("valheim");
+        try
+        {
+            foreach (var process in processes)
+            {
+                if (!process.HasExited && process.CloseMainWindow()) requested = true;
+            }
+        }
+        finally
+        {
+            foreach (var process in processes) process.Dispose();
+        }
+
+        return requested;
+    }
+
     public string ResolveValheimPath(LauncherSettings settings)
     {
         if (!string.IsNullOrWhiteSpace(settings.ValheimPath) && Directory.Exists(settings.ValheimPath))

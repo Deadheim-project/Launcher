@@ -309,6 +309,11 @@
 
                     <!-- Só libera depois da lista carregada e conferida: sem isso
                          dava para abrir o Valheim sem os mods do servidor. -->
+                    <Button Content="FECHAR JOGO" FontSize="14" FontWeight="Bold"
+                            MinWidth="140" Height="44" Margin="0,0,10,0"
+                            Background="{StaticResource DangerBrush}" Foreground="White"
+                            Command="{Binding FecharJogoCommand}"
+                            Visibility="{Binding IsGameRunning, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
                     <Button Content="JOGAR" FontSize="17" FontWeight="Bold" MinWidth="180" Height="44"
                             Command="{Binding PlayCommand}"
                             IsEnabled="{Binding PodeJogar}" />
