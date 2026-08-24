@@ -1,6 +1,6 @@
 {
   "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
-  "packVersion": "15.0.30",
+  "packVersion": "15.0.31",
   "ownMods": [
     {
       "id": "npcs",
@@ -79,6 +79,19 @@
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/donationshop/releases",
       "version": "1.0.0"
+    },
+    {
+      "id": "adaptivenet",
+      "name": "AdaptiveNet",
+      "description": "Rede adaptativa do servidor: escalonamento de ZDO por proximidade e telemetria de diagnostico.",
+      "required": true,
+      "source": "GitHub",
+      "gitHubOwner": "Deadheim-project",
+      "gitHubRepo": "AdaptiveNet",
+      "assetPattern": "AdaptiveNet.zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/AdaptiveNet/releases",
+      "version": "0.3.0"
     }
   ],
   "thunderstoreMods": [
