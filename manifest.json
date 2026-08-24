@@ -1,6 +1,6 @@
 {
   "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
-  "packVersion": "15.0.31",
+  "packVersion": "15.0.32",
   "ownMods": [
     {
       "id": "npcs",
@@ -275,18 +275,6 @@
       "version": "1.2.10",
       "author": "Smoothbrain",
       "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/Groups/"
-    },
-    {
-      "id": "vbnettweaks",
-      "name": "VBNetTweaks",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "VitByr",
-      "thunderstoreName": "VBNetTweaks",
-      "version": "0.2.0",
-      "author": "VitByr",
-      "url": "https://thunderstore.io/c/valheim/p/VitByr/VBNetTweaks/"
     },
     {
       "id": "servercharacters",
