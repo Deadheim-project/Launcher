@@ -18,6 +18,16 @@ public sealed class LauncherSettings
     /// <summary>
     /// Senha do servidor oficial, distribuída no launcher para que todos os
     /// jogadores entrem diretamente sem depender do FastLink ou digitá-la.
+    ///
+    /// É a mesma que o Azumatt.FastLink_servers.yml publica e a mesma do
+    /// AutoJoinPassword: senha de jogo, feita para ser distribuída.
+    ///
+    /// Aqui entra SÓ a senha do jogo. Este repositório precisa ser público — é
+    /// de raw.githubusercontent.com que o launcher busca o manifest.json — então
+    /// tudo neste arquivo é publicado junto. O valor anterior era, byte a byte,
+    /// a senha de FTP da DatHost: além de dar escrita em plugins, na whitelist
+    /// do anticheat e nos mundos salvos, ela nem servia para entrar, e todo
+    /// jogador com instalação nova era recusado no -password.
     /// </summary>
-    public string? ServerPassword { get; set; } = "Nt1ieJzMGTs";
+    public string? ServerPassword { get; set; } = "secret";
 }
