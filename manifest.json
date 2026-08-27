@@ -1,6 +1,6 @@
 {
   "_comment": "Fonte de verdade autoral: edite à mão. As versões aqui devem bater com o que roda em BepInEx/plugins/ no servidor de producao (loboda.dathost.net) -- nao com o pack Deadheimmods/Deadheim do Thunderstore. Rode installer/generate-manifest.py --check para ver onde o pack publicado diverge deste manifest, so como aviso; ele nao sobrescreve mais o arquivo.",
-  "packVersion": "15.0.34",
+  "packVersion": "15.0.35",
   "ownMods": [
     {
       "id": "npcs",
@@ -504,18 +504,6 @@
       "version": "1.0.4",
       "author": "Korppis",
       "url": "https://thunderstore.io/c/valheim/p/Korppis/Spearfishing/"
-    },
-    {
-      "id": "arcane-ward",
-      "name": "Arcane Ward",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "KGvalheim",
-      "thunderstoreName": "Arcane_Ward",
-      "version": "0.7.0",
-      "author": "KGvalheim",
-      "url": "https://thunderstore.io/c/valheim/p/KGvalheim/Arcane_Ward/"
     },
     {
       "id": "comfyautorepair",
