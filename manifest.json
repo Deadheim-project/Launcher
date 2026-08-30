@@ -145,42 +145,6 @@
       "url": "https://thunderstore.io/c/valheim/p/HugotheDwarf/More_and_Modified_Player_Cloth_Colliders/"
     },
     {
-      "id": "historical-heritage",
-      "name": "Historical Heritage",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "Dreanegade",
-      "thunderstoreName": "Historical_Heritage",
-      "version": "2.1.1",
-      "author": "Dreanegade",
-      "url": "https://thunderstore.io/c/valheim/p/Dreanegade/Historical_Heritage/"
-    },
-    {
-      "id": "hunter-legacy",
-      "name": "Hunter Legacy",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "Dreanegade",
-      "thunderstoreName": "Hunter_Legacy",
-      "version": "1.0.8",
-      "author": "Dreanegade",
-      "url": "https://thunderstore.io/c/valheim/p/Dreanegade/Hunter_Legacy/"
-    },
-    {
-      "id": "magic-supremacy",
-      "name": "Magic Supremacy",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "Dreanegade",
-      "thunderstoreName": "Magic_Supremacy",
-      "version": "3.0.6",
-      "author": "Dreanegade",
-      "url": "https://thunderstore.io/c/valheim/p/Dreanegade/Magic_Supremacy/"
-    },
-    {
       "id": "azuextendedplayerinventory",
       "name": "AzuExtendedPlayerInventory",
       "description": "Do modpack Deadheim 15.0.5.",
