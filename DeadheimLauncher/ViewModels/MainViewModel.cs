@@ -223,7 +223,7 @@ public sealed partial class MainViewModel : ObservableObject
     public MainViewModel()
     {
         _manifestService = new ManifestService(_http);
-        _installerService = new ModInstallerService(_http, new GitHubReleaseService(_http), new ThunderstoreService(_http));
+        _installerService = new ModInstallerService(_http, new GitHubReleaseService(_http), new ThunderstoreService(_http), new HexiumService(_http));
 
         _gameProcessTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _gameProcessTimer.Tick += (_, _) => AtualizarEstadoDoJogo();

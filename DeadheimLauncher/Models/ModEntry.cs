@@ -3,7 +3,15 @@ namespace DeadheimLauncher.Models;
 public enum ModSource
 {
     GitHub,
-    Thunderstore
+    Thunderstore,
+
+    /// <summary>
+    /// https://valheim.hexium.gg -- segunda plataforma de mods, mesma forma de API
+    /// e mesmo par namespace+nome do Thunderstore. Fonte adicional, nunca
+    /// substituta: só declara Hexium o mod que não existe (ou está atrasado) no
+    /// Thunderstore. Ver HexiumService.
+    /// </summary>
+    Hexium
 }
 
 /// <summary>Em que aba o mod aparece.</summary>
@@ -80,7 +88,8 @@ public sealed class ModEntry
     /// <summary>Padrão (substring) do nome do asset a baixar do release, ex. ".zip".</summary>
     public string? AssetPattern { get; set; }
 
-    // ModSource.Thunderstore
+    // ModSource.Thunderstore e ModSource.Hexium -- as duas plataformas identificam
+    // um pacote pelo mesmo par namespace+nome, entao os campos servem as duas.
     public string? ThunderstoreNamespace { get; set; }
     public string? ThunderstoreName { get; set; }
 }

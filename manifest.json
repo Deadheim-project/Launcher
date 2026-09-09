@@ -149,12 +149,12 @@
       "name": "AzuExtendedPlayerInventory",
       "description": "Do modpack Deadheim 15.0.5.",
       "required": true,
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "AzuExtendedPlayerInventory",
-      "version": "2.4.1",
+      "version": "2.4.12",
       "author": "Azumatt",
-      "url": "https://thunderstore.io/c/valheim/p/Azumatt/AzuExtendedPlayerInventory/"
+      "url": "https://valheim.hexium.gg/mods/Azumatt/AzuExtendedPlayerInventory"
     },
     {
       "id": "maxplayercount",
@@ -245,12 +245,12 @@
       "name": "ServerCharacters",
       "description": "Do modpack Deadheim 15.0.5.",
       "required": true,
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "ServerCharacters",
-      "version": "1.4.16",
+      "version": "1.4.17",
       "author": "Smoothbrain",
-      "url": "https://thunderstore.io/c/valheim/p/Smoothbrain/ServerCharacters/"
+      "url": "https://valheim.hexium.gg/mods/Smoothbrain/ServerCharacters"
     },
     {
       "id": "tombstonelock",
