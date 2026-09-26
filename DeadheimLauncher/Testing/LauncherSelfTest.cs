@@ -497,6 +497,8 @@ public static class LauncherSelfTest
             Check("UI: janela de configurações abre sem erro de XAML", true);
             Check("UI: configurações tem o botão de desinstalar mods",
                 janela.FindName("UninstallButton") is System.Windows.Controls.Button);
+            Check("UI: configurações tem o botão de pegar o LogOutput",
+                janela.FindName("LogOutputButton") is System.Windows.Controls.Button);
         }
         catch (Exception ex)
         {
