@@ -1,7 +1,7 @@
 ﻿<Window x:Class="DeadheimLauncher.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Configurações" Height="510" Width="480"
+        Title="Configurações" Height="590" Width="480"
         Background="{StaticResource BgBrush}"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <StackPanel Margin="18">
@@ -38,6 +38,11 @@
                    Text="Apaga os mods que o launcher instalou. Suas escolhas de opcionais e a pasta do Valheim não são tocadas — o próximo Jogar baixa tudo de novo." />
         <Button x:Name="UninstallButton" Content="Desinstalar mods" HorizontalAlignment="Left"
                 Padding="14,6" Margin="0,8,0,0" Click="Uninstall_Click" />
+
+        <TextBlock TextWrapping="Wrap" Opacity="0.75" FontSize="11" Margin="0,14,0,0"
+                   Text="Copia o LogOutput.log da última partida para a Área de Trabalho, para você mandar para a staff." />
+        <Button x:Name="LogOutputButton" Content="Pegar LogOutput" HorizontalAlignment="Left"
+                Padding="14,6" Margin="0,8,0,0" Click="LogOutput_Click" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Cancelar" Padding="14,6" Margin="0,0,8,0" Click="Cancel_Click" />

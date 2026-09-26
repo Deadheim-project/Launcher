@@ -55,6 +55,12 @@ public static class AppPaths
     /// </summary>
     public static string ProfileConfigDir(string profileName) => Path.Combine(ProfileBepInExDir(profileName), "config");
 
+    /// <summary>
+    /// Log do BepInEx da última sessão de jogo. Como o Doorstop aponta para a
+    /// raiz de jogo do perfil, o LogOutput.log sai aqui, e não na pasta do Valheim.
+    /// </summary>
+    public static string ProfileLogOutputFile(string profileName) => Path.Combine(ProfileBepInExDir(profileName), "LogOutput.log");
+
     public static void EnsureDirs()
     {
         Directory.CreateDirectory(Root);
