@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -497,6 +497,8 @@ public static class LauncherSelfTest
             Check("UI: janela de configurações abre sem erro de XAML", true);
             Check("UI: configurações tem o botão de desinstalar mods",
                 janela.FindName("UninstallButton") is System.Windows.Controls.Button);
+            Check("UI: configurações tem o botão de pegar o LogOutput",
+                janela.FindName("LogOutputButton") is System.Windows.Controls.Button);
         }
         catch (Exception ex)
         {
@@ -916,7 +918,8 @@ public static class LauncherSelfTest
         using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
         var thunderstore = new ThunderstoreService(http);
         var github = new GitHubReleaseService(http);
-        var installer = new ModInstallerService(http, github, thunderstore);
+        var hexium = new HexiumService(http);
+        var installer = new ModInstallerService(http, github, thunderstore, hexium);
 
         // Jötunn é o pacote Thunderstore mais estável da comunidade Valheim:
         // serve de alvo confiável pra provar que a resolução e o download funcionam.
@@ -965,6 +968,38 @@ public static class LauncherSelfTest
         else
         {
             Skip("Thunderstore: baixa e instala pacote real");
+        }
+
+        // Hexium: fonte adicional. O caso que motivou o suporte e' justamente uma
+        // versao fixada -- AzuExtendedPlayerInventory 2.4.12 saiu la' no dia do
+        // Valheim 1.0 e nao existia no Thunderstore. Fixar versao e' tambem o
+        // caminho que difere do Thunderstore: la' a URL de download e' previsivel e
+        // um mod pinado nao gasta chamada de API; aqui o zip vem por um id opaco de
+        // CDN, entao ate' o pinado precisa consultar. E' esse caminho que o check cobre.
+        var hexMod = new ModEntry
+        {
+            Id = "azuepi-hexium",
+            Name = "AzuExtendedPlayerInventory (Hexium)",
+            Source = ModSource.Hexium,
+            ThunderstoreNamespace = "Azumatt",
+            ThunderstoreName = "AzuExtendedPlayerInventory",
+            Version = "2.4.12"
+        };
+
+        try
+        {
+            var hexResolved = await hexium.GetLatestAsync(hexMod);
+            Check("Hexium: resolve a versão fixada",
+                hexResolved.Version == "2.4.12" && hexResolved.DownloadUrl.StartsWith("https://"),
+                $"v{hexResolved.Version} -> {hexResolved.DownloadUrl}");
+
+            Check("Hexium: a URL de download não é a do Thunderstore",
+                !hexResolved.DownloadUrl.Contains("thunderstore.io", StringComparison.OrdinalIgnoreCase),
+                hexResolved.DownloadUrl);
+        }
+        catch (Exception ex)
+        {
+            Check("Hexium: resolve a versão fixada", false, ex.Message);
         }
 
         // Prova o caminho do GitHub Releases contra um repositório público que

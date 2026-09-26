@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using Microsoft.Win32;
 using DeadheimLauncher.Models;
@@ -65,6 +66,45 @@ public partial class SettingsWindow : Window
     {
         DialogResult = false;
         Close();
+    }
+
+    /// <summary>
+    /// Copia o LogOutput.log do perfil para a Área de Trabalho e abre o Explorer
+    /// com ele selecionado — o jogador só precisa arrastar para o Discord. Copia
+    /// em vez de abrir a pasta do perfil porque ninguém acha %AppData% sozinho.
+    /// </summary>
+    private void LogOutput_Click(object sender, RoutedEventArgs e)
+    {
+        var origem = AppPaths.ProfileLogOutputFile(_profile.Name);
+        if (!File.Exists(origem))
+        {
+            MessageBox.Show(this,
+                "Ainda não existe LogOutput.log. Abra o jogo pelo launcher pelo menos uma vez e tente de novo.",
+                "Pegar LogOutput", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            var destino = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                $"Deadheim-LogOutput-{DateTime.Now:yyyyMMdd-HHmmss}.log");
+
+            // Com o Valheim aberto o BepInEx mantém o arquivo aberto para escrita;
+            // File.Copy falharia, então lemos compartilhando leitura e escrita.
+            using (var entrada = new FileStream(origem, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            using (var saida = File.Create(destino))
+            {
+                entrada.CopyTo(saida);
+            }
+
+            Process.Start("explorer.exe", $"/select,\"{destino}\"");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ErroAmigavel.Descrever(ex, "copiar o LogOutput"),
+                "Pegar LogOutput", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     /// <summary>

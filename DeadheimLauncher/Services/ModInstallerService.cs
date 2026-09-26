@@ -21,12 +21,18 @@ public sealed class ModInstallerService
     private readonly HttpClient _http;
     private readonly GitHubReleaseService _gitHub;
     private readonly ThunderstoreService _thunderstore;
+    private readonly HexiumService _hexium;
 
-    public ModInstallerService(HttpClient http, GitHubReleaseService gitHub, ThunderstoreService thunderstore)
+    public ModInstallerService(
+        HttpClient http,
+        GitHubReleaseService gitHub,
+        ThunderstoreService thunderstore,
+        HexiumService hexium)
     {
         _http = http;
         _gitHub = gitHub;
         _thunderstore = thunderstore;
+        _hexium = hexium;
     }
 
     public async Task<ResolvedModVersion> ResolveLatestAsync(ModEntry mod, CancellationToken ct = default)
@@ -35,6 +41,7 @@ public sealed class ModInstallerService
         {
             ModSource.GitHub => await _gitHub.GetLatestAsync(mod, ct),
             ModSource.Thunderstore => await _thunderstore.GetLatestAsync(mod, ct),
+            ModSource.Hexium => await _hexium.GetLatestAsync(mod, ct),
             _ => throw new NotSupportedException($"Fonte de mod não suportada: {mod.Source}")
         };
     }
