@@ -451,6 +451,15 @@ public static class LauncherSelfTest
 
                 if (vm is not null) VerificarAbasEMarcarTodos(vm);
 
+                // Versões à vista: são o que o jogador cita no suporte.
+                var versaoLauncher = (janela.FindName("VersaoDoLauncherTexto") as System.Windows.Controls.TextBlock)?.Text;
+                Check("UI: mostra a versão do launcher",
+                    versaoLauncher == "v" + AutoAtualizacaoService.VersaoAtual, versaoLauncher ?? "(ausente)");
+                var versaoServidor = (janela.FindName("VersaoDoServidorTexto") as System.Windows.Controls.TextBlock)?.Text;
+                Check("UI: mostra a versão do servidor",
+                    !string.IsNullOrWhiteSpace(versaoServidor) && versaoServidor == vm?.VersaoDoServidor,
+                    versaoServidor ?? "(ausente)");
+
                 VerificarJanelaDeConfiguracoes(janela);
             }
             finally
