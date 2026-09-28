@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DeadheimLauncher.ViewModels"
         xmlns:local="clr-namespace:DeadheimLauncher.Converters"
-        Title="Deadheim" Height="600" Width="940" MinHeight="520" MinWidth="820"
+        Title="{Binding TituloDaJanela}" Height="600" Width="940" MinHeight="520" MinWidth="820"
         Background="{StaticResource BgBrush}"
         WindowStartupLocation="CenterScreen">
     <Window.DataContext>
@@ -100,8 +100,16 @@
             <!-- Cabeçalho -->
             <Grid VerticalAlignment="Top" Margin="34,26,26,0">
                 <StackPanel HorizontalAlignment="Left">
+                    <!-- DEADHEIM em futhark antigo. Segoe UI Historic é a fonte do
+                         Windows que traz o bloco rúnico. -->
+                    <TextBlock Text="ᛞ ᛖ ᚨ ᛞ ᚺ ᛖ ᛁ ᛗ" FontFamily="Segoe UI Historic" FontSize="12"
+                               Foreground="{StaticResource AccentBrush}" Opacity="0.8" Margin="4,0,0,-2" />
                     <TextBlock Text="DEADHEIM" FontSize="46" FontWeight="Bold"
-                               FontFamily="Segoe UI Black" Foreground="{StaticResource TextBrush}" />
+                               FontFamily="Segoe UI Black" Foreground="{StaticResource TextBrush}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#C4602A" BlurRadius="26" ShadowDepth="0" Opacity="0.45" />
+                        </TextBlock.Effect>
+                    </TextBlock>
                     <StackPanel Orientation="Horizontal" Margin="2,-6,0,0">
                         <Border Width="26" Height="3" CornerRadius="2" VerticalAlignment="Center"
                                 Background="{StaticResource AccentBrush}" />
@@ -129,6 +137,65 @@
                             VerticalAlignment="Center" Command="{Binding OpenSettingsCommand}" />
                 </StackPanel>
             </Grid>
+
+            <!-- Verso do Hávamál, trocado de tempos em tempos. Entra com um
+                 fade a cada troca (TargetUpdated), para não "piscar". -->
+            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Margin="36,70,26,40" MaxWidth="470">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Border Width="34" Height="1" VerticalAlignment="Center" Background="{StaticResource BorderBrush2}" />
+                    <TextBlock Text="ᛟ" FontFamily="Segoe UI Historic" FontSize="15" Margin="8,0"
+                               VerticalAlignment="Center" Foreground="{StaticResource AccentBrush}" />
+                    <Border Width="34" Height="1" VerticalAlignment="Center" Background="{StaticResource BorderBrush2}" />
+                </StackPanel>
+                <TextBlock Text="{Binding SagaVerso, NotifyOnTargetUpdated=True}" TextWrapping="Wrap"
+                           FontFamily="Georgia" FontStyle="Italic" FontSize="17" LineHeight="26"
+                           Foreground="{StaticResource TextBrush}" Opacity="0.92">
+                    <TextBlock.Triggers>
+                        <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="0" To="0.92" Duration="0:0:0.9" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </TextBlock.Triggers>
+                </TextBlock>
+                <TextBlock Text="{Binding SagaFonte}" FontSize="11" Margin="0,10,0,0"
+                           FontWeight="SemiBold" Foreground="{StaticResource MutedTextBrush}" />
+            </StackPanel>
+
+            <!-- Versões à vista: é o que o jogador cita quando alguém pergunta
+                 "você está atualizado?", e o que o admin confere quando algo
+                 dá errado. -->
+            <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="34,0,26,14"
+                    Background="#C01A1614" BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                    CornerRadius="4" Padding="14,8">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel>
+                        <TextBlock Text="LAUNCHER" FontSize="9" FontWeight="Bold"
+                                   Foreground="{StaticResource MutedTextBrush}" />
+                        <TextBlock x:Name="VersaoDoLauncherTexto" Text="{Binding VersaoDoLauncher}"
+                                   FontFamily="Consolas" FontSize="13" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Border Width="1" Background="{StaticResource BorderBrush2}" Margin="14,2" />
+                    <StackPanel>
+                        <TextBlock Text="SERVIDOR" FontSize="9" FontWeight="Bold"
+                                   Foreground="{StaticResource MutedTextBrush}" />
+                        <TextBlock x:Name="VersaoDoServidorTexto" Text="{Binding VersaoDoServidor}"
+                                   FontFamily="Consolas" FontSize="13" Margin="0,2,0,0"
+                                   Foreground="{StaticResource AccentBrush}" />
+                    </StackPanel>
+                    <Border Width="1" Background="{StaticResource BorderBrush2}" Margin="14,2" />
+                    <StackPanel>
+                        <TextBlock Text="ENDEREÇO" FontSize="9" FontWeight="Bold"
+                                   Foreground="{StaticResource MutedTextBrush}" />
+                        <TextBlock Text="{Binding EnderecoDoServidor}"
+                                   FontFamily="Consolas" FontSize="13" Margin="0,2,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
             <!-- ===== painel de mods, sobreposto e fechado por padrão ===== -->
             <Border Background="#F21A1614" BorderBrush="{StaticResource BorderBrush2}"
@@ -315,6 +382,7 @@
                             Command="{Binding FecharJogoCommand}"
                             Visibility="{Binding IsGameRunning, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
                     <Button Content="JOGAR" FontSize="17" FontWeight="Bold" MinWidth="180" Height="44"
+                            Style="{StaticResource BotaoJogar}"
                             Command="{Binding PlayCommand}"
                             IsEnabled="{Binding PodeJogar}" />
                     </StackPanel>
