@@ -220,7 +220,7 @@ public sealed partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(ProgressoTexto));
     }
 
-    // ---- versões e identidade ----
+    // ---- versões e novidades ----
 
     /// <summary>Versão deste launcher, a mesma que o instalador e o GitHub usam.</summary>
     public string VersaoDoLauncher => "v" + AutoAtualizacaoService.VersaoAtual;
@@ -247,38 +247,20 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Changelog do manifest, na ordem em que foi publicado (mais recente primeiro).</summary>
+    public ObservableCollection<ChangelogEntry> Changelog { get; } = new();
+
+    public bool TemChangelog => Changelog.Count > 0;
+
     private void AtualizarInfoDoServidor()
     {
+        Changelog.Clear();
+        foreach (var entrada in _manifest.Changelog.Where(c => !string.IsNullOrWhiteSpace(c.Version)))
+            Changelog.Add(entrada);
+
+        OnPropertyChanged(nameof(TemChangelog));
         OnPropertyChanged(nameof(VersaoDoServidor));
         OnPropertyChanged(nameof(EnderecoDoServidor));
-    }
-
-    /// <summary>
-    /// Versos do Hávamál (em tradução livre) que se revezam no palco. É o toque
-    /// de Deadheim na tela de espera, e a fonte certa para um servidor viking:
-    /// os conselhos de Odin, não frase de efeito inventada.
-    /// </summary>
-    public static readonly (string Verso, string Fonte)[] Sagas =
-    {
-        ("O gado morre, os parentes morrem, e tu mesmo morrerás. Só uma coisa sei que nunca morre: o renome de cada morto.", "Hávamál, 77"),
-        ("Não te afastes um passo sequer das tuas armas no campo aberto: nunca se sabe quando a lança será necessária.", "Hávamál, 38"),
-        ("O covarde crê que viverá para sempre se fugir da luta; mas a velhice não lhe dará trégua, ainda que as lanças o poupem.", "Hávamál, 16"),
-        ("Melhor uma casa pequena que nenhuma: sob o próprio teto, todo homem é senhor.", "Hávamál, 36"),
-        ("Levanta cedo quem pretende tomar a vida ou os bens de outro: lobo deitado não ganha o pernil, nem homem que dorme a vitória.", "Hávamál, 58"),
-        ("Antes de entrar, observa todas as portas: nunca se sabe onde os inimigos estão sentados.", "Hávamál, 1"),
-    };
-
-    private int _indiceDaSaga = Random.Shared.Next(Sagas.Length);
-    private readonly DispatcherTimer _sagaTimer;
-
-    public string SagaVerso => Sagas[_indiceDaSaga].Verso;
-    public string SagaFonte => "— " + Sagas[_indiceDaSaga].Fonte;
-
-    private void ProximaSaga()
-    {
-        _indiceDaSaga = (_indiceDaSaga + 1) % Sagas.Length;
-        OnPropertyChanged(nameof(SagaVerso));
-        OnPropertyChanged(nameof(SagaFonte));
     }
 
     public MainViewModel()
@@ -290,10 +272,6 @@ public sealed partial class MainViewModel : ObservableObject
         _gameProcessTimer.Tick += (_, _) => AtualizarEstadoDoJogo();
         AtualizarEstadoDoJogo();
         _gameProcessTimer.Start();
-
-        _sagaTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(14) };
-        _sagaTimer.Tick += (_, _) => ProximaSaga();
-        _sagaTimer.Start();
     }
 
     private void AtualizarEstadoDoJogo()
@@ -328,11 +306,11 @@ public sealed partial class MainViewModel : ObservableObject
             _settings = _settingsService.Load();
             FastLinkCleanupService.RemoveLegacyFiles(PerfilUnico);
 
-            StatusText = "Consultando as runas do servidor...";
+            StatusText = "Baixando lista de mods do servidor...";
             _manifest = await _manifestService.GetManifestAsync(_settings.ManifestUrl);
 
             CarregarPerfil();
-            StatusText = "Pronto. Os portões de Deadheim estão abertos.";
+            StatusText = "Pronto.";
 
             // Depois de a janela já estar utilizável: checar atualização não
             // pode atrasar a abertura.
@@ -493,9 +471,9 @@ public sealed partial class MainViewModel : ObservableObject
             var valheimPath = _launchService.ResolveValheimPath(_settings);
             _launchService.PrepararJogo(valheimPath, _activeProfile.Name);
 
-            StatusText = "Rumo a Deadheim...";
+            StatusText = "Iniciando o Valheim...";
             _launchService.LaunchGame(valheimPath, _activeProfile.Name, _manifest.AplicarServidor(_settings));
-            StatusText = "Valheim iniciado. Boa caçada, viking.";
+            StatusText = "Valheim iniciado.";
         }
         catch (Exception ex)
         {
