@@ -898,6 +898,17 @@ public static class LauncherSelfTest
             && !argumentos.Contains("FastLink", StringComparison.OrdinalIgnoreCase),
             argumentos);
 
+        var manifestComServidor = new ModManifest { ServerHost = "localhost", ServerPort = 2456 };
+        var argumentosDoManifest = ValheimLaunchService.MontarArgumentosDeInicializacao(
+            "SyncTest", manifestComServidor.AplicarServidor(conexao));
+        Check("servidor do manifest substitui o das Configurações",
+            argumentosDoManifest.Contains("+connect localhost:2456")
+            && argumentosDoManifest.Contains("-password \"senha local\"")
+            && conexao.ServerHost == "servidor.exemplo",
+            argumentosDoManifest);
+        Check("manifest sem servidor mantém o das Configurações",
+            ReferenceEquals(new ModManifest().AplicarServidor(conexao), conexao));
+
         var settings = new LauncherSettings { ValheimPath = fakeGame };
         Check("caminho do Valheim configurado à mão é respeitado",
             launch.ResolveValheimPath(settings) == fakeGame);

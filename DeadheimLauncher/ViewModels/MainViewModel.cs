@@ -428,7 +428,7 @@ public sealed partial class MainViewModel : ObservableObject
             _launchService.PrepararJogo(valheimPath, _activeProfile.Name);
 
             StatusText = "Iniciando o Valheim...";
-            _launchService.LaunchGame(valheimPath, _activeProfile.Name, _settings);
+            _launchService.LaunchGame(valheimPath, _activeProfile.Name, _manifest.AplicarServidor(_settings));
             StatusText = "Valheim iniciado.";
         }
         catch (Exception ex)

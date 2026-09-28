@@ -12,6 +12,36 @@ public sealed class ModManifest
     /// </summary>
     public string? PackVersion { get; set; }
 
+    /// <summary>
+    /// Servidor onde este pacote roda. Quando o manifest traz os dois, o botão
+    /// Jogar conecta aqui em vez do endereço das Configurações — assim um
+    /// manifest de teste (ex. servidor local) leva junto o próprio endereço, e
+    /// quem aponta o ManifestUrl para ele não precisa trocar mais nada.
+    /// Ausentes, vale o que está nas Configurações.
+    /// </summary>
+    public string? ServerHost { get; set; }
+    public int? ServerPort { get; set; }
+
+    /// <summary>
+    /// Configurações com o servidor do manifest por cima, se ele declarar um.
+    /// Devolve uma cópia: o settings.json do jogador não é alterado.
+    /// </summary>
+    public LauncherSettings AplicarServidor(LauncherSettings settings)
+    {
+        if (string.IsNullOrWhiteSpace(ServerHost) || ServerPort is not (>= 1 and <= 65535))
+            return settings;
+
+        return new LauncherSettings
+        {
+            ValheimPath = settings.ValheimPath,
+            ManifestUrl = settings.ManifestUrl,
+            LastActiveProfile = settings.LastActiveProfile,
+            ServerHost = ServerHost.Trim(),
+            ServerPort = ServerPort.Value,
+            ServerPassword = settings.ServerPassword
+        };
+    }
+
     public List<ModEntry> OwnMods { get; set; } = new();
     public List<ModEntry> ThunderstoreMods { get; set; } = new();
 
