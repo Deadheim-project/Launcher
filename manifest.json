@@ -1,11 +1,11 @@
 {
-  "_comment": "Manifest do Valheim 1.0 (pacote PvP). NAO e o de producao: esse fica no main deste repo. Mods proprios vem dos releases do GitHub compilados contra o 1.0.16 (tags v7.0.0, v2.1.0, v1.0.50, v0.4.0, v2.0.0; AdaptiveNet 0.3.2 e o mesmo binario de producao). Terceiros do Hexium, porque o Thunderstore esta atrasado para o 1.0.",
-  "packVersion": "1.0-pvp",
+  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.51 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.0.0, Velas v0.4.0, RaidSystem v2.1.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium, porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao).",
+  "packVersion": "1.0-pvp.1",
   "ownMods": [
     {
       "id": "npcs",
       "name": "NPCs",
-      "description": "Mercador, Teleportador, Correio e Missoes.",
+      "description": "Mercador, Teleportador, Correio, Missoes e Loja Deadcoins.",
       "required": true,
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
@@ -13,7 +13,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.50"
+      "version": "1.0.51"
     },
     {
       "id": "deadheim",
@@ -68,19 +68,6 @@
       "version": "2.1.0"
     },
     {
-      "id": "donationshop",
-      "name": "Donation Shop",
-      "description": "Loja de doacoes.",
-      "required": true,
-      "source": "GitHub",
-      "gitHubOwner": "Deadheim-project",
-      "gitHubRepo": "donationshop",
-      "assetPattern": "DonationShop.zip",
-      "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/donationshop/releases",
-      "version": "2.0.0"
-    },
-    {
       "id": "adaptivenet",
       "name": "AdaptiveNet",
       "description": "Rede adaptativa do servidor.",
@@ -91,7 +78,7 @@
       "assetPattern": "AdaptiveNet.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/AdaptiveNet/releases",
-      "version": "0.3.2"
+      "version": "0.4.0"
     }
   ],
   "thunderstoreMods": [
