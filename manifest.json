@@ -1,6 +1,6 @@
 {
-  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.51 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.0.0, Velas v0.4.0, RaidSystem v2.1.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium, porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Opcionais (VNEI, Gizmo, ValheimFPSBoost) e ferramentas de admin (Jere, DevToggle, ConfigManager) voltaram sem versao fixa: o launcher pega a mais recente do Thunderstore.",
-  "packVersion": "1.0-pvp.2",
+  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.51 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.0.0, Velas v0.4.0, RaidSystem v2.1.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium, porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Admin e opcionais que existem no Hexium tambem vem de la com versao fixa: Server_devcommands 1.115.0, Infinity_Hammer 1.85.0, World_Edit_Commands 1.78.0, Upgrade_World 1.83.0, Azus_UnOfficial_ConfigManager 19.5.0 e VNEI 0.17.6. DevToggle, Gizmo e ValheimFPSBoost nao existem no Hexium e continuam no Thunderstore sem versao fixa (o launcher pega a mais recente).",
+  "packVersion": "1.0-pvp.3",
   "ownMods": [
     {
       "id": "npcs",
@@ -161,11 +161,12 @@
       "description": "Liga os devcommands e o teleporte que funciona de verdade. Base das outras ferramentas.",
       "required": false,
       "category": "Admin",
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "Server_devcommands",
+      "version": "1.115.0",
       "author": "JereKuusela",
-      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Server_devcommands/"
+      "url": "https://valheim.hexium.gg/mods/JereKuusela/Server_devcommands"
     },
     {
       "id": "infinity-hammer",
@@ -173,11 +174,12 @@
       "description": "Copia, cola e move qualquer estrutura ou objeto do mundo.",
       "required": false,
       "category": "Admin",
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "Infinity_Hammer",
+      "version": "1.85.0",
       "author": "JereKuusela",
-      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Infinity_Hammer/"
+      "url": "https://valheim.hexium.gg/mods/JereKuusela/Infinity_Hammer"
     },
     {
       "id": "world-edit-commands",
@@ -185,11 +187,12 @@
       "description": "Comandos de edição do mundo: terreno, objetos e vegetação em área.",
       "required": false,
       "category": "Admin",
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "World_Edit_Commands",
+      "version": "1.78.0",
       "author": "JereKuusela",
-      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/World_Edit_Commands/"
+      "url": "https://valheim.hexium.gg/mods/JereKuusela/World_Edit_Commands"
     },
     {
       "id": "upgrade-world",
@@ -197,11 +200,12 @@
       "description": "Regenera áreas já exploradas para receber conteúdo novo. CUIDADO: altera o mundo salvo.",
       "required": false,
       "category": "Admin",
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "Upgrade_World",
+      "version": "1.83.0",
       "author": "JereKuusela",
-      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Upgrade_World/"
+      "url": "https://valheim.hexium.gg/mods/JereKuusela/Upgrade_World"
     },
     {
       "id": "devtoggle",
@@ -221,11 +225,12 @@
       "description": "Menu dentro do jogo para ajustar a configuração dos mods, com F1.",
       "required": false,
       "category": "Admin",
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "Azus_UnOfficial_ConfigManager",
+      "version": "19.5.0",
       "author": "Azumatt",
-      "url": "https://thunderstore.io/c/valheim/p/Azumatt/Azus_UnOfficial_ConfigManager/"
+      "url": "https://valheim.hexium.gg/mods/Azumatt/Azus_UnOfficial_ConfigManager"
     },
     {
       "id": "vnei",
@@ -233,11 +238,12 @@
       "description": "Mostra todos os itens e receitas do jogo numa janela de consulta.",
       "required": false,
       "category": "Opcional",
-      "source": "Thunderstore",
+      "source": "Hexium",
       "thunderstoreNamespace": "MSchmoecker",
       "thunderstoreName": "VNEI",
+      "version": "0.17.6",
       "author": "MSchmoecker",
-      "url": "https://thunderstore.io/c/valheim/p/MSchmoecker/VNEI/"
+      "url": "https://valheim.hexium.gg/mods/MSchmoecker/VNEI"
     },
     {
       "id": "gizmo",
