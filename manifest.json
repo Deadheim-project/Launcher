@@ -1,6 +1,6 @@
 {
-  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.51 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.0.0, Velas v0.4.0, RaidSystem v2.1.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium, porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao).",
-  "packVersion": "1.0-pvp.1",
+  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.51 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.0.0, Velas v0.4.0, RaidSystem v2.1.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium, porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Opcionais (VNEI, Gizmo, ValheimFPSBoost) e ferramentas de admin (Jere, DevToggle, ConfigManager) voltaram sem versao fixa: o launcher pega a mais recente do Thunderstore.",
+  "packVersion": "1.0-pvp.2",
   "ownMods": [
     {
       "id": "npcs",
@@ -154,6 +154,114 @@
       "version": "5.1.1",
       "author": "Azumatt",
       "url": "https://valheim.hexium.gg/mods/Azumatt/AzuAntiCheat"
+    },
+    {
+      "id": "server-devcommands",
+      "name": "Server devcommands",
+      "description": "Liga os devcommands e o teleporte que funciona de verdade. Base das outras ferramentas.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "JereKuusela",
+      "thunderstoreName": "Server_devcommands",
+      "author": "JereKuusela",
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Server_devcommands/"
+    },
+    {
+      "id": "infinity-hammer",
+      "name": "Infinity Hammer",
+      "description": "Copia, cola e move qualquer estrutura ou objeto do mundo.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "JereKuusela",
+      "thunderstoreName": "Infinity_Hammer",
+      "author": "JereKuusela",
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Infinity_Hammer/"
+    },
+    {
+      "id": "world-edit-commands",
+      "name": "World Edit Commands",
+      "description": "Comandos de edição do mundo: terreno, objetos e vegetação em área.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "JereKuusela",
+      "thunderstoreName": "World_Edit_Commands",
+      "author": "JereKuusela",
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/World_Edit_Commands/"
+    },
+    {
+      "id": "upgrade-world",
+      "name": "Upgrade World",
+      "description": "Regenera áreas já exploradas para receber conteúdo novo. CUIDADO: altera o mundo salvo.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "JereKuusela",
+      "thunderstoreName": "Upgrade_World",
+      "author": "JereKuusela",
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Upgrade_World/"
+    },
+    {
+      "id": "devtoggle",
+      "name": "DevToggle",
+      "description": "Atalho para ligar e desligar o modo dev.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "YouDied",
+      "thunderstoreName": "DevToggle",
+      "author": "YouDied",
+      "url": "https://thunderstore.io/c/valheim/p/YouDied/DevToggle/"
+    },
+    {
+      "id": "azus-unofficial-configmanager",
+      "name": "Azus UnOfficial ConfigManager",
+      "description": "Menu dentro do jogo para ajustar a configuração dos mods, com F1.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "Azumatt",
+      "thunderstoreName": "Azus_UnOfficial_ConfigManager",
+      "author": "Azumatt",
+      "url": "https://thunderstore.io/c/valheim/p/Azumatt/Azus_UnOfficial_ConfigManager/"
+    },
+    {
+      "id": "vnei",
+      "name": "VNEI",
+      "description": "Mostra todos os itens e receitas do jogo numa janela de consulta.",
+      "required": false,
+      "category": "Opcional",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "MSchmoecker",
+      "thunderstoreName": "VNEI",
+      "author": "MSchmoecker",
+      "url": "https://thunderstore.io/c/valheim/p/MSchmoecker/VNEI/"
+    },
+    {
+      "id": "gizmo",
+      "name": "Gizmo",
+      "description": "Permite girar peças em qualquer eixo na hora de construir.",
+      "required": false,
+      "category": "Opcional",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "ComfyMods",
+      "thunderstoreName": "Gizmo",
+      "author": "ComfyMods",
+      "url": "https://thunderstore.io/c/valheim/p/ComfyMods/Gizmo/"
+    },
+    {
+      "id": "valheimfpsboost",
+      "name": "ValheimFPSBoost",
+      "description": "Reduz alguns detalhes gráficos internos para ganhar FPS. O ganho varia por máquina.",
+      "required": false,
+      "category": "Opcional",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "castix",
+      "thunderstoreName": "ValheimFPSBoost",
+      "author": "castix",
+      "url": "https://thunderstore.io/c/valheim/p/castix/ValheimFPSBoost/"
     }
   ]
 }
