@@ -79,7 +79,8 @@ jobs:
 
       - name: Gerar o instalador
         run: |
-          $tag = "${{ github.ref_name }}"
+          # No disparo manual o ref e a branch (main), nao a tag: a versao vem do input.
+          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.version }}" } else { "${{ github.ref_name }}" }
           $versao = $tag -replace '^v', ''
           if ($versao -notmatch '^\d+(\.\d+){1,3}$') { $versao = "1.0.0" }
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=$versao installer\DeadheimLauncher.iss
