@@ -907,6 +907,14 @@ public static class LauncherSelfTest
             && !argumentos.Contains("FastLink", StringComparison.OrdinalIgnoreCase),
             argumentos);
 
+        var comChangelog = ManifestService.Interpretar(
+            "{\"packVersion\":\"9.9\",\"changelog\":[{\"version\":\"9.9\",\"date\":\"01/01/2026\",\"changes\":[\"a\",\"b\"]}]}");
+        Check("manifest traz o changelog",
+            comChangelog?.Changelog.Count == 1
+            && comChangelog.Changelog[0].Version == "9.9"
+            && comChangelog.Changelog[0].Changes.Count == 2,
+            $"{comChangelog?.Changelog.Count ?? 0} entradas");
+
         var manifestComServidor = new ModManifest { ServerHost = "localhost", ServerPort = 2456 };
         var argumentosDoManifest = ValheimLaunchService.MontarArgumentosDeInicializacao(
             "SyncTest", manifestComServidor.AplicarServidor(conexao));

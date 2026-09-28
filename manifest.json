@@ -1,6 +1,54 @@
 {
   "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.51 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.0.0, Velas v0.4.0, RaidSystem v2.1.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium (inclusive o BepInExPack 5.4.2351, a versao que VNEI, Jotunn e YamlDotNet pedem), porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Admin e opcionais que existem no Hexium tambem vem de la com versao fixa: Server_devcommands 1.115.0, Infinity_Hammer 1.85.0, World_Edit_Commands 1.78.0, Upgrade_World 1.83.0, Azus_UnOfficial_ConfigManager 19.5.0 e VNEI 0.17.6, com as dependencias dele (tambem opcionais, marcar junto com o VNEI): Jotunn 2.30.2 e YamlDotNet 16.3.1. DevToggle, Gizmo e ValheimFPSBoost nao existem no Hexium e continuam no Thunderstore sem versao fixa (o launcher pega a mais recente). serverHost/serverPort: o launcher conecta nesse endereco (hoje o servidor local de teste, localhost:2456) em vez do das Configuracoes; precisa do launcher com suporte a esses campos.",
   "packVersion": "1.0-pvp.6",
+  "changelog": [
+    {
+      "version": "1.0-pvp.6",
+      "date": "28/09/2026",
+      "title": "Servidor local de teste",
+      "changes": [
+        "Este pacote conecta em localhost:2456 (servidor rodando na mesma máquina)."
+      ]
+    },
+    {
+      "version": "Launcher 1.2.6",
+      "date": "28/09/2026",
+      "title": "Versões e novidades na tela inicial",
+      "changes": [
+        "A tela inicial mostra a versão do launcher, a do servidor e o endereço de conexão.",
+        "As novidades do servidor passam a aparecer aqui."
+      ]
+    },
+    {
+      "version": "1.0-pvp.5",
+      "date": "28/09/2026",
+      "title": "Opcionais e ferramentas de admin de volta",
+      "changes": [
+        "Opcionais: VNEI, Gizmo e ValheimFPSBoost.",
+        "VNEI precisa do Jotunn e do YamlDotNet: marque os três juntos na aba Opcionais.",
+        "Admin: Server devcommands, Infinity Hammer, World Edit Commands, Upgrade World, DevToggle e Azus UnOfficial ConfigManager.",
+        "BepInExPack atualizado para 5.4.2351."
+      ]
+    },
+    {
+      "version": "1.0-pvp.1",
+      "date": "28/09/2026",
+      "title": "Loja Deadcoins",
+      "changes": [
+        "NPCs 1.0.51: a Loja Deadcoins substitui a Donation Shop, com o preço conferido no servidor.",
+        "AdaptiveNet 0.4.0."
+      ]
+    },
+    {
+      "version": "1.0-pvp",
+      "date": "27/09/2026",
+      "title": "Nova temporada no Valheim 1.0",
+      "changes": [
+        "Mods do Deadheim recompilados para o Valheim 1.0.",
+        "Guilds, Groups, ServerCharacters, CreatureLevelAndLootControl e AzuAntiCheat nas versões compatíveis com o 1.0."
+      ]
+    }
+  ],
   "serverHost": "localhost",
   "serverPort": 2456,
   "ownMods": [

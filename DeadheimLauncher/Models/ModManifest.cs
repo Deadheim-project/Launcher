@@ -42,6 +42,13 @@ public sealed class ModManifest
         };
     }
 
+    /// <summary>
+    /// Novidades mostradas na tela inicial, da mais recente para a mais antiga.
+    /// Vêm no manifest para que anunciar uma mudança seja o mesmo commit que a
+    /// faz, sem precisar publicar launcher novo.
+    /// </summary>
+    public List<ChangelogEntry> Changelog { get; set; } = new();
+
     public List<ModEntry> OwnMods { get; set; } = new();
     public List<ModEntry> ThunderstoreMods { get; set; } = new();
 
