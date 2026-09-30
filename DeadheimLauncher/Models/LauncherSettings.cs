@@ -13,21 +13,21 @@ public sealed class LauncherSettings
     public string ManifestUrl { get; set; } =
         "https://raw.githubusercontent.com/Deadheim-project/Launcher/main/manifest.json";
     public string LastActiveProfile { get; set; } = "Default";
-    public string ServerHost { get; set; } = "loboda.dathost.net";
-    public int ServerPort { get; set; } = 20486;
+
+    // Temporada nova em desenvolvimento: o servidor e o local de teste do dono
+    // (D:\dh-local, 127.0.0.1:2456). Trocar pelo endereco real quando o servidor
+    // entrar no ar -- ate la nenhum jogador conecta.
+    public string ServerHost { get; set; } = "127.0.0.1";
+    public int ServerPort { get; set; } = 2456;
     /// <summary>
-    /// Senha do servidor oficial, distribuída no launcher para que todos os
-    /// jogadores entrem diretamente sem depender do FastLink ou digitá-la.
-    ///
-    /// É a mesma que o Azumatt.FastLink_servers.yml publica e a mesma do
-    /// AutoJoinPassword: senha de jogo, feita para ser distribuída.
+    /// Senha do servidor, distribuída no launcher para que o jogador entre
+    /// direto, sem digitá-la. Hoje é a do servidor local de teste.
     ///
     /// Aqui entra SÓ a senha do jogo. Este repositório precisa ser público — é
     /// de raw.githubusercontent.com que o launcher busca o manifest.json — então
-    /// tudo neste arquivo é publicado junto. O valor anterior era, byte a byte,
-    /// a senha de FTP da DatHost: além de dar escrita em plugins, na whitelist
-    /// do anticheat e nos mundos salvos, ela nem servia para entrar, e todo
-    /// jogador com instalação nova era recusado no -password.
+    /// tudo neste arquivo é publicado junto. Um valor antigo daqui era, byte a
+    /// byte, a senha de FTP da DatHost: além de dar escrita em plugins, na
+    /// whitelist do anticheat e nos mundos salvos, ela nem servia para entrar.
     /// </summary>
-    public string? ServerPassword { get; set; } = "secret";
+    public string? ServerPassword { get; set; } = "dhlocal1";
 }
