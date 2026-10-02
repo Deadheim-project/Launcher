@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.52"
+      "version": "1.0.53"
     },
     {
       "id": "deadheim",
@@ -85,7 +85,7 @@
       "assetPattern": "RaidSystem.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/RaidSystem/releases",
-      "version": "2.2.0"
+      "version": "2.2.1"
     },
     {
       "id": "hearthstone",
