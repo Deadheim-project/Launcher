@@ -3,6 +3,14 @@
   "packVersion": "1.0-pvp.7",
   "changelog": [
     {
+      "version": "Launcher 1.2.7",
+      "date": "02/10/2026",
+      "title": "Tela inicial sem o endereço",
+      "changes": [
+        "A tela inicial mostra só a versão do launcher e a do servidor; o endereço de conexão saiu."
+      ]
+    },
+    {
       "version": "1.0-pvp.7",
       "date": "01/10/2026",
       "title": "Mercador e leilão",
