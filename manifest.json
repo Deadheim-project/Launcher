@@ -14,7 +14,8 @@
         "Base fora da zona segura pode ser raidada com dano reduzido; dentro, 100% protegida.",
         "/pve confirmar: modo PvE permanente, sem volta.",
         "Forja de Potencial: Garantia de Refino para não perder o item.",
-        "Admin: Infinity Hammer 1.86.0 e World Edit Commands 1.79.0."
+        "Admin: Infinity Hammer 1.86.0 e World Edit Commands 1.79.0.",
+        "AzuAntiCheat 5.2.0 (correção de segurança) e Creature Level & Loot Control 5.0.6."
       ]
     },
     {
@@ -221,7 +222,7 @@
       "source": "Hexium",
       "thunderstoreNamespace": "Smoothbrain",
       "thunderstoreName": "CreatureLevelAndLootControl",
-      "version": "5.0.5",
+      "version": "5.0.6",
       "author": "Smoothbrain",
       "url": "https://valheim.hexium.gg/mods/Smoothbrain/CreatureLevelAndLootControl"
     },
@@ -233,7 +234,7 @@
       "source": "Hexium",
       "thunderstoreNamespace": "Azumatt",
       "thunderstoreName": "AzuAntiCheat",
-      "version": "5.1.1",
+      "version": "5.2.0",
       "author": "Azumatt",
       "url": "https://valheim.hexium.gg/mods/Azumatt/AzuAntiCheat"
     },
