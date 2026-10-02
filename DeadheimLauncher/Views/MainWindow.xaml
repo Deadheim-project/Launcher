@@ -204,13 +204,6 @@
                                    FontFamily="Consolas" FontSize="13" Margin="0,2,0,0"
                                    Foreground="{StaticResource AccentBrush}" />
                     </StackPanel>
-                    <Border Width="1" Background="{StaticResource BorderBrush2}" Margin="14,2" />
-                    <StackPanel>
-                        <TextBlock Text="ENDEREÇO" FontSize="9" FontWeight="Bold"
-                                   Foreground="{StaticResource MutedTextBrush}" />
-                        <TextBlock Text="{Binding EnderecoDoServidor}"
-                                   FontFamily="Consolas" FontSize="13" Margin="0,2,0,0" />
-                    </StackPanel>
                 </StackPanel>
             </Border>
 

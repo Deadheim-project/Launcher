@@ -235,18 +235,6 @@ public sealed partial class MainViewModel : ObservableObject
     public string VersaoDoServidor =>
         string.IsNullOrWhiteSpace(_manifest.PackVersion) ? "—" : _manifest.PackVersion!;
 
-    /// <summary>Onde o Jogar vai conectar: o do manifest, se houver, ou o das Configurações.</summary>
-    public string EnderecoDoServidor
-    {
-        get
-        {
-            var efetivo = _manifest.AplicarServidor(_settings);
-            return string.IsNullOrWhiteSpace(efetivo.ServerHost)
-                ? "—"
-                : $"{efetivo.ServerHost.Trim()}:{efetivo.ServerPort}";
-        }
-    }
-
     /// <summary>Changelog do manifest, na ordem em que foi publicado (mais recente primeiro).</summary>
     public ObservableCollection<ChangelogEntry> Changelog { get; } = new();
 
@@ -260,7 +248,6 @@ public sealed partial class MainViewModel : ObservableObject
 
         OnPropertyChanged(nameof(TemChangelog));
         OnPropertyChanged(nameof(VersaoDoServidor));
-        OnPropertyChanged(nameof(EnderecoDoServidor));
     }
 
     public MainViewModel()
