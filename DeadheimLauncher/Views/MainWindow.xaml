@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DeadheimLauncher.ViewModels"
         xmlns:local="clr-namespace:DeadheimLauncher.Converters"
-        Title="{Binding TituloDaJanela}" Height="600" Width="940" MinHeight="520" MinWidth="820"
+        Title="{Binding TituloDaJanela}" Height="640" Width="940" MinHeight="520" MinWidth="820"
         Background="{StaticResource BgBrush}"
         WindowStartupLocation="CenterScreen">
     <Window.DataContext>
@@ -130,17 +130,57 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Novidades do servidor e do launcher, vindas do manifest. Ocupa o
-                 palco que antes ficava vazio; o painel de mods, quando aberto,
-                 fica por cima. -->
-            <Border HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="480"
-                    Margin="34,112,26,76" Padding="16,12"
-                    Background="#C01A1614" BorderBrush="{StaticResource BorderBrush2}"
-                    BorderThickness="1" CornerRadius="6"
-                    Visibility="{Binding TemChangelog, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="NOVIDADES" FontSize="11" FontWeight="Bold"
-                               Foreground="{StaticResource AccentBrush}" Margin="0,0,0,10" />
+            <!-- Palco: a apresentação do servidor e, quando o manifest trouxer,
+                 as novidades. Cada aba só aparece se o manifest tiver o conteúdo
+                 dela; sozinha, O SERVIDOR faz as vezes de título. Fica sem
+                 caixa em volta, direto sobre a parte escura da arte; o painel
+                 de mods, quando aberto, fica por cima. -->
+            <TabControl HorizontalAlignment="Left" Width="560" Margin="34,108,0,14"
+                        SelectedIndex="{Binding AbaDoPalco}"
+                        Visibility="{Binding TemConteudoNoPalco, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                <TabItem Header="O SERVIDOR"
+                         Visibility="{Binding TemApresentacao, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock x:Name="TituloDaApresentacao" Text="{Binding Apresentacao.Title}"
+                                       FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap"
+                                       Visibility="{Binding Apresentacao.TemTitulo, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+                            <TextBlock Text="{Binding Apresentacao.About}" FontSize="13" LineHeight="19"
+                                       TextWrapping="Wrap" Margin="0,6,0,0"
+                                       Foreground="{StaticResource SoftTextBrush}"
+                                       Visibility="{Binding Apresentacao.TemSobre, Converter={x:Static local:BoolToVisibilityConverter.Instance}}" />
+
+                            <!-- Os sistemas do servidor, dois por linha. UniformGrid
+                                 deixa todos os cartões com a mesma altura, então a
+                                 grade não fica serrilhada quando um texto é maior. -->
+                            <ItemsControl ItemsSource="{Binding Destaques}" Margin="-4,10,-4,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="2" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="4" Padding="12,8" CornerRadius="4"
+                                                Background="#C01A1614" BorderBrush="{StaticResource BorderBrush2}"
+                                                BorderThickness="1">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="Bold"
+                                                           TextWrapping="Wrap" Foreground="{StaticResource AccentBrush}" />
+                                                <TextBlock Text="{Binding Text}" FontSize="12" LineHeight="17"
+                                                           TextWrapping="Wrap" Margin="0,3,0,0"
+                                                           Foreground="{StaticResource SoftTextBrush}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem Header="NOVIDADES"
+                         Visibility="{Binding TemChangelog, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding Changelog}">
                             <ItemsControl.ItemTemplate>
@@ -180,13 +220,14 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
-                </DockPanel>
-            </Border>
+                </TabItem>
+            </TabControl>
 
             <!-- Versões à vista: é o que o jogador cita quando alguém pergunta
                  "você está atualizado?", e o que o admin confere quando algo
-                 dá errado. -->
-            <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="34,0,26,14"
+                 dá errado. No canto direito, para não disputar espaço com a
+                 apresentação. -->
+            <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,26,14"
                     Background="#C01A1614" BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
                     CornerRadius="4" Padding="14,8">
                 <StackPanel Orientation="Horizontal">

@@ -45,9 +45,16 @@ public sealed class ModManifest
     /// <summary>
     /// Novidades mostradas na tela inicial, da mais recente para a mais antiga.
     /// Vêm no manifest para que anunciar uma mudança seja o mesmo commit que a
-    /// faz, sem precisar publicar launcher novo.
+    /// faz, sem precisar publicar launcher novo. Vazio, a aba NOVIDADES não
+    /// aparece.
     /// </summary>
     public List<ChangelogEntry> Changelog { get; set; } = new();
+
+    /// <summary>
+    /// Apresentação do servidor na tela inicial. Ausente, a tela fica só com
+    /// as novidades (se houver). Launcher antigo ignora o campo.
+    /// </summary>
+    public ServerPresentation? Presentation { get; set; }
 
     public List<ModEntry> OwnMods { get; set; } = new();
     public List<ModEntry> ThunderstoreMods { get; set; } = new();

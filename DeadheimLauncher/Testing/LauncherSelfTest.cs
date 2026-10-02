@@ -460,6 +460,17 @@ public static class LauncherSelfTest
                     !string.IsNullOrWhiteSpace(versaoServidor) && versaoServidor == vm?.VersaoDoServidor,
                     versaoServidor ?? "(ausente)");
 
+                // A apresentação é o que o jogador novo lê antes de clicar em
+                // Jogar. Depende do manifest publicado trazer o campo; sem ele,
+                // o palco fica legitimamente sem a aba.
+                var tituloDaApresentacao = (janela.FindName("TituloDaApresentacao") as System.Windows.Controls.TextBlock)?.Text;
+                if (vm is { TemApresentacao: true, Apresentacao.TemTitulo: true })
+                    Check("UI: mostra a apresentação do servidor",
+                        tituloDaApresentacao == vm.Apresentacao.Title,
+                        tituloDaApresentacao ?? "(ausente)");
+                else
+                    Skip("UI: mostra a apresentação do servidor (manifest sem apresentação)");
+
                 VerificarJanelaDeConfiguracoes(janela);
             }
             finally
@@ -914,6 +925,15 @@ public static class LauncherSelfTest
             && comChangelog.Changelog[0].Version == "9.9"
             && comChangelog.Changelog[0].Changes.Count == 2,
             $"{comChangelog?.Changelog.Count ?? 0} entradas");
+
+        var comApresentacao = ManifestService.Interpretar(
+            "{\"presentation\":{\"title\":\"T\",\"about\":\"S\",\"highlights\":[{\"title\":\"A\",\"text\":\"x\"},{\"title\":\"B\"}]}}");
+        Check("manifest traz a apresentação do servidor",
+            comApresentacao?.Presentation is { Title: "T", About: "S", Highlights.Count: 2 }
+            && comApresentacao.Presentation.Highlights[0].Text == "x",
+            $"{comApresentacao?.Presentation?.Highlights.Count ?? 0} destaques");
+        Check("manifest sem apresentação continua legível",
+            ManifestService.Interpretar("{\"packVersion\":\"9.9\"}") is { Presentation: null });
 
         var manifestComServidor = new ModManifest { ServerHost = "localhost", ServerPort = 2456 };
         var argumentosDoManifest = ValheimLaunchService.MontarArgumentosDeInicializacao(

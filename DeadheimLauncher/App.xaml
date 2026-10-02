@@ -14,6 +14,9 @@
             <SolidColorBrush x:Key="AccentPressedBrush" Color="#A24C1F" />
             <SolidColorBrush x:Key="TextBrush" Color="#EDE6DC" />
             <SolidColorBrush x:Key="MutedTextBrush" Color="#998C80" />
+            <!-- Entre o texto principal e o apagado: para parágrafos que são
+                 para ler, como a apresentação do servidor. -->
+            <SolidColorBrush x:Key="SoftTextBrush" Color="#CDC3B7" />
             <SolidColorBrush x:Key="DangerBrush" Color="#D4574B" />
             <SolidColorBrush x:Key="OkBrush" Color="#7FA86B" />
 

@@ -220,7 +220,7 @@ public sealed partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(ProgressoTexto));
     }
 
-    // ---- versões e novidades ----
+    // ---- versões, apresentação e novidades ----
 
     /// <summary>Versão deste launcher, a mesma que o instalador e o GitHub usam.</summary>
     public string VersaoDoLauncher => "v" + AutoAtualizacaoService.VersaoAtual;
@@ -240,14 +240,45 @@ public sealed partial class MainViewModel : ObservableObject
 
     public bool TemChangelog => Changelog.Count > 0;
 
+    /// <summary>Apresentação do servidor (presentation do manifest).</summary>
+    public ServerPresentation? Apresentacao => _manifest.Presentation;
+
+    /// <summary>Cartões da apresentação, sem os que vieram sem nome.</summary>
+    public ObservableCollection<PresentationHighlight> Destaques { get; } = new();
+
+    public bool TemApresentacao =>
+        Apresentacao is not null && (Apresentacao.TemTitulo || Apresentacao.TemSobre || Destaques.Count > 0);
+
+    /// <summary>Sem nenhuma das duas, o palco fica só com a arte, sem uma faixa de abas vazia.</summary>
+    public bool TemConteudoNoPalco => TemApresentacao || TemChangelog;
+
+    /// <summary>
+    /// Aba aberta no palco: 0 = O SERVIDOR, 1 = NOVIDADES. Cada aba só aparece
+    /// quando o manifest traz o conteúdo dela, e a TabControl não sai sozinha
+    /// de uma aba que sumiu — sem isto, um manifest só com novidades abriria
+    /// numa aba escondida e vazia.
+    /// </summary>
+    [ObservableProperty]
+    private int _abaDoPalco;
+
     private void AtualizarInfoDoServidor()
     {
         Changelog.Clear();
         foreach (var entrada in _manifest.Changelog.Where(c => !string.IsNullOrWhiteSpace(c.Version)))
             Changelog.Add(entrada);
 
+        Destaques.Clear();
+        foreach (var destaque in (_manifest.Presentation?.Highlights ?? new()).Where(d => !string.IsNullOrWhiteSpace(d.Title)))
+            Destaques.Add(destaque);
+
         OnPropertyChanged(nameof(TemChangelog));
+        OnPropertyChanged(nameof(Apresentacao));
+        OnPropertyChanged(nameof(TemApresentacao));
+        OnPropertyChanged(nameof(TemConteudoNoPalco));
         OnPropertyChanged(nameof(VersaoDoServidor));
+
+        if (!TemApresentacao && TemChangelog) AbaDoPalco = 1;
+        else if (!TemChangelog) AbaDoPalco = 0;
     }
 
     public MainViewModel()
