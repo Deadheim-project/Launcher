@@ -26,7 +26,7 @@
 param(
     [string]$Org = "Deadheim-project",
     [string]$LauncherRepo = "Launcher",
-    [string]$Version = "v1.2.8",
+    [string]$Version = "v1.2.9",
     [switch]$Yes
 )
 
