@@ -1,5 +1,5 @@
 {
-  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.52 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.2.0 (pontuacoes da temporada, PvE permanente, Garantia de Refino), Velas v0.4.0, RaidSystem v2.2.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0. Terceiros do Hexium (inclusive o BepInExPack 5.4.2351, a versao que VNEI, Jotunn e YamlDotNet pedem), porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Admin e opcionais que existem no Hexium tambem vem de la com versao fixa: Server_devcommands 1.115.0, Infinity_Hammer 1.86.0, World_Edit_Commands 1.79.0, Upgrade_World 1.83.0, Azus_UnOfficial_ConfigManager 19.5.0 e VNEI 0.17.6, com as dependencias dele (tambem opcionais, marcar junto com o VNEI): Jotunn 2.30.2 e YamlDotNet 16.3.1. DevToggle, Gizmo e ValheimFPSBoost nao existem no Hexium e continuam no Thunderstore sem versao fixa (o launcher pega a mais recente).",
+  "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). Mods proprios vem dos releases do GitHub compilados contra o 1.0.16: npcs v1.0.52 (inclui a Loja Deadcoins, que substituiu o donationshop), Deadheim v7.2.0 (pontuacoes da temporada, PvE permanente, Garantia de Refino), Velas v0.4.0, RaidSystem v2.2.0, Hearthstone v2.1.0, AdaptiveNet v0.4.0, Montarias v0.1.66. Terceiros do Hexium (inclusive o BepInExPack 5.4.2351, a versao que VNEI, Jotunn e YamlDotNet pedem), porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Admin e opcionais que existem no Hexium tambem vem de la com versao fixa: Server_devcommands 1.115.0, Infinity_Hammer 1.86.0, World_Edit_Commands 1.79.0, Upgrade_World 1.83.0, Azus_UnOfficial_ConfigManager 19.5.0 e VNEI 0.17.6, com as dependencias dele (tambem opcionais, marcar junto com o VNEI): Jotunn 2.30.2 e YamlDotNet 16.3.1. DevToggle, Gizmo e ValheimFPSBoost nao existem no Hexium e continuam no Thunderstore sem versao fixa (o launcher pega a mais recente).",
   "packVersion": "1.0-pvp.8",
   "serverHost": "loboda.dathost.net",
   "serverPort": 20486,
@@ -111,7 +111,20 @@
       "assetPattern": "AdaptiveNet.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/AdaptiveNet/releases",
-      "version": "0.4.0"
+      "version": "0.4.2"
+    },
+    {
+      "id": "montarias",
+      "name": "Montarias",
+      "description": "Montarias: Capivara e Centauro.",
+      "required": true,
+      "source": "GitHub",
+      "gitHubOwner": "Deadheim-project",
+      "gitHubRepo": "Montarias",
+      "assetPattern": "Montarias.zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/Montarias/releases",
+      "version": "0.1.66"
     }
   ],
   "thunderstoreMods": [
