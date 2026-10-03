@@ -1,0 +1,119 @@
+name: Ranking do servidor
+
+# Publica o rankings.json que o launcher mostra na aba RANKING (guildas,
+# cacados e PvP).
+#
+# Os numeros vivem em arquivos que os mods gravam no servidor da DatHost. A
+# cada 10 minutos este workflow baixa esses arquivos por FTP (so leitura),
+# monta o JSON com tools/rankings/gerar_rankings.py e o publica no branch
+# "rankings", sempre com um commit so (force push): no main seria um commit a
+# cada atualizacao. O launcher le de
+# https://raw.githubusercontent.com/Deadheim-project/Launcher/rankings/rankings.json
+#
+# Precisa de dois secrets do repositorio (Settings > Secrets and variables >
+# Actions): DATHOST_FTP_USER e DATHOST_FTP_PASSWORD, os mesmos do
+# ~/.deadheim-netrc. Sem eles o workflow so avisa e sai, sem falhar.
+# Opcional: a variavel DEADHEIM_WORLD com o nome do mundo, se houver mais de um
+# pvp-<mundo>.txt no servidor (sem ela vale o maior arquivo).
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rankings
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FTP_HOST: loboda.dathost.net
+      FTP_USER: ${{ secrets.DATHOST_FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.DATHOST_FTP_PASSWORD }}
+      DEADHEIM_WORLD: ${{ vars.DEADHEIM_WORLD }}
+
+    steps:
+      - name: Conferir credencial
+        id: credencial
+        run: |
+          if [ -z "$FTP_USER" ] || [ -z "$FTP_PASSWORD" ]; then
+            echo "::warning::Sem DATHOST_FTP_USER/DATHOST_FTP_PASSWORD nos secrets: ranking nao atualizado."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.credencial.outputs.ok == 'true'
+
+      - name: Baixar os dados do servidor
+        if: steps.credencial.outputs.ok == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          NETRC="$RUNNER_TEMP/netrc"
+          printf 'machine %s login %s password %s\n' "$FTP_HOST" "$FTP_USER" "$FTP_PASSWORD" > "$NETRC"
+          DADOS="$RUNNER_TEMP/dados"
+          mkdir -p "$DADOS/pvp"
+
+          # Tenta FTP com TLS e, se o servidor nao aceitar, FTP simples (como o deploy-mod.sh).
+          ftp() { curl --netrc-file "$NETRC" -sS --max-time 60 --ssl "$@" || curl --netrc-file "$NETRC" -sS --max-time 60 "$@"; }
+
+          # O arquivo do PvP tem o nome do mundo: pvp-<mundo>.txt.
+          ftp -l "ftp://$FTP_HOST/BepInEx/config/Deadheim/" > "$DADOS/lista.txt"
+          while IFS= read -r nome; do
+            nome="${nome%$'\r'}"
+            case "$nome" in
+              pvp-*.txt)
+                if [ -z "$DEADHEIM_WORLD" ] || [ "$nome" = "pvp-$DEADHEIM_WORLD.txt" ]; then
+                  ftp -o "$DADOS/pvp/$nome" "ftp://$FTP_HOST/BepInEx/config/Deadheim/$nome"
+                fi ;;
+            esac
+          done < "$DADOS/lista.txt"
+
+          PVP="$(ls -S "$DADOS"/pvp/pvp-*.txt 2>/dev/null | head -n1 || true)"
+          [ -n "$PVP" ] && echo "PvP: $(basename "$PVP")" || echo "::warning::Nenhum pvp-*.txt em BepInEx/config/Deadheim."
+          echo "PVP_FILE=$PVP" >> "$GITHUB_ENV"
+
+          ftp -o "$DADOS/RaidData.json" "ftp://$FTP_HOST/BepInEx/config/RaidSystem/RaidData.json" \
+            || echo "::warning::RaidData.json nao baixado: ranking de guildas fica de fora."
+          ftp -o "$DADOS/Detalhes.RaidSystem.cfg" "ftp://$FTP_HOST/BepInEx/config/Detalhes.RaidSystem.cfg" \
+            || echo "::notice::Detalhes.RaidSystem.cfg nao baixado: pontuacao padrao do RaidSystem."
+
+          rm -f "$NETRC"
+          echo "DADOS=$DADOS" >> "$GITHUB_ENV"
+
+      - name: Montar o rankings.json
+        if: steps.credencial.outputs.ok == 'true'
+        run: |
+          python3 -m unittest discover -s tools/rankings -p "test_*.py"
+          mkdir -p "$RUNNER_TEMP/saida"
+          python3 tools/rankings/gerar_rankings.py \
+            --pvp "$PVP_FILE" \
+            --raid "$DADOS/RaidData.json" \
+            --raid-cfg "$DADOS/Detalhes.RaidSystem.cfg" \
+            --saida "$RUNNER_TEMP/saida/rankings.json"
+
+      - name: Publicar no branch rankings
+        if: steps.credencial.outputs.ok == 'true'
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/saida"
+          cat > README.md <<'EOF'
+          # Ranking do servidor
+
+          Gerado pelo workflow `rankings.yml` a cada 10 minutos e reescrito por inteiro
+          a cada vez. Não edite aqui: o launcher lê `rankings.json` deste branch.
+          EOF
+          git init -q -b rankings
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rankings.json README.md
+          git commit -q -m "Ranking de $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" rankings:rankings

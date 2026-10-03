@@ -7,3 +7,6 @@ installer/Output/
 
 # zips de distribuicao ficam em releases, nunca no repositorio
 *.zip
+
+# cache do python (tools/rankings)
+__pycache__/

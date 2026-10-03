@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Windows.Diagnostics;
 using DeadheimLauncher.Models;
 using DeadheimLauncher.Services;
+using DeadheimLauncher.ViewModels;
 
 namespace DeadheimLauncher.Testing;
 
@@ -60,6 +61,7 @@ public static class LauncherSelfTest
             RunReinstallChecks();
             RunCleanupChecks();
             RunFastLinkCleanupChecks();
+            RunRankingChecks();
 
             if (includeNetwork)
             {
@@ -84,6 +86,46 @@ public static class LauncherSelfTest
         }
 
         return Report();
+    }
+
+    // -------------------------------------------------------------- ranking
+
+    /// <summary>
+    /// O rankings.json é gerado por tools/rankings/gerar_rankings.py. Aqui confere
+    /// que o launcher lê esse formato, numera as posições e não quebra com campo
+    /// faltando ou sobrando (o gerador pode ganhar campo antes do launcher).
+    /// </summary>
+    private static void RunRankingChecks()
+    {
+        var r = RankingsService.Interpretar(
+            "{\"version\":1,\"generatedAt\":\"2026-10-03T12:00:00Z\",\"campoNovo\":true," +
+            "\"guilds\":[{\"name\":\"Lobos\",\"points\":129,\"members\":2,\"castles\":[\"Abismo\"]},{\"name\":\"Corvos\"},{\"name\":\"\"}]," +
+            "\"hunted\":[{\"name\":\"Bjorn\",\"guild\":\"Lobos\",\"pot\":5000,\"hunted\":true}]," +
+            "\"pvp\":[{\"name\":\"Bjorn\",\"kills\":12,\"deaths\":0,\"isPk\":true},{\"name\":\"Ragnar\",\"kills\":3,\"deaths\":2}]}");
+
+        Check("ranking: lê guildas, caçados e PvP",
+            r is { Guilds.Count: 2, Hunted.Count: 1, Pvp.Count: 2 },
+            $"{r?.Guilds.Count} / {r?.Hunted.Count} / {r?.Pvp.Count}");
+        Check("ranking: guilda sem nome é descartada e as posições são numeradas",
+            r?.Guilds[0] is { Position: 1, Name: "Lobos", Points: 129, TemCastelos: true }
+            && r.Guilds[1] is { Position: 2, TemCastelos: false }
+            && r.Pvp[1].Position == 2);
+        Check("ranking: data vem em UTC",
+            r?.GeneratedAt == new DateTimeOffset(2026, 10, 3, 12, 0, 0, TimeSpan.Zero),
+            r?.GeneratedAt?.ToString("O") ?? "");
+        Check("ranking: K/D sem mortes não divide por zero",
+            r?.Pvp[0].Kd == 12.ToString("0.00") && r.Pvp[1].Kd == 1.5.ToString("0.00"),
+            $"{r?.Pvp[0].Kd} / {r?.Pvp[1].Kd}");
+        Check("ranking: caçado e aviso têm rótulos diferentes",
+            new HuntedPlayer { Hunted = true }.Situacao != new HuntedPlayer { Hunted = false }.Situacao);
+        Check("ranking: arquivo mínimo continua legível",
+            RankingsService.Interpretar("{}") is { Guilds.Count: 0, Hunted.Count: 0, Pvp.Count: 0, GeneratedAt: null });
+
+        var agora = new DateTimeOffset(2026, 10, 3, 18, 0, 0, TimeSpan.Zero);
+        Check("ranking: de hoje mostra só a hora",
+            MainViewModel.DescreverQuando(agora.AddMinutes(-28), agora) == "Atualizado às 17:32");
+        Check("ranking: de outro dia mostra a data",
+            MainViewModel.DescreverQuando(agora.AddDays(-1), agora) == "Atualizado em 02/10 às 18:00");
     }
 
     // -------------------------------------------------------------- atualizacao

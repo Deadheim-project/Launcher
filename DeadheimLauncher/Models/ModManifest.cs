@@ -56,6 +56,13 @@ public sealed class ModManifest
     /// </summary>
     public ServerPresentation? Presentation { get; set; }
 
+    /// <summary>
+    /// De onde vem o ranking da aba RANKING. Ausente, vale o
+    /// RankingsService.DefaultUrl; está aqui para dar para trocar a origem sem
+    /// publicar launcher novo.
+    /// </summary>
+    public string? RankingsUrl { get; set; }
+
     public List<ModEntry> OwnMods { get; set; } = new();
     public List<ModEntry> ThunderstoreMods { get; set; } = new();
 

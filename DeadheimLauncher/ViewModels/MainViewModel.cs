@@ -19,6 +19,8 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly ModInstallerService _installerService;
     private readonly ValheimLaunchService _launchService = new();
     private readonly DispatcherTimer _gameProcessTimer;
+    private readonly DispatcherTimer _rankingTimer;
+    private readonly RankingsService _rankingsService;
 
     private LauncherSettings _settings = new();
     private ModManifest _manifest = new();
@@ -249,14 +251,17 @@ public sealed partial class MainViewModel : ObservableObject
     public bool TemApresentacao =>
         Apresentacao is not null && (Apresentacao.TemTitulo || Apresentacao.TemSobre || Destaques.Count > 0);
 
-    /// <summary>Sem nenhuma das duas, o palco fica só com a arte, sem uma faixa de abas vazia.</summary>
-    public bool TemConteudoNoPalco => TemApresentacao || TemChangelog;
+    /// <summary>
+    /// O palco sempre tem conteúdo: a aba RANKING aparece mesmo sem apresentação
+    /// nem novidades no manifest (sem ranking, ela mesma diz que não carregou).
+    /// </summary>
+    public bool TemConteudoNoPalco => true;
 
     /// <summary>
-    /// Aba aberta no palco: 0 = O SERVIDOR, 1 = NOVIDADES. Cada aba só aparece
-    /// quando o manifest traz o conteúdo dela, e a TabControl não sai sozinha
-    /// de uma aba que sumiu — sem isto, um manifest só com novidades abriria
-    /// numa aba escondida e vazia.
+    /// Aba aberta no palco: 0 = O SERVIDOR, 1 = NOVIDADES, 2 = RANKING. As duas
+    /// primeiras só aparecem quando o manifest traz o conteúdo delas, e a
+    /// TabControl não sai sozinha de uma aba que sumiu — sem isto, um manifest
+    /// só com novidades abriria numa aba escondida e vazia.
     /// </summary>
     [ObservableProperty]
     private int _abaDoPalco;
@@ -277,9 +282,82 @@ public sealed partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(TemConteudoNoPalco));
         OnPropertyChanged(nameof(VersaoDoServidor));
 
-        if (!TemApresentacao && TemChangelog) AbaDoPalco = 1;
-        else if (!TemChangelog) AbaDoPalco = 0;
+        if ((AbaDoPalco == 0 && !TemApresentacao) || (AbaDoPalco == 1 && !TemChangelog))
+            AbaDoPalco = TemApresentacao ? 0 : TemChangelog ? 1 : 2;
     }
+
+    // ---- ranking: guildas, caçados e PvP ----
+
+    /// <summary>Guildas pelo Ranking de Guerra (pontos do RaidSystem).</summary>
+    public ObservableCollection<GuildRank> RankingGuildas { get; } = new();
+
+    /// <summary>Cabeças a prêmio abertas, primeiro quem já está sendo caçado.</summary>
+    public ObservableCollection<HuntedPlayer> RankingCacados { get; } = new();
+
+    /// <summary>Jogadores por abates contra jogador.</summary>
+    public ObservableCollection<PvpRank> RankingPvp { get; } = new();
+
+    public bool SemGuildas => RankingGuildas.Count == 0;
+    public bool SemCacados => RankingCacados.Count == 0;
+    public bool SemPvp => RankingPvp.Count == 0;
+
+    [ObservableProperty]
+    private bool _carregandoRanking;
+
+    /// <summary>"Atualizado às 14:32", ou o aviso de que não carregou.</summary>
+    [ObservableProperty]
+    private string _rankingSituacao = "Carregando o ranking...";
+
+    /// <summary>
+    /// Busca o ranking sem ocupar a janela: é vitrine, não pode segurar o Jogar
+    /// nem mostrar erro vermelho. Falha vira só o texto da situação.
+    /// </summary>
+    [RelayCommand]
+    private async Task AtualizarRankingAsync()
+    {
+        if (CarregandoRanking) return;
+        CarregandoRanking = true;
+        try
+        {
+            var rankings = await _rankingsService.GetAsync(_manifest.RankingsUrl);
+            if (rankings is null)
+            {
+                RankingSituacao = "O ranking ainda não está disponível.";
+                return;
+            }
+
+            Preencher(RankingGuildas, rankings.Guilds);
+            Preencher(RankingCacados, rankings.Hunted);
+            Preencher(RankingPvp, rankings.Pvp);
+            OnPropertyChanged(nameof(SemGuildas));
+            OnPropertyChanged(nameof(SemCacados));
+            OnPropertyChanged(nameof(SemPvp));
+
+            RankingSituacao = rankings.GeneratedAt is { } quando
+                ? DescreverQuando(quando.ToLocalTime(), DateTimeOffset.Now)
+                : "Ranking do servidor.";
+        }
+        catch (Exception ex)
+        {
+            RankingSituacao = "Não foi possível carregar o ranking. " + ErroAmigavel.Descrever(ex);
+        }
+        finally
+        {
+            CarregandoRanking = false;
+        }
+    }
+
+    private static void Preencher<T>(ObservableCollection<T> destino, IEnumerable<T> itens)
+    {
+        destino.Clear();
+        foreach (var item in itens) destino.Add(item);
+    }
+
+    /// <summary>Data do ranking em palavras: hoje só a hora, outro dia com a data.</summary>
+    public static string DescreverQuando(DateTimeOffset quando, DateTimeOffset agora) =>
+        quando.Date == agora.Date
+            ? $"Atualizado às {quando:HH:mm}"
+            : $"Atualizado em {quando:dd/MM} às {quando:HH:mm}";
 
     public MainViewModel()
     {
@@ -290,6 +368,11 @@ public sealed partial class MainViewModel : ObservableObject
         _gameProcessTimer.Tick += (_, _) => AtualizarEstadoDoJogo();
         AtualizarEstadoDoJogo();
         _gameProcessTimer.Start();
+
+        // O servidor é lido a cada 10 minutos; buscar mais que isso só repetiria o mesmo arquivo.
+        _rankingsService = new RankingsService(_http);
+        _rankingTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+        _rankingTimer.Tick += (_, _) => _ = AtualizarRankingAsync();
     }
 
     private void AtualizarEstadoDoJogo()
@@ -341,6 +424,10 @@ public sealed partial class MainViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+
+            // Mesmo sem lista de mods: o ranking vem de outro arquivo.
+            _ = AtualizarRankingAsync();
+            _rankingTimer.Start();
         }
     }
 
