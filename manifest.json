@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.3.0"
+      "version": "7.3.1"
     },
     {
       "id": "velas",
@@ -85,7 +85,7 @@
       "assetPattern": "RaidSystem.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/RaidSystem/releases",
-      "version": "2.2.1"
+      "version": "2.2.2"
     },
     {
       "id": "hearthstone",
@@ -98,7 +98,7 @@
       "assetPattern": "Hearthstone.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Hearthstone/releases",
-      "version": "2.1.0"
+      "version": "2.1.1"
     },
     {
       "id": "adaptivenet",
