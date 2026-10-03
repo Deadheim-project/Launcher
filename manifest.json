@@ -38,7 +38,7 @@
     {
       "id": "npcs",
       "name": "NPCs",
-      "description": "Mercador, Teleportador, Correio, Missoes e Loja Deadcoins.",
+      "description": "Mercador, Teleportador, Correio, Missoes, Loja Deadcoins e Arena.",
       "required": true,
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.53"
+      "version": "1.0.55"
     },
     {
       "id": "deadheim",
