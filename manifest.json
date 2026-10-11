@@ -51,7 +51,7 @@
     {
       "id": "deadheim",
       "name": "Deadheim",
-      "description": "Mod base do servidor (inclui VipList).",
+      "description": "Mod base do servidor.",
       "required": true,
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
@@ -60,6 +60,19 @@
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
       "version": "7.5.5"
+    },
+    {
+      "id": "viplist",
+      "name": "VipList",
+      "description": "Lista VIP sincronizada pelo servidor (o Deadheim depende dela).",
+      "required": true,
+      "source": "GitHub",
+      "gitHubOwner": "Deadheim-project",
+      "gitHubRepo": "viplist",
+      "assetPattern": "VipList.zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/viplist/releases",
+      "version": "1.0.0"
     },
     {
       "id": "velas",
