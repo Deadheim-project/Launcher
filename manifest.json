@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.69"
+      "version": "1.0.70"
     },
     {
       "id": "deadheim",
@@ -129,7 +129,7 @@
     {
       "id": "ValheimMontarias",
       "name": "Montarias",
-      "description": "Montarias: Capivara.",
+      "description": "Montarias: Capivara, Neck, Deer, Boar, Eikthyr e Moder (voa).",
       "required": true,
       "source": "GitHub",
       "gitHubOwner": "Deadheim-project",
@@ -137,7 +137,7 @@
       "assetPattern": "Montarias.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Montarias/releases",
-      "version": "0.3.21"
+      "version": "0.3.22"
     }
   ],
   "thunderstoreMods": [
