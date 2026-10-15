@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.72"
+      "version": "1.0.73"
     },
     {
       "id": "deadheim",
@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.5.9"
+      "version": "7.6.0"
     },
     {
       "id": "viplist",
@@ -85,7 +85,7 @@
       "assetPattern": "Velas.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Velas/releases",
-      "version": "0.5.1"
+      "version": "0.5.2"
     },
     {
       "id": "raidsystem",
