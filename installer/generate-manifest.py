@@ -62,7 +62,7 @@ EXCLUDED_PACKAGES = {"Marketplace_And_Server_NPCs_Revamped", "FastLink"}
 # comparados por versão (não precisam bater com o servidor).
 OPTIONAL_PACKAGES = {
     "Server_devcommands",
-    "DevToggle",
+    "MapTeleport",
     "Azus_UnOfficial_ConfigManager",
 }
 
@@ -95,8 +95,8 @@ ADMIN_MODS = [
      "Regenera áreas já exploradas para receber conteúdo novo. CUIDADO: altera o mundo salvo."),
     ("JereKuusela", "Structure_Tweaks",
      "Deixa estruturas invisíveis, invulneráveis ou atravessáveis."),
-    ("YouDied", "DevToggle",
-     "Atalho para ligar e desligar o modo dev."),
+    ("Landoria", "MapTeleport",
+     "Admin: segure a tecla modificadora e clique no mapa para teletransportar."),
     ("Azumatt", "Azus_UnOfficial_ConfigManager",
      "Menu dentro do jogo para ajustar a configuração dos mods, com F1."),
 ]

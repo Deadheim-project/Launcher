@@ -577,16 +577,17 @@
       "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Upgrade_World/"
     },
     {
-      "id": "devtoggle",
-      "name": "DevToggle",
-      "description": "Atalho para ligar e desligar o modo dev.",
+      "id": "mapteleport",
+      "name": "MapTeleport",
+      "description": "Admin: segure a tecla modificadora e clique no mapa para teletransportar.",
       "required": false,
       "category": "Admin",
       "source": "Thunderstore",
-      "thunderstoreNamespace": "YouDied",
-      "thunderstoreName": "DevToggle",
-      "author": "YouDied",
-      "url": "https://thunderstore.io/c/valheim/p/YouDied/DevToggle/"
+      "thunderstoreNamespace": "Landoria",
+      "thunderstoreName": "MapTeleport",
+      "version": "1.0.0",
+      "author": "Landoria",
+      "url": "https://thunderstore.io/c/valheim/p/Landoria/MapTeleport/"
     },
     {
       "id": "azus-unofficial-configmanager",
