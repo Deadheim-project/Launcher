@@ -233,12 +233,12 @@
       "description": "Copia, cola e move qualquer estrutura ou objeto do mundo.",
       "required": false,
       "category": "Admin",
-      "source": "Hexium",
+      "source": "Thunderstore",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "Infinity_Hammer",
       "version": "1.86.0",
       "author": "JereKuusela",
-      "url": "https://valheim.hexium.gg/mods/JereKuusela/Infinity_Hammer"
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Infinity_Hammer/"
     },
     {
       "id": "world-edit-commands",
@@ -246,12 +246,12 @@
       "description": "Comandos de edição do mundo: terreno, objetos e vegetação em área.",
       "required": false,
       "category": "Admin",
-      "source": "Hexium",
+      "source": "Thunderstore",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "World_Edit_Commands",
       "version": "1.79.0",
       "author": "JereKuusela",
-      "url": "https://valheim.hexium.gg/mods/JereKuusela/World_Edit_Commands"
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/World_Edit_Commands/"
     },
     {
       "id": "upgrade-world",
@@ -259,12 +259,12 @@
       "description": "Regenera áreas já exploradas para receber conteúdo novo. CUIDADO: altera o mundo salvo.",
       "required": false,
       "category": "Admin",
-      "source": "Hexium",
+      "source": "Thunderstore",
       "thunderstoreNamespace": "JereKuusela",
       "thunderstoreName": "Upgrade_World",
       "version": "1.83.0",
       "author": "JereKuusela",
-      "url": "https://valheim.hexium.gg/mods/JereKuusela/Upgrade_World"
+      "url": "https://thunderstore.io/c/valheim/p/JereKuusela/Upgrade_World/"
     },
     {
       "id": "devtoggle",
