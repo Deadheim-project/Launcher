@@ -279,6 +279,19 @@
       "url": "https://thunderstore.io/c/valheim/p/YouDied/DevToggle/"
     },
     {
+      "id": "planbuild",
+      "name": "PlanBuild",
+      "description": "Plantas de construção: planeja, copia e cola estruturas. Admin. Precisa do Jotunn (marque junto) e do mesmo mod no servidor.",
+      "required": false,
+      "category": "Admin",
+      "source": "Thunderstore",
+      "thunderstoreNamespace": "MathiasDecrock",
+      "thunderstoreName": "PlanBuild",
+      "version": "0.20.0",
+      "author": "MathiasDecrock",
+      "url": "https://thunderstore.io/c/valheim/p/MathiasDecrock/PlanBuild/"
+    },
+    {
       "id": "azus-unofficial-configmanager",
       "name": "Azus UnOfficial ConfigManager",
       "description": "Menu dentro do jogo para ajustar a configuração dos mods, com F1.",
