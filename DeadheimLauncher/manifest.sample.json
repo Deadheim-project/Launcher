@@ -180,18 +180,6 @@
       "url": "https://thunderstore.io/c/valheim/p/Azumatt/AzuExtendedPlayerInventory/"
     },
     {
-      "id": "maxplayercount",
-      "name": "MaxPlayerCount",
-      "description": "Do modpack Deadheim 15.0.5.",
-      "required": true,
-      "source": "Thunderstore",
-      "thunderstoreNamespace": "Azumatt",
-      "thunderstoreName": "MaxPlayerCount",
-      "version": "1.2.4",
-      "author": "Azumatt",
-      "url": "https://thunderstore.io/c/valheim/p/Azumatt/MaxPlayerCount/"
-    },
-    {
       "id": "azuanticheat",
       "name": "AzuAntiCheat",
       "description": "Do modpack Deadheim 15.0.5.",
