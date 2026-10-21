@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.77"
+      "version": "1.0.78"
     },
     {
       "id": "deadheim",
@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.8.1"
+      "version": "7.8.2"
     },
     {
       "id": "viplist",
