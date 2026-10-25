@@ -1,6 +1,6 @@
 {
   "_comment": "Manifest do Valheim 1.0 (pacote PvP da nova temporada). As versoes valem pelos campos version de cada mod; este texto nao lista versoes para nao ficar desatualizado. Mods proprios vem dos releases do GitHub (Deadheim-project), compilados contra o Valheim 1.0. Terceiros vem do Hexium, inclusive o BepInExPack, porque o Thunderstore esta atrasado para o 1.0 (ex.: Guilds 1.1.13 quebra, o 1.1.14 do Hexium nao). Admin e opcionais que existem no Hexium tambem vem de la com versao fixa: Server_devcommands, Infinity_Hammer, World_Edit_Commands, Upgrade_World, Azus_UnOfficial_ConfigManager e VNEI, com as dependencias dele (tambem opcionais, marcar junto com o VNEI): Jotunn e YamlDotNet. Gizmo e ValheimFPSBoost nao existem no Hexium e continuam no Thunderstore sem versao fixa (o launcher pega a mais recente).",
-  "packVersion": "betaTest",
+  "packVersion": "27.0.0",
   "serverHost": "loboda.dathost.net",
   "serverPort": 20486,
   "presentation": {
