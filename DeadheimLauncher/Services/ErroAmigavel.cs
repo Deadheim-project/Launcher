@@ -28,6 +28,11 @@ public static class ErroAmigavel
 
     private static string Traduzir(Exception ex) => ex switch
     {
+        // No Linux o caminho digitado vira Z:\..., então o exemplo ajuda mais que a frase genérica.
+        ValheimNotFoundException when Wine.Ativo
+            => "não encontrei a pasta do Valheim. Abra Configurações e cole o caminho do jogo no Linux, " +
+               "ex.: /home/voce/.local/share/Steam/steamapps/common/Valheim (o launcher converte sozinho).",
+
         ValheimNotFoundException => "não encontrei a pasta do Valheim. Abra Configurações e aponte onde o jogo está instalado.",
 
         BepInExNotFoundException => "o BepInEx não está instalado no Valheim. Marque o BepInEx na lista de mods e clique em Jogar de novo — o launcher instala sozinho.",
