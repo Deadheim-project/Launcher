@@ -4,32 +4,32 @@
   "serverHost": "loboda.dathost.net",
   "serverPort": 20486,
   "presentation": {
-    "title": "Temporada PvP no Valheim 1.0",
-    "about": "PvP em mundo aberto, clãs e guerra de castelos. Seu personagem fica salvo no servidor: o que você conquista, e o que perde, vale de verdade.",
+    "title": "27ª Temporada: vanilla na essência, Deadheim na experiência",
+    "about": "O Valheim 1.0 original, com poucas mudanças pensadas para ampliar as possibilidades sem perder a essência do jogo. Explore os biomas, construa seu legado, forme alianças ou rivalize: pela riqueza, pela glória ou pela força, há muitas maneiras de conquistar Deadheim.",
     "highlights": [
       {
-        "title": "PvP aberto",
-        "text": "Em todo o mapa fora das zonas seguras. A ilha inicial protege quem começa."
+        "title": "PvP e arenas",
+        "text": "Arenas e rankings competitivos. Enfrente outros guerreiros e conquiste seu lugar entre os melhores."
       },
       {
-        "title": "Guerra de castelos",
-        "text": "Atacados só na janela de raid. A guilda que segura o castelo ganha tributo."
+        "title": "PvE e arenas",
+        "text": "Desafios nas arenas com recompensas exclusivas para quem prefere lutar contra criaturas."
       },
       {
-        "title": "Clãs e bases",
-        "text": "Guilda e grupo sem fogo amigo. Base na zona segura fica 100% protegida."
+        "title": "Caça a recompensas",
+        "text": "Ponha preço na rivalidade com o /bounty, persiga os procurados e transforme a caçada em lucro."
       },
       {
-        "title": "PK e caçada",
-        "text": "Quem mata vira PK e perde mais ao morrer. /bounty põe uma cabeça a prêmio."
+        "title": "Economia e comércio",
+        "text": "Negocie com outros jogadores no Leilão e pelo Correio, e explore os NPCs comerciantes."
       },
       {
-        "title": "Economia",
-        "text": "Leilão no Mercador, Correio entre jogadores, Missões e a Loja Deadcoins."
+        "title": "Montarias",
+        "text": "Montarias exclusivas para cruzar os biomas, e muito mais para descobrir."
       },
       {
-        "title": "PvE permanente",
-        "text": "/pve confirmar tira você do PvP para sempre, com bônus nas profissões."
+        "title": "Novas lendas",
+        "text": "A temporada que reúne tudo o que construímos até aqui. Novos desafios, novas rivalidades."
       }
     ]
   },
@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.85"
+      "version": "1.0.86"
     },
     {
       "id": "deadheim",
@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.8.17"
+      "version": "7.8.18"
     },
     {
       "id": "viplist",
@@ -111,7 +111,7 @@
       "assetPattern": "Hearthstone.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Hearthstone/releases",
-      "version": "2.1.1"
+      "version": "2.1.2"
     },
     {
       "id": "adaptivenet",
