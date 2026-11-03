@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.91"
+      "version": "1.0.92"
     },
     {
       "id": "deadheim",
@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.9.1"
+      "version": "7.10.0"
     },
     {
       "id": "viplist",
@@ -86,19 +86,6 @@
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Velas/releases",
       "version": "0.5.2"
-    },
-    {
-      "id": "raidsystem",
-      "name": "Raid System",
-      "description": "Sistema de raides.",
-      "required": true,
-      "source": "GitHub",
-      "gitHubOwner": "Deadheim-project",
-      "gitHubRepo": "RaidSystem",
-      "assetPattern": "RaidSystem.zip",
-      "author": "Detalhes",
-      "url": "https://github.com/Deadheim-project/RaidSystem/releases",
-      "version": "2.2.3"
     },
     {
       "id": "hearthstone",
@@ -137,7 +124,7 @@
       "assetPattern": "Montarias.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Montarias/releases",
-      "version": "0.3.26"
+      "version": "0.3.27"
     }
   ],
   "thunderstoreMods": [
@@ -157,7 +144,7 @@
     {
       "id": "guilds",
       "name": "Guilds",
-      "description": "Dependencia dura do raidsystem. 1.1.14 (Hexium, 11/09) e a primeira com as correcoes do 1.0; o Thunderstore ainda esta no 1.1.13, que quebra.",
+      "description": "Guildas usadas pelo PvP do Deadheim para reconhecer aliados e pelo Velas como sistema de clãs.",
       "required": true,
       "source": "Hexium",
       "thunderstoreNamespace": "Smoothbrain",
