@@ -61,6 +61,7 @@ public static class LauncherSelfTest
             RunReinstallChecks();
             RunCleanupChecks();
             RunFastLinkCleanupChecks();
+            RunLinuxChecks();
             RunRankingChecks();
 
             if (includeNetwork)
@@ -892,6 +893,110 @@ public static class LauncherSelfTest
     }
 
     // ---------------------------------------------------------------- sync com o jogo
+
+    /// <summary>
+    /// Jogador de Linux roda o launcher no Wine. O que dá para conferir sem Linux:
+    /// conversão de caminho, leitura das bibliotecas da Steam, detecção da versão
+    /// nativa e o script que a inicia.
+    /// </summary>
+    private static void RunLinuxChecks()
+    {
+        Write($"SELFTEST: Wine {(Wine.Ativo ? "detectado" : "não detectado")}");
+
+        var caminhoLinux = Wine.CandidatosParaCaminhoInformado("/run/media/jingo/Pichau/SteamLibrary/steamapps/common/Valheim", null);
+        Check("linux: caminho do Linux vira Z:",
+            caminhoLinux.SequenceEqual(new[] { @"Z:\run\media\jingo\Pichau\SteamLibrary\steamapps\common\Valheim" }),
+            string.Join(" | ", caminhoLinux));
+
+        var comC = Wine.CandidatosParaCaminhoInformado(@" ""C:\run\media\jingo\Valheim"" ", null);
+        Check("linux: caminho do Linux com C: tenta o próprio e depois o Z:",
+            comC.SequenceEqual(new[] { @"C:\run\media\jingo\Valheim", @"Z:\run\media\jingo\Valheim" }),
+            string.Join(" | ", comC));
+
+        var comTil = Wine.CandidatosParaCaminhoInformado("~/.steam/steam/steamapps/common/Valheim", "/home/jingo");
+        Check("linux: ~ vira o home do usuário",
+            comTil.SequenceEqual(new[] { @"Z:\home\jingo\.steam\steam\steamapps\common\Valheim" }),
+            string.Join(" | ", comTil));
+
+        Check("linux: caminho já no Z: fica como está",
+            Wine.CandidatosParaCaminhoInformado(@"Z:\home\jingo\Valheim", null).SequenceEqual(new[] { @"Z:\home\jingo\Valheim" }));
+
+        const string vdf = """
+            "libraryfolders"
+            {
+                "0"
+                {
+                    "path"		"/home/jingo/.local/share/Steam"
+                    "apps" { "228980" "1" }
+                }
+                "1"
+                {
+                    "path"		"D:\\SteamLibrary"
+                }
+                "2"
+                {
+                    "Path"		"/run/media/jingo/Pichau/SteamLibrary"
+                }
+            }
+            """;
+        var bibliotecas = ValheimLaunchService.LerBibliotecasDaSteam(vdf);
+        Check("linux: libraryfolders.vdf lista todas as bibliotecas",
+            bibliotecas.SequenceEqual(new[]
+            {
+                "/home/jingo/.local/share/Steam", @"D:\SteamLibrary", "/run/media/jingo/Pichau/SteamLibrary"
+            }),
+            string.Join(" | ", bibliotecas));
+
+        var nativo = Path.Combine(AppPaths.Root, "ValheimLinux");
+        Directory.CreateDirectory(nativo);
+        File.WriteAllText(Path.Combine(nativo, "valheim.x86_64"), "elf");
+        var proton = Path.Combine(AppPaths.Root, "ValheimProton");
+        Directory.CreateDirectory(proton);
+        File.WriteAllText(Path.Combine(proton, "valheim.exe"), "pe");
+        File.WriteAllText(Path.Combine(proton, "valheim.x86_64"), "sobra");
+        Check("linux: pasta só com valheim.x86_64 é a versão nativa", ValheimLaunchService.EhVersaoLinux(nativo));
+        Check("linux: pasta com valheim.exe segue o caminho do Windows", !ValheimLaunchService.EhVersaoLinux(proton));
+
+        new ProfileService().LoadOrCreate("LinuxTest");
+        var core = Path.Combine(AppPaths.ProfileBepInExDir("LinuxTest"), "core");
+        Directory.CreateDirectory(core);
+        File.WriteAllText(Path.Combine(AppPaths.ProfileGameDir("LinuxTest"), "winhttp.dll"), "injetor");
+        new ValheimLaunchService().PrepararJogo(nativo, "LinuxTest");
+        Check("linux: preparar não põe nada do Windows na pasta nativa",
+            Directory.GetFileSystemEntries(nativo).Length == 1,
+            string.Join(" | ", Directory.GetFileSystemEntries(nativo).Select(Path.GetFileName)));
+
+        var conexao = new LauncherSettings { ServerHost = " loboda.dathost.net ", ServerPort = 20486, ServerPassword = "a'b c" };
+        if (!Wine.Ativo)
+        {
+            var mensagem = "";
+            try { new ValheimLaunchService().LaunchGame(nativo, "LinuxTest", conexao); }
+            catch (ValheimNotFoundException ex) { mensagem = ex.Message; }
+            Check("linux: versão nativa no Windows dá erro dizendo que é de Linux", mensagem.Contains("Linux"), mensagem);
+        }
+
+        var script = ValheimLaunchService.MontarScriptLinux(
+            "/run/media/jingo/Pichau/SteamLibrary/steamapps/common/Valheim",
+            "/home/jingo/.wine/drive_c/users/jingo/AppData/Roaming/DeadheimLauncher/profiles/Default/game/",
+            conexao);
+        Check("linux: script começa com #!/bin/sh e só usa LF",
+            script.StartsWith("#!/bin/sh\n") && !script.Contains('\r'));
+        Check("linux: script entra na pasta do jogo",
+            script.Contains("cd '/run/media/jingo/Pichau/SteamLibrary/steamapps/common/Valheim' || exit 1"), script);
+        Check("linux: script aponta o Doorstop para o BepInEx do perfil",
+            script.Contains("DOORSTOP_TARGET_ASSEMBLY='/home/jingo/.wine/drive_c/users/jingo/AppData/Roaming/DeadheimLauncher/profiles/Default/game/BepInEx/core/BepInEx.Preloader.dll'")
+            && script.Contains("LD_LIBRARY_PATH='/home/jingo/.wine/drive_c/users/jingo/AppData/Roaming/DeadheimLauncher/profiles/Default/game/doorstop_libs'")
+            && script.Contains("LD_PRELOAD=libdoorstop_x64.so"),
+            script);
+        Check("linux: script conecta no servidor com a senha protegida",
+            script.Contains("exec ./valheim.x86_64 '+connect' 'loboda.dathost.net:20486' '-password' 'a'\\''b c'"), script);
+        Check("linux: script avisa a Steam qual é o jogo", script.Contains("export SteamAppId=892970"));
+
+        var semSenha = false;
+        try { ValheimLaunchService.MontarScriptLinux("/jogo", "/perfil", new LauncherSettings { ServerHost = "x", ServerPort = 1, ServerPassword = "" }); }
+        catch (ServerConnectionNotConfiguredException) { semSenha = true; }
+        Check("linux: script sem senha do servidor dá o mesmo erro do Windows", semSenha);
+    }
 
     private static void RunGameSyncChecks()
     {
