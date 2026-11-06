@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.92"
+      "version": "1.0.93"
     },
     {
       "id": "deadheim",
@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.10.0"
+      "version": "7.11.0"
     },
     {
       "id": "viplist",
@@ -73,6 +73,19 @@
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/viplist/releases",
       "version": "1.0.0"
+    },
+    {
+      "id": "deadheim-inventory",
+      "name": "Deadheim Inventory UI",
+      "description": "Inventario com abas Equipamento, Aparencia e Atalhos (usa a TransmogApi do Deadheim).",
+      "required": true,
+      "source": "GitHub",
+      "gitHubOwner": "Deadheim-project",
+      "gitHubRepo": "deadheim-inventory",
+      "assetPattern": "DeadheimInventoryUI.zip",
+      "author": "Detalhes",
+      "url": "https://github.com/Deadheim-project/deadheim-inventory/releases",
+      "version": "0.1.0"
     },
     {
       "id": "velas",
@@ -111,7 +124,7 @@
       "assetPattern": "AdaptiveNet.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/AdaptiveNet/releases",
-      "version": "0.5.3"
+      "version": "0.6.0"
     },
     {
       "id": "ValheimMontarias",
@@ -124,7 +137,7 @@
       "assetPattern": "Montarias.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Montarias/releases",
-      "version": "0.3.27"
+      "version": "0.3.28"
     }
   ],
   "thunderstoreMods": [
