@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-07T15:37:55Z",
+  "guilds": [],
+  "hunted": [
+    {
+      "name": "kaveira",
+      "guild": null,
+      "pot": 2000,
+      "hunted": false
+    }
+  ],
+  "pvp": [
+    {
+      "name": "kaveira",
+      "guild": null,
+      "kills": 10,
+      "deaths": 2,
+      "pkKills": 3,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "leona",
+      "guild": null,
+      "kills": 3,
+      "deaths": 0,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Chandeko",
+      "guild": null,
+      "kills": 2,
+      "deaths": 0,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Leone",
+      "guild": null,
+      "kills": 1,
+      "deaths": 0,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "dan",
+      "guild": null,
+      "kills": 1,
+      "deaths": 2,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Adolf",
+      "guild": null,
+      "kills": 0,
+      "deaths": 1,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": true
+    },
+    {
+      "name": "MAFALDA",
+      "guild": null,
+      "kills": 0,
+      "deaths": 1,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Replicante",
+      "guild": null,
+      "kills": 0,
+      "deaths": 1,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Grip",
+      "guild": null,
+      "kills": 0,
+      "deaths": 4,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "kabritin",
+      "guild": null,
+      "kills": 0,
+      "deaths": 7,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    }
+  ]
+}
