@@ -46,7 +46,7 @@
       "assetPattern": "Npcs.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/npcs/releases",
-      "version": "1.0.93"
+      "version": "1.0.95"
     },
     {
       "id": "deadheim",
@@ -59,7 +59,7 @@
       "assetPattern": "Deadheim.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Deadheim/releases",
-      "version": "7.11.2"
+      "version": "7.12.0"
     },
     {
       "id": "viplist",
@@ -137,7 +137,7 @@
       "assetPattern": "Montarias.zip",
       "author": "Detalhes",
       "url": "https://github.com/Deadheim-project/Montarias/releases",
-      "version": "0.3.28"
+      "version": "0.3.29"
     }
   ],
   "thunderstoreMods": [
