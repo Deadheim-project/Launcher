@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-14T14:29:22Z",
+  "guilds": [],
+  "hunted": [
+    {
+      "name": "kaveira",
+      "guild": null,
+      "pot": 11000,
+      "hunted": true
+    },
+    {
+      "name": "TeuCu",
+      "guild": "Vandalos",
+      "pot": 700,
+      "hunted": true
+    },
+    {
+      "name": "kaveira",
+      "guild": null,
+      "pot": 2000,
+      "hunted": false
+    }
+  ],
+  "pvp": [
+    {
+      "name": "kaveira",
+      "guild": null,
+      "kills": 11,
+      "deaths": 3,
+      "pkKills": 3,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Chandeko",
+      "guild": null,
+      "kills": 3,
+      "deaths": 0,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "leona",
+      "guild": null,
+      "kills": 3,
+      "deaths": 0,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Leone",
+      "guild": null,
+      "kills": 2,
+      "deaths": 1,
+      "pkKills": 1,
+      "isPk": true,
+      "pve": false
+    },
+    {
+      "name": "Adolf",
+      "guild": null,
+      "kills": 2,
+      "deaths": 2,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "dan",
+      "guild": null,
+      "kills": 2,
+      "deaths": 2,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Paiakan",
+      "guild": null,
+      "kills": 1,
+      "deaths": 1,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "MAFALDA",
+      "guild": null,
+      "kills": 0,
+      "deaths": 2,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Replicante",
+      "guild": null,
+      "kills": 0,
+      "deaths": 3,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Grip",
+      "guild": null,
+      "kills": 0,
+      "deaths": 4,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "kabritin",
+      "guild": null,
+      "kills": 0,
+      "deaths": 7,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    }
+  ]
+}
