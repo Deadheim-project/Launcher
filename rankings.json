@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-21T09:48:58Z",
+  "guilds": [],
+  "hunted": [
+    {
+      "name": "kaveira",
+      "guild": null,
+      "pot": 11000,
+      "hunted": true
+    },
+    {
+      "name": "MAFALDA",
+      "guild": null,
+      "pot": 10000,
+      "hunted": true
+    },
+    {
+      "name": "TeuCu",
+      "guild": "Vandalos",
+      "pot": 700,
+      "hunted": true
+    },
+    {
+      "name": "kaveira",
+      "guild": null,
+      "pot": 9400,
+      "hunted": false
+    }
+  ],
+  "pvp": [
+    {
+      "name": "kaveira",
+      "guild": null,
+      "kills": 13,
+      "deaths": 3,
+      "pkKills": 5,
+      "isPk": true,
+      "pve": false
+    },
+    {
+      "name": "Adolf",
+      "guild": null,
+      "kills": 7,
+      "deaths": 7,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Replicante",
+      "guild": null,
+      "kills": 4,
+      "deaths": 7,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "leona",
+      "guild": null,
+      "kills": 3,
+      "deaths": 0,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Chandeko",
+      "guild": null,
+      "kills": 3,
+      "deaths": 1,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Leone",
+      "guild": null,
+      "kills": 3,
+      "deaths": 2,
+      "pkKills": 2,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "dan",
+      "guild": null,
+      "kills": 2,
+      "deaths": 3,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "kabritin",
+      "guild": null,
+      "kills": 2,
+      "deaths": 7,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Paiakan",
+      "guild": null,
+      "kills": 1,
+      "deaths": 3,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "MAFALDA",
+      "guild": null,
+      "kills": 0,
+      "deaths": 2,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    },
+    {
+      "name": "Grip",
+      "guild": null,
+      "kills": 0,
+      "deaths": 4,
+      "pkKills": 0,
+      "isPk": false,
+      "pve": false
+    }
+  ]
+}
